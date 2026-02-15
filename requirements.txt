@@ -1,0 +1,26 @@
+# NexStep AI Pro - Requirements
+# Python 3.8+
+
+# Core Framework
+streamlit==1.31.0
+
+# AI & ML
+google-generativeai==0.3.2
+
+# PDF Processing
+PyMuPDF==1.23.8
+reportlab==4.0.9
+
+# Data Processing
+pandas==2.1.4
+numpy==1.26.3
+
+# Visualization
+altair==5.2.0
+
+# Animation
+streamlit-lottie==0.0.5
+requests==2.31.0
+
+# Optional: Enhanced Features
+python-dotenv==1.0.0  # For environment variables
