@@ -93,14 +93,14 @@ _HEADER_HTML = """<!DOCTYPE html>
 <title>JobLess AI</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400&display=swap" rel="stylesheet">
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
+* { margin:0; padding:0; box-sizing:border-box; cursor: none !important; }
 
 /* FIX 1: overflow:hidden on body kills 3D transforms on iOS Safari.
    Use overflow:clip instead — it clips visually without creating a
    stacking context that flattens preserve-3d children.
    Fallback: auto (allows scroll in very old browsers, not ideal but safe). */
 body {
-  background: transparent!important;
+  background: #060b14!important;
   overflow: clip; /* modern browsers */
   overflow: hidden; /* legacy fallback — overridden above in supporting browsers */
   font-family: 'Inter', sans-serif;
@@ -282,33 +282,29 @@ body {
 <script>
 (function(){
   var fe = window.frameElement;
-  if(fe){ fe.style.cssText += 'border:none!important;outline:none!important;box-shadow:none!important;background:transparent!important;'; }
+  if(fe){ fe.style.cssText += 'border:none!important;outline:none!important;box-shadow:none!important;background:#060b14!important;'; }
 })();
 </script>
 
 <script>
-/* ── Forward mouse events from this iframe to the parent window
-   so the custom cursor keeps tracking over the header area. ── */
 (function() {
-  function forwardMouse(e) {
+  var s = document.createElement('style');
+  s.textContent = '* { cursor: none !important; }';
+  document.head.appendChild(s);
+  function fwd(e) {
     try {
       var fe = window.frameElement;
       if (!fe) return;
-      var rect = fe.getBoundingClientRect();
-      var px = e.clientX + rect.left;
-      var py = e.clientY + rect.top;
-      var synth = new window.parent.MouseEvent(e.type, {
-        clientX: px, clientY: py,
+      var r = fe.getBoundingClientRect();
+      window.parent.document.dispatchEvent(new window.parent.MouseEvent(e.type, {
+        clientX: e.clientX + r.left, clientY: e.clientY + r.top,
         bubbles: true, cancelable: false
-      });
-      window.parent.document.dispatchEvent(synth);
+      }));
     } catch(err) {}
   }
-  document.addEventListener('mousemove',  forwardMouse, { passive: true });
-  document.addEventListener('mouseover',  forwardMouse, { passive: true });
-  document.addEventListener('mouseout',   forwardMouse, { passive: true });
-  document.addEventListener('mousedown',  forwardMouse, { passive: true });
-  document.addEventListener('mouseup',    forwardMouse, { passive: true });
+  ['mousemove','mouseover','mouseout','mousedown','mouseup'].forEach(function(ev) {
+    document.addEventListener(ev, fwd, { passive: true });
+  });
 })();
 </script>
 
@@ -596,10 +592,28 @@ class Config:
     def set_provider(self, provider: str):
         st.session_state["ai_provider"] = provider
 
+    _SECRETS = {
+        "Google Gemini  🆓": "GEMINI_API_KEY",
+        "Groq  🆓⚡": "GROQ_API_KEY",
+        "Cohere  🆓": "COHERE_API_KEY",
+    }
+
     def get_api_key(self, provider=None) -> str:
         p = provider or self.get_provider()
         val = st.session_state.get(f"api_key_{p}", "")
-        return val or os.getenv(self._ENV.get(p, ""), "")
+        if val:
+            return val
+        try:
+            secret_key = self._SECRETS.get(p, "")
+            if secret_key:
+                return st.secrets.get(secret_key, "")
+        except Exception:
+            pass
+        return os.getenv(self._ENV.get(p, ""), "")
+
+    def using_own_key(self, provider=None) -> bool:
+        p = provider or self.get_provider()
+        return bool(st.session_state.get(f"api_key_{p}", ""))
 
     def set_api_key(self, key: str, provider=None) -> bool:
         p = provider or self.get_provider()
@@ -629,13 +643,17 @@ class AIHandler:
             if not _GEMINI_OK:
                 raise RuntimeError("Run: pip install google-generativeai")
             genai.configure(api_key=api_key)
-            gen_config = genai.GenerationConfig(
-                max_output_tokens=max_tokens,
-                temperature=temperature,
-                # Native JSON mode: Gemini guarantees a parseable JSON response,
-                # eliminating the need for markdown-fence stripping heuristics.
-                **({"response_mime_type": "application/json"} if json_mode else {})
-            )
+            try:
+                gen_config = genai.GenerationConfig(
+                    max_output_tokens=max_tokens,
+                    temperature=temperature,
+                    **({"response_mime_type": "application/json"} if json_mode else {})
+                )
+            except TypeError:
+                gen_config = genai.GenerationConfig(
+                    max_output_tokens=max_tokens,
+                    temperature=temperature,
+                )
             model = genai.GenerativeModel(
                 model_name, generation_config=gen_config)
             response = model.generate_content(prompt)
@@ -1124,6 +1142,9 @@ class UIComponents:
                 try {
                     var P = window.parent, pdoc = P.document;
                     if (!pdoc || !pdoc.body) { setTimeout(init, 80); return; }
+                    if (P.__nexstepRunning && !pdoc.getElementById('ns-canvas')) {
+                        P.__nexstepRunning = false;
+                    }
                     if (P.__nexstepRunning) return;
                     P.__nexstepRunning = true;
                     if (!pdoc.getElementById('nexstep-injected-css')) {
@@ -1167,7 +1188,7 @@ class UIComponents:
         })();
         </script>
         """
-        components.html(particle_js, height=0, scrolling=False)
+        components.html(particle_js, height=1, scrolling=False)
 
     @staticmethod
     def show_api_setup_banner():
@@ -1247,6 +1268,9 @@ def render_tab_career_analysis(ai_handler: AIHandler, pdf_handler: PDFHandler,
             st.error("⚠️ Configure your API key in the sidebar first.")
         elif not raw_text:
             st.warning("⚠️ Please upload a resume or enter your details above.")
+        elif not ai_handler.config.using_own_key() and st.session_state.get('free_uses', 0) >= 5:
+            st.warning("⚠️ You've used all 5 free analyses this session. Add your own free API key in the sidebar!")
+            st.info("🔑 Get a free Groq key in 2 mins: https://console.groq.com/keys")
         else:
             context = {
                 'industries': target_industry, 'career_stage': career_stage,
@@ -1261,6 +1285,8 @@ def render_tab_career_analysis(ai_handler: AIHandler, pdf_handler: PDFHandler,
             if data:
                 st.session_state.current_analysis = data
                 history_manager.add_to_history(raw_text, data, context)
+                if not ai_handler.config.using_own_key():
+                    st.session_state['free_uses'] = st.session_state.get('free_uses', 0) + 1
                 st.success(
                     "✅ Analysis complete! Scroll down to see your results.")
                 st.balloons()
@@ -1541,6 +1567,8 @@ def render_tab_resume_builder(ai_handler: AIHandler, selected_model: str):
             st.error("⚠️ Configure your API key first!")
         elif not rb_name or not rb_target_role:
             st.error("⚠️ Please fill in at least your Name and Target Role.")
+        elif not ai_handler.config.using_own_key() and st.session_state.get('free_uses', 0) >= 5:
+            st.warning("⚠️ Free session limit reached. Add your own free API key in the sidebar!")
         else:
             profile_data = {
                 "name": rb_name, "email": rb_email, "phone": rb_phone,
@@ -1556,6 +1584,8 @@ def render_tab_resume_builder(ai_handler: AIHandler, selected_model: str):
                     profile_data, selected_model)
             if result:
                 st.session_state.built_resume = result
+                if not ai_handler.config.using_own_key():
+                    st.session_state['free_uses'] = st.session_state.get('free_uses', 0) + 1
                 st.success("✅ Resume built successfully!")
 
     if st.session_state.built_resume:
@@ -1817,6 +1847,8 @@ def _render_interview_setup(ai_handler: AIHandler, selected_model: str):
             st.error("⚠️ Configure your API key first!")
         elif not mi_role or is_separator:
             st.error("⚠️ Please select a valid job role.")
+        elif not ai_handler.config.using_own_key() and st.session_state.get('free_uses', 0) >= 5:
+            st.warning("⚠️ Free session limit reached. Add your own free API key in the sidebar!")
         else:
             with st.spinner("🧠 Generating interview questions..."):
                 questions = ai_handler.generate_interview_questions(
@@ -1829,6 +1861,8 @@ def _render_interview_setup(ai_handler: AIHandler, selected_model: str):
                 st.session_state.interview_role = mi_role
                 st.session_state.interview_started = True
                 st.session_state.current_q_index = 0
+                if not ai_handler.config.using_own_key():
+                    st.session_state['free_uses'] = st.session_state.get('free_uses', 0) + 1
                 st.rerun()
 
 
@@ -2263,13 +2297,25 @@ def render_sidebar(config: Config) -> tuple[str, str, str, bool, bool]:
 
         st.divider()
 
+        uses = st.session_state.get('free_uses', 0)
+        own_key = config.using_own_key(selected_provider)
         if config.is_ready():
-            st.success(f"""
-            **✅ Ready to Analyze**
-            - Provider: {selected_provider.split()[0]}
-            - Model: {selected_model}
-            - History: {len(st.session_state.history)} records
-            """)
+            if own_key:
+                st.success(f"""
+                **✅ Your Key Active**
+                - Provider: {selected_provider.split()[0]}
+                - Unlimited use
+                """)
+            else:
+                remaining = max(0, 5 - uses)
+                bar = '█' * remaining + '░' * (5 - remaining)
+                st.success(f"""
+                **✅ Ready (Free Tier)**
+                - Provider: {selected_provider.split()[0]}
+                - Free uses left: {remaining}/5  {bar}
+                """)
+                if remaining <= 2:
+                    st.warning("🔑 Running low! Add your own key for unlimited use.")
         else:
             st.error(
                 f"**⚠️ {selected_provider} Key Required**\nPaste your key above to start")
@@ -2293,6 +2339,7 @@ def init_session_state():
         'interview_started': False,
         'current_q_index': 0,
         'final_verdict': None,
+        'free_uses': 0,
     }
     for key, val in defaults.items():
         if key not in st.session_state:
