@@ -100,7 +100,7 @@ _HEADER_HTML = """<!DOCTYPE html>
    stacking context that flattens preserve-3d children.
    Fallback: auto (allows scroll in very old browsers, not ideal but safe). */
 body {
-  background: transparent!important;
+  background: #060b14!important;
   overflow: clip; /* modern browsers */
   overflow: hidden; /* legacy fallback — overridden above in supporting browsers */
   font-family: 'Inter', sans-serif;
@@ -282,33 +282,7 @@ body {
 <script>
 (function(){
   var fe = window.frameElement;
-  if(fe){ fe.style.cssText += 'border:none!important;outline:none!important;box-shadow:none!important;background:transparent!important;'; }
-})();
-</script>
-
-<script>
-/* ── Forward mouse events from this iframe to the parent window
-   so the custom cursor keeps tracking over the header area. ── */
-(function() {
-  function forwardMouse(e) {
-    try {
-      var fe = window.frameElement;
-      if (!fe) return;
-      var rect = fe.getBoundingClientRect();
-      var px = e.clientX + rect.left;
-      var py = e.clientY + rect.top;
-      var synth = new window.parent.MouseEvent(e.type, {
-        clientX: px, clientY: py,
-        bubbles: true, cancelable: false
-      });
-      window.parent.document.dispatchEvent(synth);
-    } catch(err) {}
-  }
-  document.addEventListener('mousemove',  forwardMouse, { passive: true });
-  document.addEventListener('mouseover',  forwardMouse, { passive: true });
-  document.addEventListener('mouseout',   forwardMouse, { passive: true });
-  document.addEventListener('mousedown',  forwardMouse, { passive: true });
-  document.addEventListener('mouseup',    forwardMouse, { passive: true });
+  if(fe){ fe.style.cssText += 'border:none!important;outline:none!important;box-shadow:none!important;background:#060b14!important;'; }
 })();
 </script>
 
