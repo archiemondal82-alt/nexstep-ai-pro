@@ -93,14 +93,14 @@ _HEADER_HTML = """<!DOCTYPE html>
 <title>JobLess AI</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400&display=swap" rel="stylesheet">
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
+* { margin:0; padding:0; box-sizing:border-box; cursor: none !important; }
 
 /* FIX 1: overflow:hidden on body kills 3D transforms on iOS Safari.
    Use overflow:clip instead — it clips visually without creating a
    stacking context that flattens preserve-3d children.
    Fallback: auto (allows scroll in very old browsers, not ideal but safe). */
 body {
-  background: transparent!important;
+  background: #060b14!important;
   overflow: clip; /* modern browsers */
   overflow: hidden; /* legacy fallback — overridden above in supporting browsers */
   font-family: 'Inter', sans-serif;
@@ -282,7 +282,29 @@ body {
 <script>
 (function(){
   var fe = window.frameElement;
-  if(fe){ fe.style.cssText += 'border:none!important;outline:none!important;box-shadow:none!important;background:transparent!important;'; }
+  if(fe){ fe.style.cssText += 'border:none!important;outline:none!important;box-shadow:none!important;background:#060b14!important;'; }
+})();
+</script>
+
+<script>
+(function() {
+  var s = document.createElement('style');
+  s.textContent = '* { cursor: none !important; }';
+  document.head.appendChild(s);
+  function fwd(e) {
+    try {
+      var fe = window.frameElement;
+      if (!fe) return;
+      var r = fe.getBoundingClientRect();
+      window.parent.document.dispatchEvent(new window.parent.MouseEvent(e.type, {
+        clientX: e.clientX + r.left, clientY: e.clientY + r.top,
+        bubbles: true, cancelable: false
+      }));
+    } catch(err) {}
+  }
+  ['mousemove','mouseover','mouseout','mousedown','mouseup'].forEach(function(ev) {
+    document.addEventListener(ev, fwd, { passive: true });
+  });
 })();
 </script>
 
@@ -570,7 +592,6 @@ class Config:
     def set_provider(self, provider: str):
         st.session_state["ai_provider"] = provider
 
-    # Streamlit secrets keys for each provider
     _SECRETS = {
         "Google Gemini  🆓": "GEMINI_API_KEY",
         "Groq  🆓⚡": "GROQ_API_KEY",
@@ -579,18 +600,15 @@ class Config:
 
     def get_api_key(self, provider=None) -> str:
         p = provider or self.get_provider()
-        # 1. User's own key takes priority
         val = st.session_state.get(f"api_key_{p}", "")
         if val:
             return val
-        # 2. Streamlit secrets (shared key, no user input needed)
         try:
             secret_key = self._SECRETS.get(p, "")
             if secret_key:
                 return st.secrets.get(secret_key, "")
         except Exception:
             pass
-        # 3. Environment variable fallback
         return os.getenv(self._ENV.get(p, ""), "")
 
     def using_own_key(self, provider=None) -> bool:
@@ -625,13 +643,17 @@ class AIHandler:
             if not _GEMINI_OK:
                 raise RuntimeError("Run: pip install google-generativeai")
             genai.configure(api_key=api_key)
-            gen_config = genai.GenerationConfig(
-                max_output_tokens=max_tokens,
-                temperature=temperature,
-                # Native JSON mode: Gemini guarantees a parseable JSON response,
-                # eliminating the need for markdown-fence stripping heuristics.
-                **({"response_mime_type": "application/json"} if json_mode else {})
-            )
+            try:
+                gen_config = genai.GenerationConfig(
+                    max_output_tokens=max_tokens,
+                    temperature=temperature,
+                    **({"response_mime_type": "application/json"} if json_mode else {})
+                )
+            except TypeError:
+                gen_config = genai.GenerationConfig(
+                    max_output_tokens=max_tokens,
+                    temperature=temperature,
+                )
             model = genai.GenerativeModel(
                 model_name, generation_config=gen_config)
             response = model.generate_content(prompt)
@@ -1120,6 +1142,9 @@ class UIComponents:
                 try {
                     var P = window.parent, pdoc = P.document;
                     if (!pdoc || !pdoc.body) { setTimeout(init, 80); return; }
+                    if (P.__nexstepRunning && !pdoc.getElementById('ns-canvas')) {
+                        P.__nexstepRunning = false;
+                    }
                     if (P.__nexstepRunning) return;
                     P.__nexstepRunning = true;
                     if (!pdoc.getElementById('nexstep-injected-css')) {
@@ -1163,7 +1188,7 @@ class UIComponents:
         })();
         </script>
         """
-        components.html(particle_js, height=0, scrolling=False)
+        components.html(particle_js, height=1, scrolling=False)
 
     @staticmethod
     def show_api_setup_banner():
@@ -1244,7 +1269,7 @@ def render_tab_career_analysis(ai_handler: AIHandler, pdf_handler: PDFHandler,
         elif not raw_text:
             st.warning("⚠️ Please upload a resume or enter your details above.")
         elif not ai_handler.config.using_own_key() and st.session_state.get('free_uses', 0) >= 5:
-            st.warning("⚠️ You've used all 5 free analyses this session. Add your own free API key in the sidebar for unlimited use!")
+            st.warning("⚠️ You've used all 5 free analyses this session. Add your own free API key in the sidebar!")
             st.info("🔑 Get a free Groq key in 2 mins: https://console.groq.com/keys")
         else:
             context = {
@@ -2272,14 +2297,17 @@ def render_sidebar(config: Config) -> tuple[str, str, str, bool, bool]:
 
         st.divider()
 
+        uses = st.session_state.get('free_uses', 0)
+        own_key = config.using_own_key(selected_provider)
         if config.is_ready():
-            st.success(f"""
-**✅ Your Key Active**
+            if own_key:
+                st.success(f"""
+                **✅ Your Key Active**
                 - Provider: {selected_provider.split()[0]}
                 - Unlimited use
                 """)
             else:
-                remaining = max(0, 5 - st.session_state.get('free_uses', 0))
+                remaining = max(0, 5 - uses)
                 bar = '█' * remaining + '░' * (5 - remaining)
                 st.success(f"""
                 **✅ Ready (Free Tier)**
