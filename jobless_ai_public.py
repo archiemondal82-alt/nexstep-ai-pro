@@ -100,7 +100,7 @@ _HEADER_HTML = """<!DOCTYPE html>
    stacking context that flattens preserve-3d children.
    Fallback: auto (allows scroll in very old browsers, not ideal but safe). */
 body {
-  background: #060b14!important;
+  background: transparent!important;
   overflow: clip; /* modern browsers */
   overflow: hidden; /* legacy fallback — overridden above in supporting browsers */
   font-family: 'Inter', sans-serif;
@@ -282,7 +282,7 @@ body {
 <script>
 (function(){
   var fe = window.frameElement;
-  if(fe){ fe.style.cssText += 'border:none!important;outline:none!important;box-shadow:none!important;background:#060b14!important;'; }
+  if(fe){ fe.style.cssText += 'border:none!important;outline:none!important;box-shadow:none!important;background:transparent!important;'; }
 })();
 </script>
 
@@ -603,13 +603,19 @@ class AIHandler:
             if not _GEMINI_OK:
                 raise RuntimeError("Run: pip install google-generativeai")
             genai.configure(api_key=api_key)
-            gen_config = genai.GenerationConfig(
-                max_output_tokens=max_tokens,
-                temperature=temperature,
-                # Native JSON mode: Gemini guarantees a parseable JSON response,
-                # eliminating the need for markdown-fence stripping heuristics.
-                **({"response_mime_type": "application/json"} if json_mode else {})
-            )
+            # response_mime_type requires google-generativeai >= 0.4.0
+            # Fallback gracefully for older installs
+            try:
+                gen_config = genai.GenerationConfig(
+                    max_output_tokens=max_tokens,
+                    temperature=temperature,
+                    **({"response_mime_type": "application/json"} if json_mode else {})
+                )
+            except TypeError:
+                gen_config = genai.GenerationConfig(
+                    max_output_tokens=max_tokens,
+                    temperature=temperature,
+                )
             model = genai.GenerativeModel(
                 model_name, generation_config=gen_config)
             response = model.generate_content(prompt)
@@ -1098,10 +1104,6 @@ class UIComponents:
                 try {
                     var P = window.parent, pdoc = P.document;
                     if (!pdoc || !pdoc.body) { setTimeout(init, 80); return; }
-                    /* Reset the running flag if canvas was removed (Streamlit rerun wipes DOM) */
-                    if (P.__nexstepRunning && !pdoc.getElementById('ns-canvas')) {
-                        P.__nexstepRunning = false;
-                    }
                     if (P.__nexstepRunning) return;
                     P.__nexstepRunning = true;
                     if (!pdoc.getElementById('nexstep-injected-css')) {
@@ -1145,7 +1147,7 @@ class UIComponents:
         })();
         </script>
         """
-        components.html(particle_js, height=1, scrolling=False)
+        components.html(particle_js, height=0, scrolling=False)
 
     @staticmethod
     def show_api_setup_banner():
