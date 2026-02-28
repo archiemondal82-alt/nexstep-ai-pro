@@ -3667,6 +3667,74 @@ def _build_ai_pyq_pdf(company: str, role: str, sections: list) -> bytes:
 # ==================== MAIN ====================
 
 
+def _load_landing_page() -> str:
+    """Load the landing page HTML from file, with fallback if file not found."""
+    landing_path = os.path.join(os.path.dirname(
+        __file__), "jobless_ai_landing.html")
+    try:
+        with open(landing_path, "r", encoding="utf-8") as f:
+            return f.read()
+    except FileNotFoundError:
+        return "<h1>Landing page not found. Place jobless_ai_landing.html in the same directory.</h1>"
+
+
+def _show_landing_page():
+    """Render the full-page landing experience inside Streamlit."""
+    # Hide all Streamlit chrome so the landing page looks native
+    st.markdown("""
+        <style>
+            /* Hide Streamlit header, footer, and sidebar toggle */
+            header[data-testid="stHeader"],
+            footer,
+            #MainMenu,
+            [data-testid="collapsedControl"],
+            [data-testid="stToolbar"] { display: none !important; }
+
+            /* Remove all padding/margin so the iframe fills the viewport */
+            .main > div:first-child { padding: 0 !important; }
+            .block-container {
+                padding: 0 !important;
+                max-width: 100% !important;
+            }
+            [data-testid="stAppViewContainer"] > section.main {
+                padding: 0 !important;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
+    html_content = _load_landing_page()
+
+    # Inject a small script so CTA clicks navigate the parent window (not the iframe)
+    # This rewrites ?page=app links to use window.top.location
+    inject_nav_script = """
+    <script>
+    (function() {
+        // After DOM is ready, patch all ?page=app links to navigate the top frame
+        function patchLinks() {
+            document.querySelectorAll('a[href="?page=app"]').forEach(function(a) {
+                a.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.top.location.href = window.top.location.pathname + '?page=app';
+                });
+            });
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', patchLinks);
+        } else {
+            patchLinks();
+        }
+    })();
+    </script>
+    """
+
+    # Insert the navigation script just before </body>
+    html_with_nav = html_content.replace(
+        "</body>", inject_nav_script + "\n</body>")
+
+    # Render at a generous height; scrolling=True lets the page scroll inside the iframe
+    components.html(html_with_nav, height=7000, scrolling=True)
+
+
 def main():
     st.set_page_config(
         page_title="JobLess AI",
@@ -3675,6 +3743,13 @@ def main():
         initial_sidebar_state="collapsed",
     )
 
+    # ── Routing: show landing page unless ?page=app is in the URL ──────────
+    page = st.query_params.get("page", "landing")
+    if page != "app":
+        _show_landing_page()
+        st.stop()
+
+    # ── App mode ────────────────────────────────────────────────────────────
     init_session_state()
 
     config = Config()
