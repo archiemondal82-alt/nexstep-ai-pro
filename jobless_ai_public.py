@@ -5592,7 +5592,7 @@ def _show_landing_page():
         </style>
     """, unsafe_allow_html=True)
 
-    html_content = _load_landing_page()
+    html_content = _LANDING_PAGE_HTML
 
     # ── 2. Build the navigation + resize script to inject ────────────────────
     # Because Streamlit iframes are sandboxed, window.top.location is blocked.
@@ -5646,27 +5646,28 @@ def _show_landing_page():
     parent_script = """
     <script>
     (function() {
-        window.addEventListener('message', function(e) {
-            if (!e.data || typeof e.data !== 'object') return;
-
-            if (e.data.type === 'JOBLESS_NAV' && e.data.page === 'app') {
-                // Navigate the top-level Streamlit page
-                var url = new URL(window.location.href);
-                url.searchParams.set('page', 'app');
-                window.location.href = url.toString();
-            }
-
-            if (e.data.type === 'JOBLESS_RESIZE' && e.data.height) {
-                // Find our iframe and set its height to match the content
-                var iframes = document.querySelectorAll('iframe');
-                iframes.forEach(function(f) {
-                    // Only target the landing-page iframe (tallest one)
-                    if (e.data.height > 500) {
-                        f.style.height = e.data.height + 'px';
-                    }
-                });
-            }
-        });
+        // Attach listener to window.parent (the Streamlit app page),
+        // NOT to this iframe's window. This is the key fix — messages
+        // from the landing page iframe go to window.parent, so the
+        // listener must live there too.
+        try {
+            window.parent.addEventListener('message', function(e) {
+                if (!e.data || typeof e.data !== 'object') return;
+                if (e.data.type === 'JOBLESS_NAV' && e.data.page === 'app') {
+                    var url = new URL(window.parent.location.href);
+                    url.searchParams.set('page', 'app');
+                    window.parent.location.href = url.toString();
+                }
+                if (e.data.type === 'JOBLESS_RESIZE' && e.data.height) {
+                    var iframes = window.parent.document.querySelectorAll('iframe');
+                    iframes.forEach(function(f) {
+                        if (e.data.height > 500) {
+                            f.style.height = e.data.height + 'px';
+                        }
+                    });
+                }
+            });
+        } catch(err) { /* cross-origin guard */ }
     })();
     </script>
     """
