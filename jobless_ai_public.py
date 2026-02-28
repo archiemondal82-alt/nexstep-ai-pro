@@ -5546,92 +5546,48 @@ _LANDING_PAGE_HTML = """
 """
 
 
-def _load_landing_page() -> str:
-    """Return the embedded landing page HTML."""
-    return _LANDING_PAGE_HTML
-
-
 def _show_landing_page():
-    """Render the landing page via components.html().
+    """Render the landing page. Uses a base64 data URI iframe for reliability on Streamlit Cloud."""
+    import base64
 
-    Why components.html() and not st.markdown():
-      - st.markdown strips <script> tags and mangles iframe srcdoc/data-URIs
-      - components.html() renders raw HTML+JS correctly
-
-    Why window.parent.location.href for navigation:
-      - components.html() sandboxes include allow-same-origin, so window.parent
-        is accessible (same streamlit.app domain on Streamlit Cloud)
-      - No postMessage chain needed — one direct location assignment works
-    """
-
-    # Hide all Streamlit chrome ──────────────────────────────────────────────
+    # Hide all Streamlit chrome
     st.markdown("""
         <style>
             header[data-testid="stHeader"], footer, #MainMenu,
             [data-testid="collapsedControl"], [data-testid="stToolbar"],
             [data-testid="stDecoration"], [data-testid="stStatusWidget"]
                 { display: none !important; }
-            html, body { margin: 0 !important; padding: 0 !important; }
-            .main, .block-container,
+            html, body, .main, .block-container,
             [data-testid="stAppViewContainer"],
             [data-testid="stAppViewContainer"] > section.main,
             [data-testid="stVerticalBlock"],
             [data-testid="stVerticalBlockBorderWrapper"],
             div[data-testid="stMainBlockContainer"] {
                 padding: 0 !important; margin: 0 !important;
-                max-width: 100% !important;
+                max-width: 100% !important; height: 100vh !important;
             }
-            iframe { border: none !important; }
+            iframe#landing-frame { border: none !important; }
         </style>
     """, unsafe_allow_html=True)
 
-    # CSS fixes injected into the landing page <head> ───────────────────────
-    css_patch = """<style>
-        html, body {
-            height: auto !important;
-            min-height: 100% !important;
-            overflow-x: hidden !important;
-        }
-        #hero {
-            min-height: 820px !important; height: auto !important;
-            display: flex !important; flex-direction: column !important;
-        }
-        .hero-inner {
-            flex: unset !important; display: flex !important;
-            align-items: center !important;
-            padding-top: 100px !important; padding-bottom: 60px !important;
-            min-height: 700px !important;
-        }
-        .hero-left, .hero-right { flex: 1 !important; }
-    </style>"""
-
-    # Navigation script injected before </body> ──────────────────────────────
-    # components.html iframes have allow-same-origin in their sandbox, so
-    # window.parent is accessible (same streamlit.app domain).
-    # We use window.parent.location.href directly — no postMessage needed.
+    # Add navigation script BEFORE </body>
     nav_script = """<script>
     (function () {
         function goToApp() {
             try {
-                // window.parent = the Streamlit app page (same origin on Cloud)
                 var base = window.parent.location.href.split('?')[0].split('#')[0];
                 window.parent.location.href = base + '?page=app';
             } catch (e) {
-                // Fallback: try top-level window
                 try {
                     var base2 = window.top.location.href.split('?')[0].split('#')[0];
                     window.top.location.href = base2 + '?page=app';
                 } catch (e2) {
-                    // Last resort: navigate this iframe; Streamlit will reload
                     window.location.href = '/?page=app';
                 }
             }
         }
-
-        // Intercept every click on a ?page=app link
         document.addEventListener('click', function (e) {
             var el = e.target;
-            // Walk up the DOM in case the click landed on a child element
             for (var i = 0; i < 5 && el; i++, el = el.parentElement) {
                 if (el.tagName === 'A') {
                     var href = el.getAttribute('href') || '';
@@ -5648,13 +5604,20 @@ def _show_landing_page():
     })();
     </script>"""
 
-    # Build final HTML ────────────────────────────────────────────────────────
-    html_final = _LANDING_PAGE_HTML
-    html_final = html_final.replace("</head>", css_patch + "\n</head>")
-    html_final = html_final.replace("</body>", nav_script + "\n</body>")
+    html_final = _LANDING_PAGE_HTML.replace(
+        "</body>", nav_script + "\n</body>")
 
-    # Render — components.html renders raw HTML+JS correctly ────────────────
-    components.html(html_final, height=9000, scrolling=True)
+    # Encode as base64 data URI — the most reliable way to embed full HTML in Streamlit
+    b64 = base64.b64encode(html_final.encode("utf-8")).decode("utf-8")
+    data_uri = f"data:text/html;charset=utf-8;base64,{b64}"
+
+    st.markdown(
+        f'<iframe id="landing-frame" src="{data_uri}" '
+        f'width="100%" height="900" frameborder="0" '
+        f'style="border:none;display:block;width:100%;height:100vh;"></iframe>',
+        unsafe_allow_html=True,
+    )
+
 
 def main():
     st.set_page_config(
