@@ -3666,66 +3666,1947 @@ def _build_ai_pyq_pdf(company: str, role: str, sections: list) -> bytes:
 
 # ==================== MAIN ====================
 
+_LANDING_PAGE_HTML = """
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JobLess AI — AI Career Intelligence</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --black: #0a0a0a;
+      --white: #f5f5f0;
+      --cyan: #00d0ff;
+      --cyan-dim: rgba(0, 208, 255, 0.15);
+      --grey: #1a1a1a;
+      --mid: #888;
+      --light-bg: #f0eeea;
+      --border: #e8e6e0;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--white);
+      color: var(--black);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 48px;
+      background: rgba(10, 10, 10, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .nav-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 26px;
+      color: var(--white);
+      letter-spacing: 2px;
+    }
+
+    .nav-logo span {
+      color: var(--cyan);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: rgba(255, 255, 255, 0.55);
+      text-decoration: none;
+      font-size: 13px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--white);
+    }
+
+    .nav-cta {
+      background: var(--cyan);
+      color: var(--black);
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 10px 24px;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .nav-cta:hover {
+      opacity: 0.85;
+    }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh;
+      background: var(--black);
+      display: flex;
+      flex-direction: column;
+      padding: 0 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-inner {
+      display: flex;
+      align-items: center;
+      flex: 1;
+      padding-top: 100px;
+      gap: 0;
+    }
+
+    .hero-left {
+      flex: 1;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .hero-badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 0 0 rgba(0, 208, 255, 0.6);
+      animation: pip 2.2s ease-out infinite;
+    }
+
+    @keyframes pip {
+      0% {
+        box-shadow: 0 0 0 0 rgba(0, 208, 255, .6);
+      }
+
+      70% {
+        box-shadow: 0 0 0 9px rgba(0, 208, 255, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(0, 208, 255, 0);
+      }
+    }
+
+    .hero-badge-text {
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: rgba(0, 208, 255, 0.6);
+      font-weight: 400;
+    }
+
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(72px, 9vw, 130px);
+      line-height: 0.92;
+      letter-spacing: 1px;
+      color: var(--white);
+      margin-bottom: 28px;
+    }
+
+    .hero-title .cyan {
+      color: var(--cyan);
+    }
+
+    .hero-title .outline {
+      -webkit-text-stroke: 2px rgba(0, 208, 255, 0.5);
+      color: transparent;
+    }
+
+    .hero-sub {
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.4);
+      font-weight: 300;
+      letter-spacing: 0.3px;
+      max-width: 420px;
+      line-height: 1.7;
+      margin-bottom: 40px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .btn-primary {
+      background: var(--cyan);
+      color: var(--black);
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      padding: 16px 36px;
+      text-decoration: none;
+      display: inline-block;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      opacity: 0.9;
+    }
+
+    .btn-ghost {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 12px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      padding: 16px 36px;
+      text-decoration: none;
+      display: inline-block;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    .hero-right {
+      flex: 1;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding-left: 60px;
+    }
+
+    .hero-card {
+      background: var(--grey);
+      border: 1px solid rgba(0, 208, 255, 0.18);
+      padding: 32px;
+      width: 340px;
+      position: relative;
+    }
+
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: 32px;
+      right: 32px;
+      height: 2px;
+      background: var(--cyan);
+    }
+
+    .hero-card-label {
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--cyan);
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+
+    .hero-card-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      letter-spacing: 1px;
+      color: var(--white);
+      margin-bottom: 6px;
+    }
+
+    .hero-card-sub {
+      font-size: 12px;
+      color: var(--mid);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .hero-progress {
+      margin-bottom: 14px;
+    }
+
+    .hero-progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.4);
+      margin-bottom: 6px;
+    }
+
+    .hero-bar {
+      height: 3px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .hero-bar-fill {
+      height: 100%;
+      background: var(--cyan);
+      border-radius: 2px;
+      animation: fillBar 2s ease forwards;
+    }
+
+    @keyframes fillBar {
+      from {
+        width: 0;
+      }
+    }
+
+    .bar-85 {
+      width: 85%;
+      animation-delay: 0.5s;
+    }
+
+    .bar-92 {
+      width: 92%;
+      animation-delay: 0.8s;
+    }
+
+    .bar-74 {
+      width: 74%;
+      animation-delay: 1.1s;
+    }
+
+    .hero-stat-row {
+      display: flex;
+      gap: 20px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .hero-stat {
+      flex: 1;
+    }
+
+    .hero-stat-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      color: var(--cyan);
+      line-height: 1;
+    }
+
+    .hero-stat-label {
+      font-size: 10px;
+      color: var(--mid);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .hero-scroll {
+      padding: 32px 48px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hero-scroll-line {
+      flex: 1;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .hero-scroll-text {
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* ── TRUSTED BY ── */
+    #trusted {
+      background: var(--white);
+      padding: 52px 48px;
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .trusted-label {
+      font-size: 11px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--mid);
+      font-weight: 500;
+      margin-bottom: 36px;
+    }
+
+    .trusted-logos {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 56px;
+      flex-wrap: wrap;
+    }
+
+    .trusted-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px;
+      letter-spacing: 2px;
+      color: rgba(0, 0, 0, 0.2);
+      transition: color 0.2s;
+    }
+
+    .trusted-logo:hover {
+      color: var(--black);
+    }
+
+    /* ── EXPLORE FEATURES ── */
+    #features {
+      background: var(--white);
+      padding: 100px 48px;
+    }
+
+    .section-eyebrow {
+      font-size: 11px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--mid);
+      margin-bottom: 14px;
+      font-weight: 500;
+    }
+
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(48px, 6vw, 80px);
+      letter-spacing: 1px;
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+
+    .section-sub {
+      font-size: 15px;
+      color: var(--mid);
+      max-width: 480px;
+      line-height: 1.7;
+      margin-bottom: 60px;
+      font-weight: 300;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+
+    .feature-card {
+      background: var(--white);
+      padding: 40px 32px;
+      transition: background 0.25s;
+      cursor: default;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--cyan);
+      transform: scaleX(0);
+      transition: transform 0.3s;
+      transform-origin: left;
+    }
+
+    .feature-card:hover {
+      background: #fafaf8;
+    }
+
+    .feature-card:hover::after {
+      transform: scaleX(1);
+    }
+
+    .feature-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 48px;
+      color: rgba(0, 0, 0, 0.06);
+      line-height: 1;
+      margin-bottom: 20px;
+    }
+
+    .feature-icon {
+      font-size: 28px;
+      margin-bottom: 16px;
+    }
+
+    .feature-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 24px;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      color: var(--black);
+    }
+
+    .feature-desc {
+      font-size: 13px;
+      color: var(--mid);
+      line-height: 1.65;
+      font-weight: 300;
+    }
+
+    .feature-price {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      color: var(--black);
+      margin-top: 24px;
+    }
+
+    .feature-free {
+      display: inline-block;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      background: var(--black);
+      color: var(--white);
+      padding: 4px 10px;
+      margin-top: 8px;
+    }
+
+    /* ── DARK SPECS ── */
+    #specs {
+      background: var(--black);
+      padding: 100px 48px;
+      display: flex;
+      gap: 80px;
+      align-items: flex-start;
+    }
+
+    .specs-left {
+      flex: 1;
+    }
+
+    .specs-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(52px, 6vw, 88px);
+      line-height: 0.95;
+      letter-spacing: 1px;
+      color: var(--white);
+      margin-bottom: 48px;
+    }
+
+    .specs-title span {
+      color: var(--cyan);
+    }
+
+    .spec-item {
+      padding: 28px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+      cursor: default;
+    }
+
+    .spec-item:hover .spec-name {
+      color: var(--cyan);
+    }
+
+    .spec-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      letter-spacing: 1px;
+      color: var(--white);
+      margin-bottom: 8px;
+      transition: color 0.2s;
+    }
+
+    .spec-desc {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.3);
+      line-height: 1.65;
+      font-weight: 300;
+      max-width: 420px;
+    }
+
+    .specs-right {
+      flex: 0 0 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding-top: 16px;
+    }
+
+    .spec-pill {
+      background: var(--grey);
+      border: 1px solid rgba(0, 208, 255, 0.15);
+      padding: 24px 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .spec-pill:hover {
+      border-color: var(--cyan);
+      background: rgba(0, 208, 255, 0.04);
+    }
+
+    .spec-pill-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .spec-pill-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      color: var(--white);
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .spec-pill-label {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.3);
+      font-weight: 300;
+    }
+
+    .spec-pill-badge {
+      margin-left: auto;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--cyan);
+      font-weight: 500;
+      text-transform: uppercase;
+    }
+
+    /* ── WHY CHOOSE US ── */
+    #benefits {
+      background: var(--light-bg);
+      padding: 100px 48px;
+      display: flex;
+      gap: 80px;
+    }
+
+    .benefits-left {
+      flex: 0 0 420px;
+      position: relative;
+    }
+
+    .benefits-visual {
+      background: var(--black);
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .benefits-visual-inner {
+      text-align: center;
+    }
+
+    .benefits-visual-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 120px;
+      line-height: 1;
+      color: rgba(255, 255, 255, 0.04);
+    }
+
+    .benefits-visual-label {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px;
+      letter-spacing: 3px;
+      color: var(--cyan);
+      position: absolute;
+      bottom: 32px;
+      left: 32px;
+    }
+
+    .benefits-accent {
+      position: absolute;
+      top: -12px;
+      right: -12px;
+      background: var(--cyan);
+      padding: 14px 20px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      letter-spacing: 1px;
+      color: var(--black);
+    }
+
+    .benefits-right {
+      flex: 1;
+    }
+
+    .benefits-right .section-title {
+      margin-top: 0;
+    }
+
+    .benefit-list {
+      margin-top: 40px;
+    }
+
+    .benefit-item {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      padding: 28px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .benefit-icon-wrap {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+      background: var(--black);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .benefit-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .benefit-desc {
+      font-size: 13px;
+      color: var(--mid);
+      line-height: 1.65;
+      font-weight: 300;
+    }
+
+    /* ── DARK CTA BLOCK ── */
+    #cta-dark {
+      background: var(--black);
+      padding: 100px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-grid-bg {
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(rgba(0, 208, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 208, 255, 0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+    }
+
+    #cta-dark .section-eyebrow {
+      color: rgba(0, 208, 255, 0.5);
+    }
+
+    .cta-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(52px, 7vw, 100px);
+      line-height: 0.92;
+      letter-spacing: 1px;
+      color: var(--white);
+      margin: 20px 0 40px;
+      position: relative;
+    }
+
+    .cta-title span {
+      color: var(--cyan);
+    }
+
+    /* ── TESTIMONIALS ── */
+    #testimonials {
+      background: var(--black);
+      padding: 100px 48px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    #testimonials .section-title {
+      color: var(--white);
+    }
+
+    #testimonials .section-eyebrow {
+      color: rgba(0, 208, 255, 0.5);
+    }
+
+    #testimonials .section-sub {
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 60px;
+    }
+
+    .testi-card {
+      background: var(--grey);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 32px;
+      transition: border-color 0.25s;
+    }
+
+    .testi-card:nth-child(2) {
+      border-color: var(--cyan);
+      position: relative;
+    }
+
+    .testi-card:nth-child(2)::before {
+      content: 'FEATURED';
+      position: absolute;
+      top: -1px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--cyan);
+      color: var(--black);
+      font-size: 9px;
+      letter-spacing: 3px;
+      font-weight: 700;
+      padding: 4px 14px;
+    }
+
+    .testi-card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .testi-stars {
+      font-size: 14px;
+      margin-bottom: 16px;
+      letter-spacing: 2px;
+      color: var(--cyan);
+    }
+
+    .testi-text {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.55);
+      line-height: 1.75;
+      font-weight: 300;
+      margin-bottom: 24px;
+      font-style: italic;
+    }
+
+    .testi-author {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .testi-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 16px;
+      color: var(--black);
+      flex-shrink: 0;
+    }
+
+    .testi-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 16px;
+      color: var(--white);
+      letter-spacing: 1px;
+    }
+
+    .testi-role {
+      font-size: 11px;
+      color: var(--mid);
+      font-weight: 300;
+    }
+
+    /* ── FAQ ── */
+    #faq {
+      background: var(--white);
+      padding: 100px 48px;
+      display: flex;
+      gap: 80px;
+    }
+
+    .faq-left {
+      flex: 0 0 360px;
+    }
+
+    .faq-right {
+      flex: 1;
+    }
+
+    .faq-item {
+      border-top: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .faq-question {
+      padding: 24px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px;
+      letter-spacing: 0.5px;
+      color: var(--black);
+      gap: 20px;
+      transition: color 0.2s;
+      user-select: none;
+    }
+
+    .faq-question:hover {
+      color: rgba(0, 0, 0, 0.6);
+    }
+
+    .faq-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+      font-family: monospace;
+      font-weight: 300;
+      color: var(--mid);
+      transition: transform 0.3s;
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.3s;
+      font-size: 14px;
+      color: var(--mid);
+      line-height: 1.75;
+      font-weight: 300;
+      padding-bottom: 0;
+    }
+
+    .faq-item.open .faq-answer {
+      max-height: 200px;
+      padding-bottom: 24px;
+    }
+
+    .faq-item.open .faq-icon {
+      transform: rotate(45deg);
+    }
+
+    /* ── PROVIDERS ── */
+    #providers {
+      background: var(--light-bg);
+      padding: 80px 48px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+    }
+
+    .providers-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 56px;
+      max-width: 900px;
+      margin-inline: auto;
+    }
+
+    .provider-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      padding: 36px 28px;
+      text-align: left;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .provider-card:hover {
+      border-color: var(--black);
+      transform: translateY(-4px);
+    }
+
+    .provider-icon {
+      font-size: 32px;
+      margin-bottom: 16px;
+    }
+
+    .provider-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 24px;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .provider-free {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #2e7d32;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .provider-models {
+      font-size: 12px;
+      color: var(--mid);
+      line-height: 1.8;
+      font-weight: 300;
+    }
+
+    .provider-badge {
+      display: inline-block;
+      font-size: 9px;
+      letter-spacing: 2px;
+      background: var(--black);
+      color: var(--white);
+      padding: 3px 8px;
+      margin-top: 16px;
+      text-transform: uppercase;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--black);
+      padding: 80px 48px 48px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .footer-top {
+      display: flex;
+      gap: 80px;
+      padding-bottom: 60px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .footer-brand {
+      flex: 0 0 280px;
+    }
+
+    .footer-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 32px;
+      letter-spacing: 2px;
+      color: var(--white);
+      margin-bottom: 16px;
+    }
+
+    .footer-logo span {
+      color: var(--cyan);
+    }
+
+    .footer-tagline {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.3);
+      line-height: 1.7;
+      font-weight: 300;
+      max-width: 220px;
+    }
+
+    .footer-cols {
+      flex: 1;
+      display: flex;
+      gap: 60px;
+    }
+
+    .footer-col h4 {
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.3);
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+
+    .footer-col ul {
+      list-style: none;
+    }
+
+    .footer-col li {
+      margin-bottom: 12px;
+    }
+
+    .footer-col a {
+      color: rgba(255, 255, 255, 0.55);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+
+    .footer-col a:hover {
+      color: var(--white);
+    }
+
+    .footer-newsletter {
+      flex: 0 0 280px;
+    }
+
+    .footer-newsletter h4 {
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.3);
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+
+    .footer-newsletter p {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.3);
+      margin-bottom: 20px;
+      line-height: 1.65;
+      font-weight: 300;
+    }
+
+    .newsletter-form {
+      display: flex;
+      gap: 0;
+    }
+
+    .newsletter-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-right: none;
+      padding: 12px 16px;
+      color: var(--white);
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+    }
+
+    .newsletter-input::placeholder {
+      color: rgba(255, 255, 255, 0.25);
+    }
+
+    .newsletter-btn {
+      background: var(--cyan);
+      color: var(--black);
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 700;
+      padding: 12px 20px;
+      border: none;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: opacity 0.2s;
+    }
+
+    .newsletter-btn:hover {
+      opacity: 0.85;
+    }
+
+    .footer-bottom {
+      padding-top: 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-copy {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.2);
+      font-weight: 300;
+    }
+
+    .footer-legal {
+      display: flex;
+      gap: 24px;
+    }
+
+    .footer-legal a {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.2);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-legal a:hover {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* ── FOOTER WATERMARK ── */
+    .footer-watermark {
+      text-align: center;
+      padding-top: 40px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(60px, 10vw, 140px);
+      letter-spacing: 4px;
+      color: rgba(255, 255, 255, 0.02);
+      line-height: 1;
+      overflow: hidden;
+    }
+
+    /* ── ANIMATIONS ── */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) {
+      nav {
+        padding: 16px 24px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      #hero,
+      #trusted,
+      #features,
+      #specs,
+      #benefits,
+      #cta-dark,
+      #testimonials,
+      #faq,
+      #providers,
+      footer {
+        padding-left: 24px;
+        padding-right: 24px;
+      }
+
+      .hero-inner {
+        flex-direction: column;
+        padding-top: 120px;
+        gap: 48px;
+      }
+
+      .hero-right {
+        padding-left: 0;
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .hero-card {
+        width: 100%;
+        max-width: 400px;
+      }
+
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      #specs {
+        flex-direction: column;
+        gap: 48px;
+      }
+
+      .specs-right {
+        flex: none;
+        width: 100%;
+      }
+
+      #benefits {
+        flex-direction: column;
+      }
+
+      .benefits-left {
+        flex: none;
+        width: 100%;
+        max-width: 420px;
+      }
+
+      .testimonials-grid {
+        grid-template-columns: 1fr;
+      }
+
+      #faq {
+        flex-direction: column;
+      }
+
+      .faq-left {
+        flex: none;
+      }
+
+      .footer-top {
+        flex-direction: column;
+        gap: 48px;
+      }
+
+      .footer-cols {
+        flex-wrap: wrap;
+        gap: 40px;
+      }
+
+      .providers-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">Jobless<span>AI</span></div>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#specs">How It Works</a></li>
+      <li><a href="#benefits">Why Us</a></li>
+      <li><a href="#testimonials">Reviews</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <a href="?page=app" class="nav-cta">Launch App →</a>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-inner">
+      <div class="hero-left">
+        <div class="hero-badge">
+          <div class="hero-badge-dot"></div>
+          <span class="hero-badge-text">AI Career Intelligence · v2.0 Pro</span>
+        </div>
+        <h1 class="hero-title">
+          <span class="outline">CAREER</span><br>
+          <span class="cyan">INTELLIGENCE</span><br>
+          UNLEASHED
+        </h1>
+        <p class="hero-sub">
+          Transform your potential into a concrete career roadmap. Resume analysis, mock interviews, skill gap detection
+          — powered by cutting-edge AI. Free forever.
+        </p>
+        <div class="hero-actions">
+          <a href="?page=app" class="btn-primary">Start Free Now →</a>
+          <a href="#features" class="btn-ghost">Explore Features</a>
+        </div>
+      </div>
+      <div class="hero-right">
+        <div class="hero-card">
+          <div class="hero-card-label">⚡ Live Analysis Preview</div>
+          <div class="hero-card-title">CAREER SCORE BREAKDOWN</div>
+          <div class="hero-card-sub">Resume uploaded · Gemini 2.0 Flash · 2s ago</div>
+
+          <div class="hero-progress">
+            <div class="hero-progress-label"><span>Resume Match</span><span>85%</span></div>
+            <div class="hero-bar">
+              <div class="hero-bar-fill bar-85"></div>
+            </div>
+          </div>
+          <div class="hero-progress">
+            <div class="hero-progress-label"><span>Skill Alignment</span><span>92%</span></div>
+            <div class="hero-bar">
+              <div class="hero-bar-fill bar-92"></div>
+            </div>
+          </div>
+          <div class="hero-progress">
+            <div class="hero-progress-label"><span>Market Demand</span><span>74%</span></div>
+            <div class="hero-bar">
+              <div class="hero-bar-fill bar-74"></div>
+            </div>
+          </div>
+
+          <div class="hero-stat-row">
+            <div class="hero-stat">
+              <div class="hero-stat-num">7</div>
+              <div class="hero-stat-label">Tools</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-num">3</div>
+              <div class="hero-stat-label">AI Providers</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-num">100%</div>
+              <div class="hero-stat-label">Free Tier</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-scroll">
+      <div class="hero-scroll-line"></div>
+      <span class="hero-scroll-text">Scroll to explore</span>
+      <div class="hero-scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- TRUSTED BY -->
+  <section id="trusted">
+    <p class="trusted-label">Trusted by students & professionals at</p>
+    <div class="trusted-logos">
+      <span class="trusted-logo">Google</span>
+      <span class="trusted-logo">Amazon</span>
+      <span class="trusted-logo">Microsoft</span>
+      <span class="trusted-logo">Infosys</span>
+      <span class="trusted-logo">TCS</span>
+      <span class="trusted-logo">Wipro</span>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="fade-up">
+      <p class="section-eyebrow">Explore Our Tools</p>
+      <h2 class="section-title">EXPLORE OUR<br>AI TOOLKIT</h2>
+      <p class="section-sub">Seven powerful tools, one platform. Everything you need from first resume to final
+        interview — no subscription required.</p>
+    </div>
+
+    <div class="features-grid fade-up">
+      <div class="feature-card">
+        <div class="feature-num">01</div>
+        <div class="feature-icon">📊</div>
+        <div class="feature-name">Career Analysis</div>
+        <p class="feature-desc">Deep AI analysis of your resume against any job description. Get skill gaps, improvement
+          tips, and a match score instantly.</p>
+        <div class="feature-price">Core Tool</div>
+        <div class="feature-free">Free Forever</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-num">02</div>
+        <div class="feature-icon">📝</div>
+        <div class="feature-name">Resume Builder</div>
+        <p class="feature-desc">AI-powered resume generator tailored to your target role. Export a polished PDF in
+          seconds — no design skills needed.</p>
+        <div class="feature-price">Core Tool</div>
+        <div class="feature-free">Free Forever</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-num">03</div>
+        <div class="feature-icon">🎤</div>
+        <div class="feature-name">Mock Interview</div>
+        <p class="feature-desc">Practice with AI-generated questions for your exact role and company. Get model answers
+          and performance feedback.</p>
+        <div class="feature-price">Core Tool</div>
+        <div class="feature-free">Free Forever</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-num">04</div>
+        <div class="feature-icon">📂</div>
+        <div class="feature-name">PYQ Hub</div>
+        <p class="feature-desc">AI-generated previous year question papers for top companies and roles. With answers and
+          explanations. Export as PDF.</p>
+        <div class="feature-price">Core Tool</div>
+        <div class="feature-free">Free Forever</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-num">05</div>
+        <div class="feature-icon">⚖️</div>
+        <div class="feature-name">Career Compare</div>
+        <p class="feature-desc">Side-by-side comparison of multiple career paths or job offers. Let AI help you make the
+          decision with clarity.</p>
+        <div class="feature-price">Core Tool</div>
+        <div class="feature-free">Free Forever</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-num">06</div>
+        <div class="feature-icon">📚</div>
+        <div class="feature-name">Resources Hub</div>
+        <p class="feature-desc">Curated learning resources, roadmaps, and certifications tailored to your target role
+          and current skill level.</p>
+        <div class="feature-price">Core Tool</div>
+        <div class="feature-free">Free Forever</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-num">07</div>
+        <div class="feature-icon">📜</div>
+        <div class="feature-name">Analysis History</div>
+        <p class="feature-desc">Track your career growth over time. Review past analyses, see your progress, and compare
+          before vs. after.</p>
+        <div class="feature-price">Core Tool</div>
+        <div class="feature-free">Free Forever</div>
+      </div>
+      <div class="feature-card" style="background: var(--black); border: none;">
+        <div class="feature-num" style="color: rgba(255,255,255,0.04);">∞</div>
+        <div class="feature-icon">🚀</div>
+        <div class="feature-name" style="color: var(--white);">Bring Your Own Key</div>
+        <p class="feature-desc" style="color: rgba(255,255,255,0.3);">Use Gemini, Groq, or Cohere — all free APIs. Your
+          data stays with you. No middleman. No cost.</p>
+        <div class="feature-price" style="color: var(--cyan);">Always Free</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DARK SPECS -->
+  <section id="specs">
+    <div class="specs-left">
+      <div class="section-eyebrow" style="color: rgba(0,208,255,0.5);">Product Specs</div>
+      <h2 class="specs-title">LATEST AI<br>SPECS FROM<br><span>OUR ENGINE</span></h2>
+
+      <div class="spec-item">
+        <div class="spec-name">MULTI-PROVIDER INTELLIGENCE</div>
+        <p class="spec-desc">Switch between Google Gemini, Groq, and Cohere with a click. Run the same analysis on
+          different models and compare results for the sharpest insight.</p>
+      </div>
+      <div class="spec-item">
+        <div class="spec-name">REAL-TIME PDF PARSING</div>
+        <p class="spec-desc">Upload any PDF resume and get instant text extraction via PyMuPDF. Works on all formats —
+          scanned or digital.</p>
+      </div>
+      <div class="spec-item">
+        <div class="spec-name">PRECISION SCORING ENGINE</div>
+        <p class="spec-desc">Proprietary career scoring delivers skill-gap detection, role alignment scoring, and
+          learning path generation in under 3 seconds.</p>
+      </div>
+      <div class="spec-item">
+        <div class="spec-name">EXPORT-READY PDF OUTPUT</div>
+        <p class="spec-desc">Every analysis, resume, and question paper can be exported as a beautifully formatted PDF
+          using our ReportLab engine.</p>
+      </div>
+    </div>
+
+    <div class="specs-right">
+      <div class="spec-pill">
+        <div class="spec-pill-icon">⚡</div>
+        <div>
+          <div class="spec-pill-name">GEMINI 2.0 FLASH</div>
+          <div class="spec-pill-label">Google · 1500 req/day free</div>
+        </div>
+        <div class="spec-pill-badge">Live</div>
+      </div>
+      <div class="spec-pill">
+        <div class="spec-pill-icon">🦙</div>
+        <div>
+          <div class="spec-pill-name">LLAMA 3.3 70B</div>
+          <div class="spec-pill-label">Groq · Ultra-fast inference</div>
+        </div>
+        <div class="spec-pill-badge">Live</div>
+      </div>
+      <div class="spec-pill">
+        <div class="spec-pill-icon">🌊</div>
+        <div>
+          <div class="spec-pill-name">COMMAND R+</div>
+          <div class="spec-pill-label">Cohere · Generous free tier</div>
+        </div>
+        <div class="spec-pill-badge">Live</div>
+      </div>
+      <div class="spec-pill">
+        <div class="spec-pill-icon">📄</div>
+        <div>
+          <div class="spec-pill-name">PDF RESUME PARSER</div>
+          <div class="spec-pill-label">PyMuPDF · All formats</div>
+        </div>
+        <div class="spec-pill-badge">Active</div>
+      </div>
+      <div class="spec-pill">
+        <div class="spec-pill-icon">📊</div>
+        <div>
+          <div class="spec-pill-name">CAREER SCORING ALGO</div>
+          <div class="spec-pill-label">Altair + custom metrics</div>
+        </div>
+        <div class="spec-pill-badge">Active</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BENEFITS -->
+  <section id="benefits">
+    <div class="benefits-left">
+      <div class="benefits-visual">
+        <div class="benefits-visual-inner">
+          <div class="benefits-visual-num">AI</div>
+        </div>
+        <div class="benefits-visual-label">POWERED BY<br>FREE AI</div>
+      </div>
+      <div class="benefits-accent">100% FREE</div>
+    </div>
+
+    <div class="benefits-right">
+      <p class="section-eyebrow">Benefits of JobLess AI</p>
+      <h2 class="section-title">WHY CHOOSE<br>OUR PLATFORM</h2>
+      <p class="section-sub">Discover the advantages that make JobLess AI the go-to tool for serious job seekers.</p>
+
+      <div class="benefit-list">
+        <div class="benefit-item">
+          <div class="benefit-icon-wrap" style="background: var(--black);">
+            <span style="color: var(--cyan);">🌍</span>
+          </div>
+          <div>
+            <div class="benefit-name">INDUSTRY-GRADE AI MODELS</div>
+            <p class="benefit-desc">We integrate only with the most capable free-tier AI APIs — Gemini, Groq, Cohere —
+              the same models used by enterprises worldwide.</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-icon-wrap" style="background: var(--black);">
+            <span style="color: var(--cyan);">🔒</span>
+          </div>
+          <div>
+            <div class="benefit-name">ZERO DATA STORAGE</div>
+            <p class="benefit-desc">Your resume and career data is processed on-the-fly and never stored by JobLess AI.
+              Full privacy, always.</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-icon-wrap" style="background: var(--black);">
+            <span style="color: var(--cyan);">✨</span>
+          </div>
+          <div>
+            <div class="benefit-name">ALWAYS UP-TO-DATE</div>
+            <p class="benefit-desc">We continuously update our tool catalogue and AI provider integrations to keep you
+              ahead of the job market.</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-icon-wrap" style="background: var(--black);">
+            <span style="color: var(--cyan);">🚀</span>
+          </div>
+          <div>
+            <div class="benefit-name">FREE FOREVER PROMISE</div>
+            <p class="benefit-desc">All 7 tools. All 3 AI providers. All exports. Free. We believe great career tools
+              should be accessible to everyone.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA DARK -->
+  <section id="cta-dark">
+    <div class="cta-grid-bg"></div>
+    <p class="section-eyebrow" style="position: relative;">What They Say About Us</p>
+    <h2 class="cta-title" style="position: relative;">REAL RESULTS<br>FROM <span>REAL</span> USERS</h2>
+    <p
+      style="color: rgba(255,255,255,0.3); max-width: 480px; margin: 0 auto; font-size: 15px; line-height: 1.7; position: relative;">
+      Listen directly from students and professionals who used JobLess AI to land their dream roles.
+    </p>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section id="testimonials">
+    <div class="testimonials-grid">
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"JobLess AI's mock interview tool was a game changer for my Google interview prep. The
+          AI-generated questions matched exactly what I was asked on the day."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">AR</div>
+          <div>
+            <div class="testi-name">Arjun Rao</div>
+            <div class="testi-role">SWE · Google India</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"I uploaded my resume and got a detailed skill gap report in seconds. The PYQ Hub gave me
+          50+ real company questions. I got placed at TCS within 2 weeks."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">PD</div>
+          <div>
+            <div class="testi-name">Priya Deshpande</div>
+            <div class="testi-role">Data Analyst · TCS</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"The resume builder generated a better resume than I could write myself. The AI knew
+          exactly what keywords to include for a product manager role at Amazon."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">SK</div>
+          <div>
+            <div class="testi-name">Samira Khan</div>
+            <div class="testi-role">PM · Amazon</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <div class="faq-left">
+      <p class="section-eyebrow">FAQ About JobLess AI</p>
+      <h2 class="section-title">FREQUENTLY<br>ASKED<br>QUESTIONS</h2>
+      <p class="section-sub" style="margin-bottom: 0;">Discover what our users are asking about JobLess AI — answered by
+        those who have experienced the results.</p>
+    </div>
+
+    <div class="faq-right">
+      <div class="faq-item open">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          How do I start using JobLess AI?
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-answer">
+          Simply get a free API key from Google AI Studio, Groq, or Cohere — all free with no credit card needed. Enter
+          it in the sidebar of the app and you're ready to go instantly.
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          Is my resume data stored anywhere?
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-answer">
+          No. Your resume and all personal data is processed in real-time by your chosen AI provider and is never stored
+          by JobLess AI. Your data belongs entirely to you.
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          What is the difference between Gemini, Groq, and Cohere?
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-answer">
+          All three are free AI providers. Gemini offers the most generous daily limits (1500 req/day). Groq provides
+          ultra-fast inference — great for quick mock interviews. Cohere excels at text understanding and document
+          analysis.
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          What tools does JobLess AI include?
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-answer">
+          JobLess AI includes 7 tools: Career Analysis, History Tracking, Career Compare, Resources Hub, Resume Builder,
+          Mock Interview Simulator, and PYQ Hub. All free, all in one place.
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          Can I export my results as a PDF?
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-answer">
+          Yes! Every analysis, resume, and question paper can be exported as a professionally formatted PDF — ready to
+          send to recruiters or save for your records.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROVIDERS -->
+  <section id="providers">
+    <p class="section-eyebrow" style="text-align: center; margin-inline: auto;">AI Providers</p>
+    <h2 class="section-title" style="text-align: center;">CHOOSE YOUR<br>AI ENGINE</h2>
+    <p class="section-sub" style="text-align: center; margin-inline: auto;">All providers offer completely free API
+      keys. No credit card. No subscription. Just intelligence.</p>
+
+    <div class="providers-grid">
+      <div class="provider-card">
+        <div class="provider-icon">✨</div>
+        <div class="provider-name">Google Gemini</div>
+        <div class="provider-free">✅ Free · No Card Needed</div>
+        <div class="provider-models">
+          gemini-2.0-flash<br>
+          gemini-2.0-flash-lite<br>
+          gemini-1.5-flash<br>
+          gemini-1.5-pro
+        </div>
+        <div class="provider-badge">1500 req/day</div>
+      </div>
+      <div class="provider-card" style="border-color: var(--black);">
+        <div class="provider-icon">⚡</div>
+        <div class="provider-name">Groq · Ultra Fast</div>
+        <div class="provider-free">✅ Free · Ultra-Fast</div>
+        <div class="provider-models">
+          llama-3.3-70b<br>
+          llama-3.1-8b-instant<br>
+          mixtral-8x7b<br>
+          gemma2-9b
+        </div>
+        <div class="provider-badge">Best Speed</div>
+      </div>
+      <div class="provider-card">
+        <div class="provider-icon">🌊</div>
+        <div class="provider-name">Cohere</div>
+        <div class="provider-free">✅ Free Trial · No Card</div>
+        <div class="provider-models">
+          command-r-plus<br>
+          command-r<br>
+          command<br>
+          command-light
+        </div>
+        <div class="provider-badge">Best for Docs</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LAUNCH CTA BANNER -->
+  <section style="background: var(--cyan); padding: 80px 48px; text-align: center;">
+    <p
+      style="font-size: 11px; letter-spacing: 5px; text-transform: uppercase; color: rgba(0,0,0,0.45); font-weight: 500; margin-bottom: 16px;">
+      Ready To Start?</p>
+    <h2
+      style="font-family: 'Bebas Neue', sans-serif; font-size: clamp(52px, 7vw, 100px); line-height: 0.92; letter-spacing: 1px; color: var(--black); margin-bottom: 28px;">
+      LAUNCH THE<br>APP NOW</h2>
+    <p
+      style="font-size: 15px; color: rgba(0,0,0,0.55); max-width: 420px; margin: 0 auto 40px; line-height: 1.7; font-weight: 300;">
+      Your resume. Your career. Your AI. Free forever at joblessai.streamlit.app</p>
+    <a href="?page=app"
+      style="display: inline-block; background: var(--black); color: var(--white); font-weight: 700; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; padding: 20px 52px; text-decoration: none; transition: opacity 0.2s;"
+      onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+      OPEN JOBLESS AI →
+    </a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">Jobless<span>AI</span></div>
+        <p class="footer-tagline">Transform your potential into a concrete career roadmap — powered by free AI. No
+          subscription. No compromise.</p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h4>Tools</h4>
+          <ul>
+            <li><a href="#">Career Analysis</a></li>
+            <li><a href="#">Resume Builder</a></li>
+            <li><a href="#">Mock Interview</a></li>
+            <li><a href="#">PYQ Hub</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>More</h4>
+          <ul>
+            <li><a href="#">Career Compare</a></li>
+            <li><a href="#">Resources Hub</a></li>
+            <li><a href="#">History</a></li>
+            <li><a href="#">About</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>AI Providers</h4>
+          <ul>
+            <li><a href="https://aistudio.google.com/app/apikey" target="_blank">Google Gemini</a></li>
+            <li><a href="https://console.groq.com/keys" target="_blank">Groq</a></li>
+            <li><a href="https://dashboard.cohere.com/api-keys" target="_blank">Cohere</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-newsletter">
+        <h4>Stay Updated</h4>
+        <p>Get the latest updates, new tools, and career tips delivered to your inbox.</p>
+        <div class="newsletter-form">
+          <input class="newsletter-input" type="email" placeholder="Enter your email">
+          <button class="newsletter-btn">Go →</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 JobLess AI · Created by Anubhab Mondal · Your data is never stored.</div>
+      <div class="footer-legal">
+        <a href="#">Terms & Agreement</a>
+        <a href="#">Privacy Policy</a>
+      </div>
+    </div>
+
+    <div class="footer-watermark">JOBLESS AI</div>
+  </footer>
+
+  <script>
+    // FAQ Toggle
+    function toggleFaq(el) {
+      const item = el.parentElement;
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    }
+
+    // Fade-up on scroll
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    // Smooth nav active
+    window.addEventListener('scroll', () => {
+      const nav = document.querySelector('nav');
+      nav.style.background = window.scrollY > 40
+        ? 'rgba(10,10,10,0.97)'
+        : 'rgba(10,10,10,0.92)';
+    });
+  </script>
+</body>
+
+</html>
+"""
+
+
+
 
 def _load_landing_page() -> str:
-    """Load the landing page HTML from file, with fallback if file not found."""
-    landing_path = os.path.join(os.path.dirname(__file__), "jobless_ai_landing.html")
-    try:
-        with open(landing_path, "r", encoding="utf-8") as f:
-            return f.read()
-    except FileNotFoundError:
-        return "<h1>Landing page not found. Place jobless_ai_landing.html in the same directory.</h1>"
+    """Return the embedded landing page HTML."""
+    return _LANDING_PAGE_HTML
 
 
 def _show_landing_page():
-    """Render landing page by injecting it as a full-screen overlay in the Streamlit DOM."""
-
-    import re
-
-    html_content = _load_landing_page()
-
-    # Extract body content
-    body_match = re.search(r'<body[^>]*>(.*)</body>', html_content, re.DOTALL)
-    body_html = body_match.group(1) if body_match else html_content
-
-    # Extract head styles, links, scripts
-    head_match = re.search(r'<head[^>]*>(.*?)</head>', html_content, re.DOTALL)
-    head_html = head_match.group(1) if head_match else ""
-
-    # Patch CTA links to navigate Streamlit parent
-    onclick = "window.location.href='?page=app'; return false;"
-    body_html = body_html.replace('href="?page=app"', f'href="#" onclick="{onclick}"')
-
-    combined = f"""
-    {head_html}
-    <style>
-    #__landing_root__ {{
-        position: fixed;
-        top: 0; left: 0;
-        width: 100vw; height: 100vh;
-        overflow-y: auto;
-        overflow-x: hidden;
-        z-index: 99999;
-        background: #0a0a0a;
-    }}
-    </style>
-    <div id="__landing_root__">
-    {body_html}
-    </div>
-    """
-
-    # Hide all Streamlit chrome
+    """Render the full-page landing experience inside Streamlit."""
+    # Hide all Streamlit chrome so the landing page looks native
     st.markdown("""
         <style>
-            header, footer, #MainMenu,
-            [data-testid="stHeader"],
-            [data-testid="stToolbar"],
-            [data-testid="collapsedControl"] { display: none !important; }
-            body, .main { overflow: hidden !important; }
+            /* Hide Streamlit header, footer, and sidebar toggle */
+            header[data-testid="stHeader"],
+            footer,
+            #MainMenu,
+            [data-testid="collapsedControl"],
+            [data-testid="stToolbar"] { display: none !important; }
+
+            /* Remove all padding/margin so the iframe fills the viewport */
+            .main > div:first-child { padding: 0 !important; }
+            .block-container {
+                padding: 0 !important;
+                max-width: 100% !important;
+            }
+            [data-testid="stAppViewContainer"] > section.main {
+                padding: 0 !important;
+            }
         </style>
     """, unsafe_allow_html=True)
 
-    st.markdown(combined, unsafe_allow_html=True)
+    html_content = _load_landing_page()
+
+    # Inject a small script so CTA clicks navigate the parent window (not the iframe)
+    # This rewrites ?page=app links to use window.top.location
+    inject_nav_script = """
+    <script>
+    (function() {
+        // After DOM is ready, patch all ?page=app links to navigate the top frame
+        function patchLinks() {
+            document.querySelectorAll('a[href="?page=app"]').forEach(function(a) {
+                a.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.top.location.href = window.top.location.pathname + '?page=app';
+                });
+            });
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', patchLinks);
+        } else {
+            patchLinks();
+        }
+    })();
+    </script>
+    """
+
+    # Insert the navigation script just before </body>
+    html_with_nav = html_content.replace(
+        "</body>", inject_nav_script + "\n</body>")
+
+    # Render at a generous height; scrolling=True lets the page scroll inside the iframe
+    components.html(html_with_nav, height=7000, scrolling=True)
 
 
 def main():
@@ -3737,20 +5618,10 @@ def main():
     )
 
     # ── Routing: show landing page unless ?page=app is in the URL ──────────
-    try:
-        params = st.query_params  # Streamlit >= 1.30
-        show_app = params.get("page", "") == "app"
-    except Exception:
-        try:
-            params = st.experimental_get_query_params()
-            show_app = params.get("page", [""])[0] == "app"
-        except Exception:
-            show_app = False
-
-    if not show_app:
+    page = st.query_params.get("page", "landing")
+    if page != "app":
         _show_landing_page()
         st.stop()
-
 
     # ── App mode ────────────────────────────────────────────────────────────
     init_session_state()
