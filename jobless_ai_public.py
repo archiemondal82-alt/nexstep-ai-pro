@@ -5595,37 +5595,17 @@ def _show_landing_page():
     html_content = _LANDING_PAGE_HTML
 
     # ── 2. Build the navigation + resize script to inject ────────────────────
-    # Because Streamlit iframes are sandboxed, window.top.location is blocked.
-    # Instead we use postMessage to communicate with the parent, and a tiny
-    # <script> in the parent (injected via st.markdown) listens and sets
-    # window.location.search = "?page=app" on the top frame.
-    #
-    # We also make all internal anchor links (e.g. #features) use
-    # document-level scroll so the page behaves correctly inside the iframe.
+    # ── Navigation: directly navigate window.parent (same-origin on Streamlit Cloud)
+    # Drop the postMessage/parent_script approach entirely — it breaks cross-origin.
+    # components.html iframes have allow-same-origin so window.parent.location works.
     inject_script = """
     <script>
     (function() {
-        // ── Auto-resize: tell parent how tall the page is ──────────────────
-        function sendHeight() {
-            var h = Math.max(
-                document.body.scrollHeight,
-                document.documentElement.scrollHeight
-            );
-            window.parent.postMessage({ type: 'JOBLESS_RESIZE', height: h }, '*');
-        }
-        window.addEventListener('load', sendHeight);
-        var ro = new ResizeObserver(sendHeight);
-        ro.observe(document.body);
-
-        // ── Navigation: route "?page=app" links via postMessage ──────────────
-        // We intercept clicks without changing href (avoids javascript:void(0)
-        // in the status bar) by using event capture on the document.
         function isAppLink(el) {
             var a = el.closest ? el.closest('a') : null;
             if (!a) return null;
             var href = a.getAttribute('href') || '';
-            if (href === '?page=app' || href.endsWith('?page=app')) return a;
-            return null;
+            return (href === '?page=app' || href.endsWith('?page=app')) ? a : null;
         }
 
         document.addEventListener('click', function(e) {
@@ -5633,81 +5613,50 @@ def _show_landing_page():
             if (a) {
                 e.preventDefault();
                 e.stopImmediatePropagation();
+                // Try every level of parent until we can set location
+                var wins = [window.parent, window.top, window];
+                for (var i = 0; i < wins.length; i++) {
+                    try {
+                        var cur = wins[i].location.href;
+                        var url = new URL(cur);
+                        url.searchParams.set('page', 'app');
+                        wins[i].location.href = url.toString();
+                        return;
+                    } catch(err) { /* cross-origin, try next */ }
+                }
+                // Last resort: postMessage up the chain
                 window.parent.postMessage({ type: 'JOBLESS_NAV', page: 'app' }, '*');
+                window.top.postMessage({ type: 'JOBLESS_NAV', page: 'app' }, '*');
             }
-        }, true);  // capture phase — fires before any other handler
-    })();
-    </script>
-    """
+        }, true);
 
-    # ── 3. Parent-side listener (runs in the Streamlit page, not the iframe) ─
-    # This receives postMessage events and either resizes the iframe or
-    # navigates the top-level window to ?page=app.
-    parent_script = """
-    <script>
-    (function() {
-        // Attach listener to window.parent (the Streamlit app page),
-        // NOT to this iframe's window. This is the key fix — messages
-        // from the landing page iframe go to window.parent, so the
-        // listener must live there too.
-        try {
-            window.parent.addEventListener('message', function(e) {
-                if (!e.data || typeof e.data !== 'object') return;
-                if (e.data.type === 'JOBLESS_NAV' && e.data.page === 'app') {
-                    var url = new URL(window.parent.location.href);
+        // Also listen for postMessage at every level as ultimate fallback
+        window.addEventListener('message', function(e) {
+            if (e.data && e.data.type === 'JOBLESS_NAV' && e.data.page === 'app') {
+                try {
+                    var url = new URL(window.location.href);
                     url.searchParams.set('page', 'app');
-                    window.parent.location.href = url.toString();
-                }
-                if (e.data.type === 'JOBLESS_RESIZE' && e.data.height) {
-                    var iframes = window.parent.document.querySelectorAll('iframe');
-                    iframes.forEach(function(f) {
-                        if (e.data.height > 500) {
-                            f.style.height = e.data.height + 'px';
-                        }
-                    });
-                }
-            });
-        } catch(err) { /* cross-origin guard */ }
+                    window.location.href = url.toString();
+                } catch(err) {}
+            }
+        });
     })();
     </script>
     """
 
-    # Inject the parent-side script into the Streamlit page DOM
-    components.html(parent_script, height=0, scrolling=False)
-
-    # ── 5. CSS patch: fix hero layout collapse inside iframe ──────────────────
-    # Problems inside Streamlit's sandboxed iframe:
-    #
-    # A) `min-height: 100vh` on #hero = only the iframe's tiny internal height,
-    #    so the black background fills the iframe but content collapses.
-    #
-    # B) `.hero-inner { flex: 1 }` collapses to 0 height when the parent #hero
-    #    has no explicit height (flex children need a sized parent to stretch).
-    #
-    # C) `position: fixed` on nav is relative to the iframe viewport, not the
-    #    browser window, so it overlaps content correctly but needs no change.
-    #
-    # Fix: give #hero an explicit large min-height, make .hero-inner use
-    # min-height instead of flex:1, and ensure body/html don't clip content.
     css_patch = """
     <style>
-        /* ── IFRAME COMPATIBILITY FIXES ── */
-
         html, body {
             height: auto !important;
             min-height: 100% !important;
             overflow-x: hidden !important;
         }
-
-        /* Fix A+B: hero flex collapse.
-           Use min-height instead of relying on flex:1 from a 100vh parent. */
         #hero {
             min-height: 820px !important;
             height: auto !important;
             display: flex !important;
             flex-direction: column !important;
         }
-
         .hero-inner {
             flex: unset !important;
             display: flex !important;
@@ -5717,26 +5666,13 @@ def _show_landing_page():
             min-height: 700px !important;
             gap: 0 !important;
         }
-
-        /* Ensure hero-left and hero-right take space */
-        .hero-left, .hero-right {
-            flex: 1 !important;
-        }
-
-        /* Fix nav link href (remove javascript:void status bar flash) */
-        a[href="javascript:void(0)"] {
-            cursor: pointer !important;
-        }
+        .hero-left, .hero-right { flex: 1 !important; }
     </style>
     """
 
-    # Inject CSS fix into <head>, nav script before </body>
     html_with_script = html_content.replace("</head>", css_patch + "\n</head>")
-    html_with_script = html_with_script.replace(
-        "</body>", inject_script + "\n</body>")
+    html_with_script = html_with_script.replace("</body>", inject_script + "\n</body>")
 
-    # ── 4. Render — use a very large height so all sections are reachable ────
-    # scrolling=True is critical: it lets the user scroll the landing page.
     components.html(html_with_script, height=8000, scrolling=True)
 
 
