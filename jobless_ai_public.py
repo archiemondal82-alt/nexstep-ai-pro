@@ -3,34 +3,46 @@ JobLess AI - Public Version (Users Bring Their Own API Key)
 Enhanced version with clear API key instructions
 Refactored: each tab is its own render_tab_*() function.
 """
-
-from reportlab.lib.enums import TA_CENTER as _TAC, TA_LEFT as _TAL
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+import io
+import time
+from typing import Dict, List, Optional
+from streamlit_lottie import st_lottie
+import requests
+import altair as alt
+import pandas as pd
+import json
+import fitz  # PyMuPDF
+import datetime
+import io as _io
+from reportlab.lib.pagesizes import A4 as _A4
+from reportlab.lib import colors as _rl_colors
+from reportlab.lib.styles import getSampleStyleSheet as _getSS, ParagraphStyle as _PS
+from reportlab.lib.units import cm as _cm, mm as _mm
 from reportlab.platypus import (
     SimpleDocTemplate as _SDT, Paragraph as _Para, Spacer as _Spacer,
     Table as _Table, TableStyle as _TStyle, PageBreak as _PB,
     HRFlowable as _HR, KeepTogether as _KT
 )
-from reportlab.lib.units import cm as _cm, mm as _mm
-from reportlab.lib.styles import getSampleStyleSheet as _getSS, ParagraphStyle as _PS
-from reportlab.lib import colors as _rl_colors
-from reportlab.lib.pagesizes import A4 as _A4
-import io as _io
-import datetime
+from reportlab.lib.enums import TA_CENTER as _TAC, TA_LEFT as _TAL
 import streamlit as st
 import streamlit.components.v1 as components
-import fitz  # PyMuPDF
-import json
-import pandas as pd
-import altair as alt
-import requests
-from streamlit_lottie import st_lottie
 import os
-from typing import Dict, List, Optional
-import time
-import io
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib import colors
+
+# Landing page routing
+params = st.query_params
+if params.get("page") != "app":
+    st.set_page_config(
+        layout="wide", page_title="JobLess AI — AI Career Intelligence")
+    landing_path = os.path.join(os.path.dirname(
+        __file__), "jobless_ai_landing.html")
+    with open(landing_path, "r", encoding="utf-8") as f:
+        html_content = f.read()
+    components.html(html_content, height=9000, scrolling=True)
+    st.stop()
+
 
 # ── Provider SDK imports (graceful fallback if not installed) ──────────────
 try:
