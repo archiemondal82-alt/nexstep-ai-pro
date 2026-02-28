@@ -5552,17 +5552,25 @@ def _load_landing_page() -> str:
 
 
 def _show_landing_page():
-    """Render the full-page landing experience inside Streamlit."""
+    """Render the landing page via components.html().
 
-    # Hide all Streamlit chrome
+    Why components.html() and not st.markdown():
+      - st.markdown strips <script> tags and mangles iframe srcdoc/data-URIs
+      - components.html() renders raw HTML+JS correctly
+
+    Why window.parent.location.href for navigation:
+      - components.html() sandboxes include allow-same-origin, so window.parent
+        is accessible (same streamlit.app domain on Streamlit Cloud)
+      - No postMessage chain needed — one direct location assignment works
+    """
+
+    # Hide all Streamlit chrome ──────────────────────────────────────────────
     st.markdown("""
         <style>
-            header[data-testid="stHeader"],
-            footer, #MainMenu,
-            [data-testid="collapsedControl"],
-            [data-testid="stToolbar"],
-            [data-testid="stDecoration"],
-            [data-testid="stStatusWidget"] { display: none !important; }
+            header[data-testid="stHeader"], footer, #MainMenu,
+            [data-testid="collapsedControl"], [data-testid="stToolbar"],
+            [data-testid="stDecoration"], [data-testid="stStatusWidget"]
+                { display: none !important; }
             html, body { margin: 0 !important; padding: 0 !important; }
             .main, .block-container,
             [data-testid="stAppViewContainer"],
@@ -5570,45 +5578,83 @@ def _show_landing_page():
             [data-testid="stVerticalBlock"],
             [data-testid="stVerticalBlockBorderWrapper"],
             div[data-testid="stMainBlockContainer"] {
-                padding: 0 !important; margin: 0 !important; max-width: 100% !important;
+                padding: 0 !important; margin: 0 !important;
+                max-width: 100% !important;
             }
             iframe { border: none !important; }
         </style>
     """, unsafe_allow_html=True)
 
-    # ── CSS fixes for iframe rendering ───────────────────────────────────────
-    css_patch = """
-    <style>
-        html, body { height: auto !important; min-height: 100% !important; overflow-x: hidden !important; }
-        #hero { min-height: 820px !important; height: auto !important; display: flex !important; flex-direction: column !important; }
-        .hero-inner { flex: unset !important; display: flex !important; align-items: center !important; padding-top: 100px !important; padding-bottom: 60px !important; min-height: 700px !important; }
+    # CSS fixes injected into the landing page <head> ───────────────────────
+    css_patch = """<style>
+        html, body {
+            height: auto !important;
+            min-height: 100% !important;
+            overflow-x: hidden !important;
+        }
+        #hero {
+            min-height: 820px !important; height: auto !important;
+            display: flex !important; flex-direction: column !important;
+        }
+        .hero-inner {
+            flex: unset !important; display: flex !important;
+            align-items: center !important;
+            padding-top: 100px !important; padding-bottom: 60px !important;
+            min-height: 700px !important;
+        }
         .hero-left, .hero-right { flex: 1 !important; }
-    </style>
-    """
+    </style>"""
 
-    # ── All ?page=app links get target="_top" ─────────────────────────────────
-    html_content = _LANDING_PAGE_HTML.replace(
-        'href="?page=app"', 'href="?page=app" target="_top"'
-    )
+    # Navigation script injected before </body> ──────────────────────────────
+    # components.html iframes have allow-same-origin in their sandbox, so
+    # window.parent is accessible (same streamlit.app domain).
+    # We use window.parent.location.href directly — no postMessage needed.
+    nav_script = """<script>
+    (function () {
+        function goToApp() {
+            try {
+                // window.parent = the Streamlit app page (same origin on Cloud)
+                var base = window.parent.location.href.split('?')[0].split('#')[0];
+                window.parent.location.href = base + '?page=app';
+            } catch (e) {
+                // Fallback: try top-level window
+                try {
+                    var base2 = window.top.location.href.split('?')[0].split('#')[0];
+                    window.top.location.href = base2 + '?page=app';
+                } catch (e2) {
+                    // Last resort: navigate this iframe; Streamlit will reload
+                    window.location.href = '/?page=app';
+                }
+            }
+        }
 
-    # Inject css_patch into <head>
-    html_final = html_content.replace("</head>", css_patch + "\n</head>")
+        // Intercept every click on a ?page=app link
+        document.addEventListener('click', function (e) {
+            var el = e.target;
+            // Walk up the DOM in case the click landed on a child element
+            for (var i = 0; i < 5 && el; i++, el = el.parentElement) {
+                if (el.tagName === 'A') {
+                    var href = el.getAttribute('href') || '';
+                    if (href === '?page=app' || href.indexOf('page=app') !== -1) {
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        goToApp();
+                        return;
+                    }
+                    break;
+                }
+            }
+        }, true);
+    })();
+    </script>"""
 
-    # ── KEY FIX: render via st.markdown <iframe> with allow-top-navigation ───
-    # components.html() sandbox lacks allow-top-navigation-by-user-activation,
-    # silently blocking target="_top" clicks. A st.markdown iframe lets us set
-    # the sandbox manually so target="_top" actually works.
-    import html as _html_lib
-    srcdoc = _html_lib.escape(html_final, quote=True)
+    # Build final HTML ────────────────────────────────────────────────────────
+    html_final = _LANDING_PAGE_HTML
+    html_final = html_final.replace("</head>", css_patch + "\n</head>")
+    html_final = html_final.replace("</body>", nav_script + "\n</body>")
 
-    st.markdown(
-        f'''<iframe
-            srcdoc="{srcdoc}"
-            sandbox="allow-scripts allow-same-origin allow-top-navigation-by-user-activation allow-forms allow-popups"
-            style="width:100%;height:9000px;border:none;display:block;"
-        ></iframe>''',
-        unsafe_allow_html=True,
-    )
+    # Render — components.html renders raw HTML+JS correctly ────────────────
+    components.html(html_final, height=9000, scrolling=True)
 
 def main():
     st.set_page_config(
