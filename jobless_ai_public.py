@@ -31,6 +31,7 @@ import io
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
+from mobile_nav import inject_mobile_nav
 
 # ── Provider SDK imports (graceful fallback if not installed) ──────────────
 try:
@@ -3683,6 +3684,7 @@ def main():
     history_manager = HistoryManager()
 
     ui.apply_custom_css()
+    inject_mobile_nav()
 
     # Sidebar (returns settings needed by tabs)
     selected_provider, selected_model, analysis_depth, include_learning_path, include_interview_prep = \
