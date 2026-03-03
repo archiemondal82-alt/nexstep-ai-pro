@@ -4,6 +4,11 @@ Enhanced version with clear API key instructions
 Refactored: each tab is its own render_tab_*() function.
 """
 
+import time
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+import io
 from reportlab.lib.enums import TA_CENTER as _TAC, TA_LEFT as _TAL
 from reportlab.platypus import (
     SimpleDocTemplate as _SDT, Paragraph as _Para, Spacer as _Spacer,
@@ -26,11 +31,232 @@ import requests
 from streamlit_lottie import st_lottie
 import os
 from typing import Dict, List, Optional
-import time
-import io
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib import colors
+
+# ── Spline 3D Component ────────────────────────────────────────────────────
+
+
+def render_spline_scene(scene_url: str, title: str = "Interactive 3D", description: str = "Bring your UI to life with beautiful 3D scenes.", height: int = 500, show_get_started: bool = True):
+    """
+    Render a Spline 3D scene with Spotlight effect and text overlay.
+    Integrates the React/TypeScript UI from 21st.dev.
+
+    Parameters:
+    -----------
+    scene_url : str
+        The URL of the Spline scene (e.g., 'https://prod.spline.design/...')
+    title : str
+        Title text to display on the left
+    description : str
+        Description text to display on the left
+    height : int
+        Height of the component in pixels
+    """
+
+    html_template = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+      <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{ background: #0a0f1a; overflow: hidden; cursor: none !important; }}
+        canvas {{ cursor: none !important; }}
+
+        .wrapper {{
+          width: 100%;
+          height: {height}px;
+          background: linear-gradient(135deg, #0a0f1a 0%, #0d1526 50%, #0a0f1a 100%);
+          position: relative;
+          overflow: hidden;
+          border-radius: 16px;
+          display: flex;
+          border: 1px solid rgba(0, 210, 255, 0.12);
+          box-shadow: 0 0 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+        }}
+
+        /* Ambient glow */
+        .glow-left {{
+          position: absolute;
+          width: 400px; height: 400px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(0,180,255,0.07) 0%, transparent 70%);
+          top: 50%; left: 20%;
+          transform: translate(-50%, -50%);
+          pointer-events: none;
+          z-index: 1;
+        }}
+        .glow-right {{
+          position: absolute;
+          width: 500px; height: 500px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(0,100,200,0.08) 0%, transparent 70%);
+          top: 50%; right: -10%;
+          transform: translateY(-50%);
+          pointer-events: none;
+          z-index: 1;
+        }}
+
+        /* Left text panel */
+        .left-panel {{
+          flex: 0 0 48%;
+          padding: 50px 48px;
+          position: relative;
+          z-index: 10;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }}
+        .label {{
+          font-family: 'Inter', sans-serif;
+          font-size: 0.7rem;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: rgba(0, 210, 255, 0.55);
+          margin-bottom: 18px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }}
+        .label::before {{
+          content: '';
+          display: inline-block;
+          width: 6px; height: 6px;
+          border-radius: 50%;
+          background: #00d2ff;
+          box-shadow: 0 0 8px #00d2ff;
+          animation: pulse 2s ease-in-out infinite;
+        }}
+        @keyframes pulse {{ 0%,100%{{opacity:1}} 50%{{opacity:0.4}} }}
+
+        .left-panel h1 {{
+          font-family: 'Space Grotesk', sans-serif;
+          font-size: 2.6rem;
+          font-weight: 700;
+          color: #ffffff;
+          line-height: 1.1;
+          letter-spacing: -0.02em;
+          margin-bottom: 16px;
+        }}
+        .left-panel p {{
+          color: #8a9bb5;
+          font-family: 'Inter', sans-serif;
+          font-size: 0.95rem;
+          line-height: 1.7;
+          max-width: 340px;
+          margin-bottom: 32px;
+        }}
+        .btn {{
+          display: {'inline-flex' if show_get_started else 'none'};
+          align-items: center;
+          gap: 8px;
+          padding: 13px 28px;
+          background: #00d2ff;
+          color: #020b14;
+          font-family: 'Space Grotesk', sans-serif;
+          font-size: 0.82rem;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          border-radius: 50px;
+          border: none;
+          cursor: none;
+          box-shadow: 0 0 24px rgba(0,210,255,0.35), 0 4px 16px rgba(0,0,0,0.3);
+          transition: all 0.2s ease;
+          width: fit-content;
+        }}
+        .btn:hover {{
+          background: #33dbff;
+          box-shadow: 0 0 40px rgba(0,210,255,0.6), 0 4px 20px rgba(0,0,0,0.4);
+          transform: translateY(-2px);
+        }}
+
+        /* Spline canvas panel */
+        .right-panel {{
+          flex: 1;
+          position: relative;
+          z-index: 5;
+          overflow: hidden;
+        }}
+        #spline-canvas {{
+          width: 100%;
+          height: 100%;
+          display: block;
+        }}
+
+        /* Loading overlay */
+        #loading {{
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #0a0f1a;
+          z-index: 20;
+          transition: opacity 0.6s ease;
+        }}
+        .spinner {{
+          width: 36px; height: 36px;
+          border: 2px solid rgba(0,210,255,0.15);
+          border-top-color: #00d2ff;
+          border-radius: 50%;
+          animation: spin 0.9s linear infinite;
+        }}
+        @keyframes spin {{ to {{ transform: rotate(360deg); }} }}
+      </style>
+    </head>
+    <body>
+      <div class="wrapper">
+        <div class="glow-left"></div>
+        <div class="glow-right"></div>
+
+        <!-- Left content -->
+        <div class="left-panel">
+          <div class="label">AI-Powered Career Intelligence</div>
+          <h1>{title}</h1>
+          <p>{description}</p>
+          <div class="btn" id="getStartedBtn">Get Started →</div>
+        </div>
+
+        <!-- Spline 3D canvas -->
+        <div class="right-panel">
+          <div id="loading"><div class="spinner"></div></div>
+          <canvas id="spline-canvas"></canvas>
+        </div>
+      </div>
+
+      <script type="module">
+        import {{ Application }} from 'https://unpkg.com/@splinetool/runtime@1.9.82/build/runtime.js';
+        const canvas = document.getElementById('spline-canvas');
+        const loading = document.getElementById('loading');
+        try {{
+          const app = new Application(canvas);
+          await app.load('{scene_url}');
+          // Get Started → navigate to career analysis
+        var gsBtn = document.getElementById('getStartedBtn');
+        if (gsBtn) {{
+          gsBtn.addEventListener('click', function() {{
+            window.parent.postMessage({{ type: 'jl-nav', page: 'career' }}, '*');
+          }});
+        }}
+
+        // Relay mouse position to parent so custom cursor keeps tracking
+          document.addEventListener('mousemove', function(e) {{
+            var rect = window.frameElement ? window.frameElement.getBoundingClientRect() : {{left:0, top:0}};
+            window.parent.postMessage({{ type: 'ns-move', x: e.clientX + rect.left, y: e.clientY + rect.top }}, '*');
+          }}, {{passive: true}});
+          loading.style.opacity = '0';
+          setTimeout(() => loading.style.display = 'none', 600);
+        }} catch(e) {{
+          loading.innerHTML = '<span style="color:#666;font-family:Inter,sans-serif;font-size:13px;">3D scene unavailable</span>';
+        }}
+      </script>
+    </body>
+    </html>
+    """
+
+    components.html(html_template, height=height, scrolling=False)
+
 
 # ── Provider SDK imports (graceful fallback if not installed) ──────────────
 try:
@@ -1129,6 +1355,7 @@ def get_job_links(title: str, location: str, keywords: str = "") -> dict:
     query = keywords if keywords else title
     q_enc = query.replace(" ", "+")
     title_enc = title.replace(" ", "+")
+
     naukri_slug = title.lower().replace(" ", "-")
     is_india = "india" in location.lower() or location.lower() in (
         "india - metro", "india - remote", "india - tier 2")
@@ -1196,7 +1423,7 @@ class UIComponents:
     def apply_custom_css():
         css = """
         <style>
-            @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&family=Orbitron:wght@700;900&family=Inter:wght@300;400;500&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap');
 
             @keyframes gradientShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
             @keyframes glowPulse { 0%,100%{box-shadow:0 0 20px rgba(0,210,255,0.3),0 0 40px rgba(58,123,213,0.15)} 50%{box-shadow:0 0 50px rgba(0,210,255,0.8),0 0 100px rgba(58,123,213,0.5)} }
@@ -1204,45 +1431,204 @@ class UIComponents:
             @keyframes borderRotate { 0%{background-position:0% 0%} 100%{background-position:300% 300%} }
             @keyframes slideInLeft { from{transform:perspective(800px) rotateY(-12deg) translateX(-50px);opacity:0} to{transform:perspective(800px) rotateY(0deg) translateX(0);opacity:1} }
             @keyframes scaleIn { from{transform:perspective(600px) scale(0.88) rotateX(8deg);opacity:0} to{transform:perspective(600px) scale(1) rotateX(0deg);opacity:1} }
+            @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
 
-            .stApp { background:#060b14!important; color:white!important; font-family:'Space Grotesk',sans-serif!important; cursor:none!important; }
-            h1,h2,h3 { font-family:'Space Grotesk',sans-serif!important; font-weight:700!important; letter-spacing:-0.02em!important; color:#e2e8f0!important; }
-            h2 { font-size:1.7rem!important; }
-            h3 { font-size:1.2rem!important; color:#00d2ff!important; text-transform:uppercase!important; letter-spacing:0.1em!important; font-weight:600!important; }
-            label,.stRadio label,.stCheckbox label,.stSelectbox label,.stTextInput label,.stTextArea label { font-family:'JetBrains Mono',monospace!important; font-size:0.72rem!important; letter-spacing:0.12em!important; text-transform:uppercase!important; color:rgba(0,210,255,0.75)!important; }
-            p,li { font-family:'Space Grotesk',sans-serif!important; font-size:0.97rem!important; line-height:1.7!important; color:#94a3b8!important; }
-            [data-testid="stSidebar"] h1,[data-testid="stSidebar"] h2,[data-testid="stSidebar"] h3 { font-family:'JetBrains Mono',monospace!important; font-size:0.8rem!important; letter-spacing:0.15em!important; text-transform:uppercase!important; color:rgba(0,210,255,0.7)!important; }
-            .stTabs [data-baseweb="tab"] { font-family:'JetBrains Mono',monospace!important; font-size:0.75rem!important; letter-spacing:0.1em!important; text-transform:uppercase!important; border-radius:8px!important; transition:all 0.3s cubic-bezier(0.175,0.885,0.32,1.275)!important; }
-            .stTabs [data-baseweb="tab"]:hover { transform:perspective(400px) rotateX(5deg) translateY(-2px)!important; background:rgba(0,210,255,0.12)!important; }
-            .stTabs [aria-selected="true"] { background:linear-gradient(90deg,rgba(0,210,255,0.2),rgba(168,85,247,0.15))!important; box-shadow:0 4px 20px rgba(0,210,255,0.25)!important; color:#00d2ff!important; }
-            .stTabs [data-baseweb="tab-list"] { background:rgba(255,255,255,0.03)!important; border-radius:12px!important; padding:5px!important; border:1px solid rgba(0,210,255,0.1)!important; }
-            .stButton>button { font-family:'Space Grotesk',sans-serif!important; font-weight:800!important; letter-spacing:0.08em!important; text-transform:uppercase!important; font-size:0.86rem!important; background:linear-gradient(90deg,#00d2ff,#3a7bd5)!important; border-radius:50px!important; border:none!important; color:#ffffff!important; text-shadow:0 1px 8px rgba(0,0,0,0.65)!important; animation:glowPulse 3s ease-in-out infinite; transition:transform 0.2s cubic-bezier(0.175,0.885,0.32,1.275),box-shadow 0.2s ease!important; position:relative; overflow:hidden; }
-            .stButton>button::before { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent); transform:translateX(-100%); transition:transform 0.4s ease; }
-            .stButton>button:hover::before { transform:translateX(100%); }
-            .stButton>button:hover { transform:perspective(400px) rotateX(5deg) translateY(-4px) scale(1.03)!important; box-shadow:0 15px 40px rgba(0,210,255,0.5),0 0 70px rgba(58,123,213,0.3)!important; }
-            .stButton>button:active { transform:perspective(400px) translateY(-1px) scale(0.98)!important; }
-            .result-card { background:rgba(255,255,255,0.04)!important; backdrop-filter:blur(20px) saturate(180%)!important; border-radius:20px!important; border:1px solid rgba(255,255,255,0.08)!important; padding:28px!important; margin-bottom:28px; animation:scaleIn 0.6s ease-out; transform-style:preserve-3d; transition:transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275),box-shadow 0.4s ease; position:relative; overflow:hidden; }
-            .result-card::before { content:''; position:absolute; inset:-2px; background:linear-gradient(45deg,#00d2ff,#3a7bd5,#a855f7,#00d2ff); background-size:300% 300%; border-radius:22px; z-index:-1; animation:borderRotate 4s linear infinite; opacity:0.4; }
-            .result-card:hover { transform:perspective(1000px) rotateX(2deg) rotateY(-1.5deg) translateY(-8px) scale(1.01); box-shadow:0 35px 90px rgba(0,210,255,0.2),0 0 0 1px rgba(0,210,255,0.3); }
-            .result-card h3 { font-family:'Space Grotesk',sans-serif!important; font-size:1.15rem!important; font-weight:700!important; letter-spacing:-0.01em!important; text-transform:none!important; color:#e2e8f0!important; margin-bottom:10px; }
-            .stExpander { border:1px solid rgba(0,210,255,0.15)!important; border-radius:14px!important; background:rgba(255,255,255,0.025)!important; transition:transform 0.3s ease,box-shadow 0.3s ease,border-color 0.3s ease!important; animation:slideInLeft 0.5s ease-out; }
-            .stExpander:hover { transform:perspective(900px) rotateY(0.8deg) translateY(-3px)!important; box-shadow:-8px 12px 40px rgba(0,210,255,0.12),8px 12px 40px rgba(58,123,213,0.08)!important; border-color:rgba(0,210,255,0.4)!important; }
-            [data-testid="stSidebar"] { background:linear-gradient(180deg,rgba(6,11,20,0.98) 0%,rgba(15,23,42,0.98) 100%)!important; backdrop-filter:blur(24px)!important; border-right:1px solid rgba(0,210,255,0.12)!important; box-shadow:12px 0 50px rgba(0,0,0,0.6),inset -1px 0 0 rgba(0,210,255,0.08)!important; }
-            .stTextInput>div>div>input,.stTextArea>div>div>textarea { background:rgba(255,255,255,0.04)!important; border:1px solid rgba(0,210,255,0.25)!important; border-radius:10px!important; color:#e2e8f0!important; font-family:'Space Grotesk',sans-serif!important; font-size:0.95rem!important; transition:all 0.3s ease!important; }
-            .stTextInput>div>div>input:focus,.stTextArea>div>div>textarea:focus { border-color:#00d2ff!important; box-shadow:0 0 0 2px rgba(0,210,255,0.18),0 0 30px rgba(0,210,255,0.08)!important; background:rgba(0,210,255,0.04)!important; }
-            .stAlert { border-radius:12px!important; animation:scaleIn 0.4s ease-out!important; font-family:'Space Grotesk',sans-serif!important; }
-            .stProgress>div>div>div { background:linear-gradient(90deg,#00d2ff,#3a7bd5,#a855f7,#00d2ff)!important; background-size:200% auto!important; animation:shimmer 1.5s linear infinite!important; border-radius:10px!important; box-shadow:0 0 18px rgba(0,210,255,0.65)!important; }
-            hr { border:none!important; height:1px!important; background:linear-gradient(90deg,transparent,rgba(0,210,255,0.4),rgba(168,85,247,0.4),transparent)!important; margin:20px 0!important; }
-            ::-webkit-scrollbar { width:5px; }
-            ::-webkit-scrollbar-track { background:rgba(255,255,255,0.03); }
-            ::-webkit-scrollbar-thumb { background:linear-gradient(180deg,#00d2ff,#3a7bd5); border-radius:10px; }
-            iframe { border:none!important; }
-            .stSelectbox>div>div,.stMultiSelect>div>div { background:rgba(255,255,255,0.04)!important; border:1px solid rgba(0,210,255,0.2)!important; border-radius:10px!important; font-family:'Space Grotesk',sans-serif!important; transition:border-color 0.2s ease,transform 0.2s ease!important; }
-            .stSelectbox>div>div:hover,.stMultiSelect>div>div:hover { border-color:rgba(0,210,255,0.5)!important; transform:translateY(-1px)!important; }
+            /* ── APP BACKGROUND ── */
+            .stApp { background: #060c18 !important; color: white !important; font-family: 'Space Grotesk', sans-serif !important; cursor: none !important; }
+            .main .block-container { padding-top: 0 !important; padding-left: 2rem !important; padding-right: 2rem !important; max-width: 100% !important; margin-top: -80px !important; }
+            /* Kill Streamlit's default top header gap */
+            [data-testid="stAppViewContainer"] > section > div:first-child { padding-top: 0 !important; }
+            header[data-testid="stHeader"] { height: 0 !important; min-height: 0 !important; visibility: hidden !important; }
+            #root > div:first-child { padding-top: 0 !important; }
+            .stApp > header { display: none !important; }
+            div[data-testid="stToolbar"] { display: none !important; }
+            div[data-testid="stDecoration"] { display: none !important; }
+            div[data-testid="stStatusWidget"] { display: none !important; }
+
+            /* ── TYPOGRAPHY ── */
+            h1, h2, h3 { font-family: 'Space Grotesk', sans-serif !important; font-weight: 700 !important; letter-spacing: -0.02em !important; color: #e2e8f0 !important; }
+            h2 { font-size: 1.7rem !important; }
+            h3 { font-size: 1.2rem !important; color: #00d2ff !important; text-transform: uppercase !important; letter-spacing: 0.1em !important; font-weight: 600 !important; }
+            label, .stRadio label, .stCheckbox label, .stSelectbox label, .stTextInput label, .stTextArea label { font-family: 'JetBrains Mono', monospace !important; font-size: 0.72rem !important; letter-spacing: 0.12em !important; text-transform: uppercase !important; color: rgba(0,210,255,0.75) !important; }
+            p, li { font-family: 'Space Grotesk', sans-serif !important; font-size: 0.97rem !important; line-height: 1.7 !important; color: #94a3b8 !important; }
+
+            /* ── SIDEBAR CONTAINER ── */
+            [data-testid="stSidebar"] {
+                background: #08101e !important;
+                border-right: 1px solid rgba(0, 210, 255, 0.1) !important;
+                box-shadow: 4px 0 30px rgba(0,0,0,0.5) !important;
+            }
+            [data-testid="stSidebar"] > div:first-child {
+                padding-top: 0 !important;
+            }
+            /* Sidebar text elements */
+            [data-testid="stSidebar"] h1,
+            [data-testid="stSidebar"] h2,
+            [data-testid="stSidebar"] h3 {
+                font-family: 'JetBrains Mono', monospace !important;
+                font-size: 0.72rem !important;
+                letter-spacing: 0.15em !important;
+                text-transform: uppercase !important;
+                color: rgba(0,210,255,0.6) !important;
+                margin: 16px 0 8px 0 !important;
+            }
+            /* Sidebar divider */
+            [data-testid="stSidebar"] hr {
+                border-color: rgba(0,210,255,0.08) !important;
+                margin: 12px 0 !important;
+            }
+            /* Sidebar selectbox */
+            [data-testid="stSidebar"] .stSelectbox > div > div {
+                background: rgba(255,255,255,0.04) !important;
+                border: 1px solid rgba(0,210,255,0.18) !important;
+                border-radius: 10px !important;
+                color: #e2e8f0 !important;
+                font-family: 'Space Grotesk', sans-serif !important;
+                font-size: 0.88rem !important;
+                transition: border-color 0.2s ease !important;
+            }
+            [data-testid="stSidebar"] .stSelectbox > div > div:hover {
+                border-color: rgba(0,210,255,0.45) !important;
+            }
+            /* Sidebar text inputs */
+            [data-testid="stSidebar"] .stTextInput > div > div > input {
+                background: rgba(255,255,255,0.04) !important;
+                border: 1px solid rgba(0,210,255,0.2) !important;
+                border-radius: 10px !important;
+                color: #e2e8f0 !important;
+                font-family: 'Space Grotesk', sans-serif !important;
+                font-size: 0.88rem !important;
+            }
+            [data-testid="stSidebar"] .stTextInput > div > div > input:focus {
+                border-color: #00d2ff !important;
+                box-shadow: 0 0 0 2px rgba(0,210,255,0.15) !important;
+            }
+            /* Sidebar expander */
+            [data-testid="stSidebar"] .stExpander {
+                background: rgba(255,255,255,0.02) !important;
+                border: 1px solid rgba(0,210,255,0.1) !important;
+                border-radius: 10px !important;
+            }
+
+            /* ── TABS ── */
+            .stTabs [data-baseweb="tab-list"] {
+                background: rgba(255,255,255,0.025) !important;
+                border-radius: 12px !important;
+                padding: 5px !important;
+                border: 1px solid rgba(0,210,255,0.1) !important;
+                gap: 2px !important;
+            }
+            .stTabs [data-baseweb="tab"] {
+                font-family: 'JetBrains Mono', monospace !important;
+                font-size: 0.72rem !important;
+                letter-spacing: 0.08em !important;
+                text-transform: uppercase !important;
+                border-radius: 8px !important;
+                color: #64748b !important;
+                transition: all 0.2s ease !important;
+                padding: 8px 14px !important;
+            }
+            .stTabs [data-baseweb="tab"]:hover {
+                background: rgba(0,210,255,0.08) !important;
+                color: #00d2ff !important;
+            }
+            .stTabs [aria-selected="true"] {
+                background: linear-gradient(90deg, rgba(0,210,255,0.18), rgba(58,123,213,0.12)) !important;
+                color: #00d2ff !important;
+                box-shadow: 0 2px 12px rgba(0,210,255,0.2) !important;
+            }
+
+            /* ── BUTTONS ── */
+            .stButton > button {
+                font-family: 'Space Grotesk', sans-serif !important;
+                font-weight: 700 !important;
+                letter-spacing: 0.08em !important;
+                text-transform: uppercase !important;
+                font-size: 0.82rem !important;
+                background: #00d2ff !important;
+                border-radius: 50px !important;
+                border: none !important;
+                color: #060c18 !important;
+                padding: 10px 24px !important;
+                box-shadow: 0 0 20px rgba(0,210,255,0.3) !important;
+                transition: all 0.2s ease !important;
+            }
+            .stButton > button:hover {
+                background: #33dbff !important;
+                box-shadow: 0 0 35px rgba(0,210,255,0.55) !important;
+                transform: translateY(-2px) !important;
+            }
+            .stButton > button:active { transform: translateY(0px) !important; }
+
+            /* ── CARDS ── */
+            .result-card {
+                background: rgba(255,255,255,0.03) !important;
+                backdrop-filter: blur(20px) !important;
+                border-radius: 16px !important;
+                border: 1px solid rgba(255,255,255,0.07) !important;
+                padding: 28px !important;
+                margin-bottom: 20px;
+                animation: fadeUp 0.5s ease-out;
+                transition: all 0.3s ease;
+                position: relative; overflow: hidden;
+            }
+            .result-card::before {
+                content: '';
+                position: absolute; inset: -2px;
+                background: linear-gradient(45deg,#00d2ff,#3a7bd5,#a855f7,#00d2ff);
+                background-size: 300% 300%;
+                border-radius: 18px;
+                z-index: -1;
+                animation: borderRotate 4s linear infinite;
+                opacity: 0.3;
+            }
+            .result-card:hover {
+                border-color: rgba(0,210,255,0.25) !important;
+                transform: translateY(-4px);
+                box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,210,255,0.15);
+            }
+            .result-card h3 { font-size: 1.1rem !important; font-weight: 700 !important; text-transform: none !important; color: #e2e8f0 !important; margin-bottom: 10px; letter-spacing: -0.01em !important; }
+
+            /* ── EXPANDERS ── */
+            .stExpander { border: 1px solid rgba(0,210,255,0.12) !important; border-radius: 12px !important; background: rgba(255,255,255,0.02) !important; transition: all 0.25s ease !important; }
+            .stExpander:hover { border-color: rgba(0,210,255,0.3) !important; box-shadow: 0 8px 24px rgba(0,210,255,0.07) !important; }
+
+            /* ── INPUTS ── */
+            .stTextInput > div > div > input,
+            .stTextArea > div > div > textarea {
+                background: rgba(255,255,255,0.04) !important;
+                border: 1px solid rgba(0,210,255,0.18) !important;
+                border-radius: 10px !important;
+                color: #e2e8f0 !important;
+                font-family: 'Space Grotesk', sans-serif !important;
+                font-size: 0.95rem !important;
+                transition: all 0.25s ease !important;
+            }
+            .stTextInput > div > div > input:focus,
+            .stTextArea > div > div > textarea:focus {
+                border-color: #00d2ff !important;
+                box-shadow: 0 0 0 2px rgba(0,210,255,0.15) !important;
+                background: rgba(0,210,255,0.03) !important;
+            }
+
+            /* ── PROGRESS / ALERTS / MISC ── */
+            .stAlert { border-radius: 12px !important; animation: fadeUp 0.4s ease-out !important; font-family: 'Space Grotesk', sans-serif !important; }
+            .stProgress > div > div > div { background: linear-gradient(90deg,#00d2ff,#3a7bd5,#a855f7,#00d2ff) !important; background-size: 200% auto !important; animation: shimmer 1.5s linear infinite !important; border-radius: 10px !important; box-shadow: 0 0 14px rgba(0,210,255,0.5) !important; }
+            hr { border: none !important; height: 1px !important; background: linear-gradient(90deg,transparent,rgba(0,210,255,0.35),rgba(168,85,247,0.35),transparent) !important; margin: 20px 0 !important; }
+            ::-webkit-scrollbar { width: 4px; }
+            ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+            ::-webkit-scrollbar-thumb { background: linear-gradient(180deg,#00d2ff,#3a7bd5); border-radius: 10px; }
+            iframe { border: none !important; }
+            .stSelectbox > div > div, .stMultiSelect > div > div { background: rgba(255,255,255,0.04) !important; border: 1px solid rgba(0,210,255,0.18) !important; border-radius: 10px !important; font-family: 'Space Grotesk', sans-serif !important; transition: border-color 0.2s ease !important; }
+            .stSelectbox > div > div:hover, .stMultiSelect > div > div:hover { border-color: rgba(0,210,255,0.45) !important; }
+
+            /* ── SKILL BADGES ── */
             .skill-badge { display:inline-block; padding:4px 12px; border-radius:20px; font-family:'JetBrains Mono',monospace; font-size:0.72rem; font-weight:500; letter-spacing:0.05em; margin:3px; border:1px solid rgba(0,210,255,0.35); background:rgba(0,210,255,0.08); color:#7dd3fc; transition:all 0.2s ease; cursor:default; }
             .skill-badge:hover { background:rgba(0,210,255,0.18); border-color:#00d2ff; transform:translateY(-2px); box-shadow:0 4px 15px rgba(0,210,255,0.2); }
             .skill-badge.purple { border-color:rgba(168,85,247,0.35); background:rgba(168,85,247,0.08); color:#c084fc; }
             .skill-badge.green  { border-color:rgba(52,211,153,0.35);  background:rgba(52,211,153,0.08);  color:#6ee7b7; }
+
+            /* ── MATCH RING ── */
             .match-ring-wrap { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; }
             .match-ring { position:relative; width:88px; height:88px; }
             .match-ring svg { transform:rotate(-90deg); }
@@ -1251,8 +1637,10 @@ class UIComponents:
             .match-ring .ring-text { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; }
             .match-ring .ring-pct  { font-size:1.3rem; font-weight:700; line-height:1; background:linear-gradient(135deg,#00d2ff,#a855f7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
             .match-ring .ring-label { font-size:0.6rem; color:#64748b; letter-spacing:0.08em; text-transform:uppercase; }
+
+            /* ── JOB LINKS ── */
             .job-links-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
-            .job-link-btn { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:8px; font-family:'Space Grotesk',sans-serif; font-size:0.78rem; font-weight:600; text-decoration:none!important; transition:all 0.22s cubic-bezier(.4,0,.2,1); border:1px solid; }
+            .job-link-btn { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:8px; font-family:'Space Grotesk',sans-serif; font-size:0.78rem; font-weight:600; text-decoration:none!important; transition:all 0.22s ease; border:1px solid; }
             .job-link-btn:hover { transform:translateY(-2px); text-decoration:none!important; }
             .job-link-btn.linkedin  { background:rgba(10,102,194,0.15);  border-color:rgba(10,102,194,0.5);  color:#60a5fa; }
             .job-link-btn.linkedin:hover  { background:rgba(10,102,194,0.3);  box-shadow:0 6px 20px rgba(10,102,194,0.25); }
@@ -1264,9 +1652,35 @@ class UIComponents:
             .job-link-btn.glassdoor:hover { background:rgba(15,164,107,0.25);  box-shadow:0 6px 20px rgba(15,164,107,0.2); }
             .job-link-btn.remoteok  { background:rgba(139,92,246,0.12);  border-color:rgba(139,92,246,0.4);  color:#c084fc; }
             .job-link-btn.remoteok:hover  { background:rgba(139,92,246,0.25);  box-shadow:0 6px 20px rgba(139,92,246,0.2); }
+
+            /* ── SIDEBAR NAV BUTTONS ── */
+            [data-testid="stSidebar"] .stButton > button {
+                background: transparent !important;
+                border: 1px solid transparent !important;
+                border-radius: 8px !important;
+                color: #64748b !important;
+                font-family: 'JetBrains Mono', monospace !important;
+                font-size: 0.72rem !important;
+                letter-spacing: 0.1em !important;
+                text-transform: uppercase !important;
+                font-weight: 400 !important;
+                padding: 9px 12px !important;
+                text-align: left !important;
+                box-shadow: none !important;
+                animation: none !important;
+                justify-content: flex-start !important;
+            }
+            [data-testid="stSidebar"] .stButton > button:hover {
+                background: rgba(255,255,255,0.05) !important;
+                color: #94a3b8 !important;
+                transform: none !important;
+                box-shadow: none !important;
+            }
+
+            /* ── STATS ── */
             .stats-row { display:flex; gap:16px; margin:20px 0; flex-wrap:wrap; }
-            .stat-card { flex:1; min-width:110px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,210,255,0.12); border-radius:14px; padding:16px 18px; text-align:center; transition:all 0.3s ease; }
-            .stat-card:hover { border-color:rgba(0,210,255,0.4); transform:translateY(-3px); box-shadow:0 12px 30px rgba(0,210,255,0.1); }
+            .stat-card { flex:1; min-width:110px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,210,255,0.1); border-radius:14px; padding:16px 18px; text-align:center; transition:all 0.3s ease; }
+            .stat-card:hover { border-color:rgba(0,210,255,0.35); transform:translateY(-3px); box-shadow:0 12px 30px rgba(0,210,255,0.08); }
             .stat-card .stat-num { font-family:'Bebas Neue',sans-serif; font-size:2rem; line-height:1; background:linear-gradient(135deg,#00d2ff,#a855f7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
             .stat-card .stat-lbl { font-family:'JetBrains Mono',monospace; font-size:0.65rem; color:#64748b; text-transform:uppercase; letter-spacing:0.1em; margin-top:4px; }
             .hist-card { background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.07); border-radius:14px; padding:18px 22px; margin-bottom:12px; transition:all 0.25s ease; }
@@ -1288,64 +1702,82 @@ class UIComponents:
         """
         st.markdown(css, unsafe_allow_html=True)
 
-        particle_js = """
+        # ── Custom cursor + hidden-nav wiring ─────────────────────────────
+        cursor_js = """
         <script>
         (function() {
             var fe = window.frameElement;
             if (fe) { fe.style.cssText += ';display:block!important;position:absolute!important;top:0!important;left:0!important;width:0!important;height:0!important;overflow:hidden!important;pointer-events:none!important;border:none!important;margin:0!important;padding:0!important;opacity:0!important;'; }
         })();
-        (function nexstepBoot() {
+        (function cursorBoot() {
             function init() {
                 try {
                     var P = window.parent, pdoc = P.document;
                     if (!pdoc || !pdoc.body) { setTimeout(init, 80); return; }
-                    if (P.__nexstepRunning && !pdoc.getElementById('ns-canvas')) {
-                        P.__nexstepRunning = false;
-                    }
-                    if (P.__nexstepRunning) return;
-                    P.__nexstepRunning = true;
+                    if (P.__cursorRunning && pdoc.getElementById('ns-dot')) return;
+                    P.__cursorRunning = true;
+
                     if (!pdoc.getElementById('nexstep-injected-css')) {
                         var s = pdoc.createElement('style'); s.id = 'nexstep-injected-css';
-                        s.textContent = ['* { cursor: none !important; }','#ns-canvas { position:fixed!important; top:0!important; left:0!important; width:100vw!important; height:100vh!important; pointer-events:none!important; z-index:2147483620!important; }','#ns-dot { position:fixed!important; left:0!important; top:0!important; width:10px!important; height:10px!important; background:#00d2ff!important; border-radius:50%!important; pointer-events:none!important; z-index:2147483647!important; will-change:transform!important; box-shadow:0 0 10px #00d2ff,0 0 24px rgba(0,210,255,.5)!important; transition:width .15s,height .15s,background .15s!important; mix-blend-mode:screen!important; }','#ns-dot.ns-click { width:5px!important; height:5px!important; background:#a855f7!important; box-shadow:0 0 12px #a855f7!important; }','#ns-ring { position:fixed!important; left:0!important; top:0!important; width:34px!important; height:34px!important; border:1.5px solid rgba(0,210,255,.6)!important; border-radius:50%!important; pointer-events:none!important; z-index:2147483646!important; will-change:transform!important; transition:width .2s ease,height .2s ease,border-color .2s ease,background .2s ease!important; }','#ns-ring.ns-hover { width:56px!important; height:56px!important; border-color:#a855f7!important; background:rgba(168,85,247,.06)!important; }'].join('');
+                        s.textContent = [
+                            '* { cursor: none !important; }',
+                            '#ns-dot { position:fixed!important; left:0!important; top:0!important; width:10px!important; height:10px!important; background:#00d2ff!important; border-radius:50%!important; pointer-events:none!important; z-index:2147483647!important; will-change:transform!important; box-shadow:0 0 10px #00d2ff,0 0 24px rgba(0,210,255,.5)!important; transition:width .15s,height .15s,background .15s!important; mix-blend-mode:screen!important; }',
+                            '#ns-dot.ns-click { width:5px!important; height:5px!important; background:#a855f7!important; box-shadow:0 0 12px #a855f7!important; }',
+                            '#ns-ring { position:fixed!important; left:0!important; top:0!important; width:34px!important; height:34px!important; border:1.5px solid rgba(0,210,255,.6)!important; border-radius:50%!important; pointer-events:none!important; z-index:2147483646!important; will-change:transform!important; transition:width .2s ease,height .2s ease,border-color .2s ease,background .2s ease!important; }',
+                            '#ns-ring.ns-hover { width:56px!important; height:56px!important; border-color:#a855f7!important; background:rgba(168,85,247,.06)!important; }',
+                            '.jl-ghost-btn { position:fixed!important; top:-9999px!important; left:-9999px!important; width:1px!important; height:1px!important; overflow:hidden!important; opacity:0!important; pointer-events:none!important; }'
+                        ].join('');
                         pdoc.head.appendChild(s);
                     }
-                    if (pdoc.getElementById('ns-canvas')) return;
-                    var canvas = pdoc.createElement('canvas'); canvas.id = 'ns-canvas'; pdoc.body.appendChild(canvas);
+
+                    if (pdoc.getElementById('ns-dot')) return;
                     var dot = pdoc.createElement('div'); dot.id = 'ns-dot'; pdoc.body.appendChild(dot);
                     var ring = pdoc.createElement('div'); ring.id = 'ns-ring'; pdoc.body.appendChild(ring);
                     var mx = P.innerWidth/2, my = P.innerHeight/2, rx = mx, ry = my;
                     pdoc.addEventListener('mousemove', function(e){ mx=e.clientX; my=e.clientY; dot.style.transform='translate3d('+(mx-5)+'px,'+(my-5)+'px,0)'; }, {passive:true});
-                    var HSel = 'button,a,input,textarea,select,[role="tab"],label,summary';
+                    P.addEventListener('message', function(e){ if(e.data&&e.data.type==='ns-move'){ mx=e.data.x; my=e.data.y; dot.style.transform='translate3d('+(mx-5)+'px,'+(my-5)+'px,0)'; } });
+
+                    // Tag & hide ghost nav buttons using MutationObserver
+                    var NAV_PAGES = ['career','history','compare','resources','resume','interview','pyq'];
+                    function processNavBtns() {
+                        pdoc.querySelectorAll('button').forEach(function(btn) {
+                            var t = btn.textContent.replace(/\\s+/g,'').toLowerCase();
+                            NAV_PAGES.forEach(function(p) {
+                                if (t === 'jlnav' + p) {
+                                    btn.setAttribute('data-jl-nav', p);
+                                    var wrap = btn.closest('.stButton') || btn.parentElement;
+                                    if (wrap) wrap.classList.add('jl-ghost-btn');
+                                }
+                            });
+                        });
+                    }
+                    processNavBtns();
+                    if (!P.__jlNavObserver) {
+                        P.__jlNavObserver = new P.MutationObserver(processNavBtns);
+                        P.__jlNavObserver.observe(pdoc.body, {childList:true, subtree:true});
+                    }
+
+                    // Route postMessage to tagged ghost buttons
+                    P.addEventListener('message', function(e) {
+                        if (e.data && e.data.type === 'jl-nav') {
+                            var btn = pdoc.querySelector('[data-jl-nav="' + e.data.page + '"]');
+                            if (btn) btn.click();
+                        }
+                    });
+
+                    var HSel = 'button,a,input,textarea,select,label,summary';
                     pdoc.addEventListener('mouseover', function(e){ if(e.target.closest&&e.target.closest(HSel)) ring.classList.add('ns-hover'); });
                     pdoc.addEventListener('mouseout',  function(e){ if(e.target.closest&&e.target.closest(HSel)) ring.classList.remove('ns-hover'); });
                     pdoc.addEventListener('mousedown', function(){ dot.classList.add('ns-click'); });
                     pdoc.addEventListener('mouseup',   function(){ dot.classList.remove('ns-click'); });
                     (function ringLoop(){ rx+=(mx-rx)*0.22; ry+=(my-ry)*0.22; ring.style.transform='translate3d('+(rx-17)+'px,'+(ry-17)+'px,0)'; P.requestAnimationFrame(ringLoop); })();
-                    var ctx=canvas.getContext('2d'), W, H;
-                    function resize(){ W=canvas.width=P.innerWidth; H=canvas.height=P.innerHeight; }
-                    resize(); P.addEventListener('resize', function(){ resize(); spawn(); });
-                    var COLORS=['#00d2ff','#3a7bd5','#a855f7','#38bdf8','#818cf8','#e879f9'];
-                    function rnd(a,b){ return a+Math.random()*(b-a); }
-                    function Particle(){ this.init(false); }
-                    Particle.prototype.init=function(fromBottom){ this.x=rnd(0,W); this.y=fromBottom?H+rnd(5,30):rnd(0,H); this.r=rnd(0.8,2.8); this.vy=-rnd(0.2,0.8); this.vx=rnd(-0.35,0.35); this.c=COLORS[Math.floor(Math.random()*COLORS.length)]; this.ph=rnd(0,Math.PI*2); this.ps=rnd(0.01,0.03); this.ba=rnd(0.25,0.8); this.shoot=Math.random()<0.05; if(this.shoot){this.vy=-rnd(3,6);this.vx=rnd(-1,1);this.r=rnd(0.4,1.1);this.trail=[];} };
-                    Particle.prototype.update=function(){ if(this.shoot){this.trail.push({x:this.x,y:this.y});if(this.trail.length>20)this.trail.shift();} var dx=this.x-mouseX,dy=this.y-mouseY,d=Math.sqrt(dx*dx+dy*dy); if(d<120&&d>0){var f=((120-d)/120)*1.3;this.x+=(dx/d)*f;this.y+=(dy/d)*f;} this.x+=this.vx;this.y+=this.vy;this.ph+=this.ps;this.alpha=this.ba*(0.5+0.5*Math.sin(this.ph)); if(this.y<-30||this.x<-30||this.x>W+30)this.init(true); };
-                    Particle.prototype.draw=function(){ if(this.shoot&&this.trail&&this.trail.length>1){for(var i=1;i<this.trail.length;i++){var t=i/this.trail.length;ctx.save();ctx.globalAlpha=t*this.alpha*0.45;ctx.strokeStyle=this.c;ctx.lineWidth=this.r*t*1.1;ctx.beginPath();ctx.moveTo(this.trail[i-1].x,this.trail[i-1].y);ctx.lineTo(this.trail[i].x,this.trail[i].y);ctx.stroke();ctx.restore();}} ctx.save();ctx.globalAlpha=this.alpha;ctx.fillStyle=this.c;ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fill();ctx.restore(); };
-                    var _linkFrame=0;
-                    function drawLinks(pts){ _linkFrame++;if(_linkFrame%4!==0) return;var MAX=100,MAX2=MAX*MAX;ctx.lineWidth=0.7;for(var i=0;i<pts.length;i++){for(var j=i+1;j<pts.length;j++){var dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d2=dx*dx+dy*dy;if(d2<MAX2){ctx.save();ctx.globalAlpha=(1-Math.sqrt(d2)/MAX)*0.12;ctx.strokeStyle=pts[i].c;ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.stroke();ctx.restore();}}} }
-                    var mouseX=-9999,mouseY=-9999;
-                    pdoc.addEventListener('mousemove',function(e){mouseX=e.clientX;mouseY=e.clientY;},{passive:true});
-                    var particles=[];
-                    function spawn(){var n=Math.min(90,Math.floor(W*H/9500));particles=[];for(var i=0;i<n;i++)particles.push(new Particle());}
-                    spawn();
-                    var _lastFrame=0;
-                    (function loop(now){ P.requestAnimationFrame(loop); if(now-_lastFrame<32) return; _lastFrame=now; ctx.clearRect(0,0,W,H); for(var i=0;i<particles.length;i++){particles[i].update();particles[i].draw();} drawLinks(particles); })(0);
                 } catch(err){ setTimeout(init, 200); }
             }
             init();
         })();
         </script>
         """
-        components.html(particle_js, height=1, scrolling=False)
+        components.html(cursor_js, height=1, scrolling=False)
 
     @staticmethod
     def show_api_setup_banner():
@@ -2368,12 +2800,45 @@ def render_sidebar(config: Config) -> tuple[str, str, str, bool, bool]:
             return None
 
     with st.sidebar:
-        lottie_brain = load_lottieurl(
-            "https://lottie.host/880ffc06-b30a-406d-a60d-7734e5659837/92k6e3z3tK.json")
-        if lottie_brain:
-            st_lottie(lottie_brain, height=120, key="sidebar_brain")
+        # ── Logo + Nav (only shown after API key is set) ──────────────────
+        if config.is_ready():
+            st.markdown("""
+        <div style="padding: 24px 16px 8px 16px;">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:28px;">
+                <div style="width:38px;height:38px;background:linear-gradient(135deg,#00d2ff,#3a7bd5);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:0 0 16px rgba(0,210,255,0.35);">⚡</div>
+                <span style="font-family:'Space Grotesk',sans-serif;font-size:1.05rem;font-weight:700;color:#ffffff;letter-spacing:0.04em;">JOBLESS AI</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-        st.markdown("### ⚙️ Settings")
+            page = st.session_state.get('current_page', 'home')
+            nav_items = [
+                ('home',          '🏠', 'Home'),
+                ('career',        '📊', 'Career Analysis'),
+                ('history',       '📜', 'History'),
+                ('compare',       '⚖️', 'Compare'),
+                ('resources',     '📚', 'Resources'),
+                ('resume',        '📝', 'Resume Builder'),
+                ('interview',     '🎤', 'Mock Interview'),
+                ('pyq',           '📂', 'PYQ Hub'),
+            ]
+            st.markdown('<div style="font-family:JetBrains Mono,monospace;font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(0,210,255,0.4);margin:0 0 6px 4px;">Navigation</div>', unsafe_allow_html=True)
+            for key, icon, label in nav_items:
+                is_active = page == key
+                bg = 'background:rgba(0,210,255,0.1);border:1px solid rgba(0,210,255,0.2);' if is_active else 'background:transparent;border:1px solid transparent;'
+                color = '#00d2ff' if is_active else '#64748b'
+                if st.button(f"{icon}  {label}", key=f"nav_{key}", use_container_width=True):
+                    st.session_state['current_page'] = key
+                    st.rerun()
+            st.markdown(
+                '<div style="height:1px;background:linear-gradient(90deg,transparent,rgba(0,210,255,0.2),transparent);margin:16px 0;"></div>', unsafe_allow_html=True)
+            st.markdown('<div style="font-family:JetBrains Mono,monospace;font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(0,210,255,0.4);margin-bottom:10px;">Settings</div>', unsafe_allow_html=True)
+        else:
+            lottie_brain = load_lottieurl(
+                "https://lottie.host/880ffc06-b30a-406d-a60d-7734e5659837/92k6e3z3tK.json")
+            if lottie_brain:
+                st_lottie(lottie_brain, height=120, key="sidebar_brain")
+            st.markdown("### ⚙️ Settings")
 
         # Provider selector
         st.markdown("""<div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(0,210,255,0.75);margin-bottom:6px;">🤖 AI Provider</div>""", unsafe_allow_html=True)
@@ -2508,6 +2973,7 @@ def init_session_state():
         'current_q_index': 0,
         'final_verdict': None,
         'free_uses': 0,
+        'current_page': 'home',
     }
     for key, val in defaults.items():
         if key not in st.session_state:
@@ -3688,44 +4154,327 @@ def main():
     selected_provider, selected_model, analysis_depth, include_learning_path, include_interview_prep = \
         render_sidebar(config)
 
-    # Animated header
-    components.html(_HEADER_HTML, height=190, scrolling=False)
-
-    # Gate: require API key
+    # ── PRE-API KEY: original landing ─────────────────────────────────────
     if not config.is_ready():
+        components.html(_HEADER_HTML, height=190, scrolling=False)
+        render_spline_scene(
+            scene_url="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode",
+            title="JobLess AI",
+            description="Your AI-powered career companion. Analyze resumes, prep for interviews, and land your dream job — all in one place.",
+            height=500
+        )
         ui.show_api_setup_banner()
         st.info(
             "👈 **Next Step:** Enter your API key in the sidebar to start analyzing careers!")
         st.stop()
 
-    # ── Tabs ──────────────────────────────────────────────────────────────
-    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
-        "📊 Career Analysis", "📜 History", "⚖️ Compare",
-        "📚 Resources", "📝 Resume Builder", "🎤 Mock Interview", "📂 PYQ Hub",
-    ])
+    # ── POST-API KEY: full dashboard ───────────────────────────────────────
+    # ── Page Router ───────────────────────────────────────────────────────
+    page = st.session_state.get('current_page', 'home')
 
-    with tab1:
-        render_tab_career_analysis(
-            ai_handler, pdf_handler, history_manager, selected_model,
-            analysis_depth, include_learning_path, include_interview_prep)
+    # Hidden nav buttons — triggered by postMessage from iframes (spotlight cards, Get Started)
+    # Invisible Streamlit buttons; cursor JS finds them by data-jl-nav attribute injected via JS
+    _nav_pages = ['career', 'history', 'compare',
+                  'resources', 'resume', 'interview', 'pyq']
+    for _np in _nav_pages:
+        # Label matches exactly what cursor_js looks for: "jlnav" + page (no spaces, lowercase)
+        if st.button(f"jlnav{_np}", key=f"_jlnav_{_np}"):
+            st.session_state['current_page'] = _np
+            st.rerun()
+    # (MutationObserver in cursor_js hides these buttons and wires them to postMessage)
 
-    with tab2:
-        render_tab_history()
+    # Home: show full heading + hero text
+    if page == 'home':
+        st.markdown("""
+        <style>@keyframes fadeInUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}</style>
+        <div style="animation:fadeInUp 0.6s ease-out;padding:2px 0 0 0;">
+            <h1 style="font-family:'Space Grotesk',sans-serif;font-size:3rem;font-weight:800;
+                       color:#00d2ff;letter-spacing:-0.03em;line-height:1;
+                       text-shadow:0 0 40px rgba(0,210,255,0.4),0 0 80px rgba(0,210,255,0.15);
+                       margin:0 0 6px 0;">JOBLESS AI</h1>
+            <p style="color:#64748b;font-family:'Inter',sans-serif;font-size:0.92rem;
+                      margin:0 0 8px 0;letter-spacing:0.01em;">
+                Your AI-powered career companion — analyze career paths, build ATS resumes, practice mock interviews, and ace your dream job.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
-    with tab3:
-        render_tab_compare()
+    # Robot always visible — on home it's the hero, on sections it's the compact helper
+    render_spline_scene(
+        scene_url="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode",
+        title="Interactive 3D",
+        description="Meet your AI career assistant. Powered by cutting-edge AI models, JobLess AI helps you navigate your career journey with confidence.",
+        height=280 if page == 'home' else 220,
+        show_get_started=(page == 'home')
+    )
 
-    with tab4:
-        render_tab_resources()
+    # Home: spotlight glow feature cards + Get Started
+    if page == 'home':
+        cards_html = """<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background: transparent; overflow: hidden; }
 
-    with tab5:
-        render_tab_resume_builder(ai_handler, selected_model)
+/* ── Grid ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 4px 2px 10px 2px;
+}
 
-    with tab6:
-        render_tab_mock_interview(ai_handler, selected_model)
+/* ── Spotlight card ── */
+.card {
+  --x: 0; --y: 0; --xp: 0; --yp: 0;
+  --base: 195; --spread: 60;
+  --radius: 16;
+  --border: 1.5;
+  --size: 280;
+  --hue: calc(var(--base) + (var(--xp) * var(--spread)));
+  --spotlight-size: calc(var(--size) * 1px);
+  --border-size: calc(var(--border) * 1px);
 
-    with tab7:
-        render_tab_pyq_hub(ai_handler, selected_model)
+  position: relative;
+  border-radius: calc(var(--radius) * 1px);
+  background-color: #0b1220;
+  background-image: radial-gradient(
+    var(--spotlight-size) var(--spotlight-size) at
+    calc(var(--x) * 1px) calc(var(--y) * 1px),
+    hsl(var(--hue) 80% 65% / 0.08),
+    transparent
+  );
+  background-size: calc(100% + (2 * var(--border-size))) calc(100% + (2 * var(--border-size)));
+  background-position: 50% 50%;
+  background-attachment: fixed;
+  border: var(--border-size) solid rgba(255,255,255,0.07);
+  padding: 26px 22px 22px 22px;
+  cursor: pointer;
+  transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.card::before, .card::after {
+  pointer-events: none;
+  content: "";
+  position: absolute;
+  inset: calc(var(--border-size) * -1);
+  border: var(--border-size) solid transparent;
+  border-radius: calc(var(--radius) * 1px);
+  background-attachment: fixed;
+  background-size: calc(100% + (2 * var(--border-size))) calc(100% + (2 * var(--border-size)));
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  mask: linear-gradient(transparent, transparent), linear-gradient(white, white);
+  mask-clip: padding-box, border-box;
+  mask-composite: intersect;
+  -webkit-mask: linear-gradient(transparent, transparent), linear-gradient(white, white);
+  -webkit-mask-clip: padding-box, border-box;
+  -webkit-mask-composite: destination-in;
+}
+
+.card::before {
+  background-image: radial-gradient(
+    calc(var(--spotlight-size) * 0.75) calc(var(--spotlight-size) * 0.75) at
+    calc(var(--x) * 1px) calc(var(--y) * 1px),
+    hsl(var(--hue) 80% 55% / 0.9),
+    transparent 100%
+  );
+  filter: brightness(2);
+}
+
+.card::after {
+  background-image: radial-gradient(
+    calc(var(--spotlight-size) * 0.5) calc(var(--spotlight-size) * 0.5) at
+    calc(var(--x) * 1px) calc(var(--y) * 1px),
+    hsl(0 100% 100% / 0.08),
+    transparent 100%
+  );
+}
+
+.card:hover {
+  border-color: rgba(0,210,255,0.25);
+  transform: translateY(-5px);
+  box-shadow: 0 20px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,210,255,0.08);
+}
+
+.card-icon {
+  font-size: 1.7rem;
+  margin-bottom: 14px;
+  display: block;
+  line-height: 1;
+}
+
+.card-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin-bottom: 7px;
+  letter-spacing: 0.01em;
+}
+
+.card-desc {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  color: #4a5a72;
+  line-height: 1.55;
+}
+
+.card-arrow {
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  font-size: 0.75rem;
+  color: rgba(0,210,255,0.3);
+  font-family: 'JetBrains Mono', monospace;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+.card:hover .card-arrow {
+  color: rgba(0,210,255,0.7);
+  transform: translate(2px, -2px);
+}
+
+/* ── Get Started button ── */
+.gs-wrap {
+  padding: 4px 0 0 0;
+}
+.gs-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 30px;
+  background: linear-gradient(135deg, #00d2ff 0%, #0ea8d8 100%);
+  color: #020b14;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 0 28px rgba(0,210,255,0.35), 0 4px 16px rgba(0,0,0,0.35);
+  transition: all 0.22s ease;
+  position: relative;
+  overflow: hidden;
+}
+.gs-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    180px 180px at calc(var(--bx,50%) * 1%) calc(var(--by,50%) * 1%),
+    rgba(255,255,255,0.18),
+    transparent
+  );
+  transition: opacity 0.2s;
+  opacity: 0;
+}
+.gs-btn:hover { transform: translateY(-2px); box-shadow: 0 0 44px rgba(0,210,255,0.55), 0 6px 22px rgba(0,0,0,0.4); }
+.gs-btn:hover::before { opacity: 1; }
+.gs-btn:active { transform: translateY(0px); }
+</style>
+</head>
+<body>
+<div class="grid" id="cardGrid">
+  <div class="card" data-page="career">
+    <span class="card-icon">📊</span>
+    <div class="card-title">Career Analysis</div>
+    <div class="card-desc">AI-powered career path suggestions tailored to your profile</div>
+    <span class="card-arrow">↗</span>
+  </div>
+  <div class="card" data-page="resume">
+    <span class="card-icon">📝</span>
+    <div class="card-title">Resume Builder</div>
+    <div class="card-desc">ATS-optimized resume generation in seconds</div>
+    <span class="card-arrow">↗</span>
+  </div>
+  <div class="card" data-page="interview">
+    <span class="card-icon">🎤</span>
+    <div class="card-title">Mock Interview</div>
+    <div class="card-desc">Practice with AI-generated role-specific questions</div>
+    <span class="card-arrow">↗</span>
+  </div>
+  <div class="card" data-page="pyq">
+    <span class="card-icon">📂</span>
+    <div class="card-title">PYQ Hub</div>
+    <div class="card-desc">Previous year question papers for every domain</div>
+    <span class="card-arrow">↗</span>
+  </div>
+  <div class="card" data-page="resources">
+    <span class="card-icon">📚</span>
+    <div class="card-title">Resources</div>
+    <div class="card-desc">Curated learning materials and career roadmaps</div>
+    <span class="card-arrow">↗</span>
+  </div>
+  <div class="card" data-page="compare">
+    <span class="card-icon">⚖️</span>
+    <div class="card-title">Compare</div>
+    <div class="card-desc">Side-by-side career path comparison and insights</div>
+    <span class="card-arrow">↗</span>
+  </div>
+</div>
+<div class="gs-wrap">
+  <button class="gs-btn" id="gsBtn">🚀 &nbsp;Get Started →</button>
+</div>
+
+<script>
+// Spotlight pointer tracking
+document.addEventListener('pointermove', function(e) {
+  document.querySelectorAll('.card').forEach(function(card) {
+    card.style.setProperty('--x', e.clientX.toFixed(2));
+    card.style.setProperty('--y', e.clientY.toFixed(2));
+    card.style.setProperty('--xp', (e.clientX / window.innerWidth).toFixed(2));
+    card.style.setProperty('--yp', (e.clientY / window.innerHeight).toFixed(2));
+  });
+});
+
+// Card clicks → postMessage to parent
+document.querySelectorAll('.card').forEach(function(card) {
+  card.addEventListener('click', function() {
+    window.parent.postMessage({ type: 'jl-nav', page: card.dataset.page }, '*');
+  });
+});
+
+// Get Started → Career Analysis
+document.getElementById('gsBtn').addEventListener('click', function() {
+  window.parent.postMessage({ type: 'jl-nav', page: 'career' }, '*');
+});
+
+// Relay mouse to parent for custom cursor
+document.addEventListener('mousemove', function(e) {
+  var rect = window.frameElement ? window.frameElement.getBoundingClientRect() : {left:0, top:0};
+  window.parent.postMessage({ type: 'ns-move', x: e.clientX + rect.left, y: e.clientY + rect.top }, '*');
+}, {passive: true});
+</script>
+</body>
+</html>"""
+        components.html(cards_html, height=360, scrolling=False)
+
+    # Section pages — render directly below the compact robot
+    if page != 'home':
+        # Dispatch
+        if page == 'career':
+            render_tab_career_analysis(
+                ai_handler, pdf_handler, history_manager, selected_model,
+                analysis_depth, include_learning_path, include_interview_prep)
+        elif page == 'history':
+            render_tab_history()
+        elif page == 'compare':
+            render_tab_compare()
+        elif page == 'resources':
+            render_tab_resources()
+        elif page == 'resume':
+            render_tab_resume_builder(ai_handler, selected_model)
+        elif page == 'interview':
+            render_tab_mock_interview(ai_handler, selected_model)
+        elif page == 'pyq':
+            render_tab_pyq_hub(ai_handler, selected_model)
 
     # Footer
     st.markdown(f"""
