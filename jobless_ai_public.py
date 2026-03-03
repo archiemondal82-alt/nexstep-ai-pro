@@ -2345,26 +2345,10 @@ def _render_career_results(data: Dict):
         cert_badges = render_skill_badges(certs, "purple")
         tips_html = "".join(
             f'<div class="tip-item">{t}</div>' for t in job.get('interview_tips', []))
-
-        # ── LEARNING PATH with YouTube links ──────────────────────────────
         learn_html = "".join(
-            f'<div class="learn-item" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'
-            f'  <span>{c}</span>'
-            f'  <a href="https://www.youtube.com/results?search_query={_up.quote_plus(c)}"'
-            f'     target="_blank" rel="noopener noreferrer"'
-            f'     style="flex-shrink:0;display:inline-flex;align-items:center;gap:4px;'
-            f'            background:rgba(255,0,0,0.12);border:1px solid rgba(255,0,0,0.35);'
-            f'            color:#ff4444;font-family:\'JetBrains Mono\',monospace;font-size:0.62rem;'
-            f'            font-weight:600;letter-spacing:0.06em;padding:3px 9px;border-radius:6px;'
-            f'            text-decoration:none;transition:all 0.2s ease;"'
-            f'     onmouseover="this.style.background=\'rgba(255,0,0,0.25)\';this.style.borderColor=\'rgba(255,0,0,0.7)\'"'
-            f'     onmouseout="this.style.background=\'rgba(255,0,0,0.12)\';this.style.borderColor=\'rgba(255,0,0,0.35)\'">'
-            f'    ▶ YouTube'
-            f'  </a>'
-            f'</div>'
-            for c in job.get('learning_path', [])
-        )
-        # ──────────────────────────────────────────────────────────────────
+            f'<div class="learn-item">{c}</div>' for c in job.get('learning_path', []))
+        steps_html = "".join(f'<li style="color:#94a3b8;font-size:.88rem;margin-bottom:5px;">{s}</li>'
+                             for s in job.get('next_steps', []))
 
         with st.expander(f"**{idx}. {job['title']}** — {score}% Match", expanded=(idx == 1)):
             col_left, col_mid, col_right = st.columns([3, 2, 1])
