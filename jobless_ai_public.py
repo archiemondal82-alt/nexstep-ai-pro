@@ -57,10 +57,11 @@ def render_spline_scene(scene_url: str, title: str = "Interactive 3D", descripti
     <html>
     <head>
       <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
       <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
       <style>
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-        body {{ background: #0a0f1a; overflow: hidden; cursor: none !important; }}
+        html, body {{ background: #0a0f1a !important; background-color: #0a0f1a !important; overflow: hidden; cursor: none !important; }}
         canvas {{ cursor: none !important; }}
 
         .wrapper {{
@@ -177,6 +178,7 @@ def render_spline_scene(scene_url: str, title: str = "Interactive 3D", descripti
           position: relative;
           z-index: 5;
           overflow: hidden;
+          background: #0a0f1a;
         }}
         #spline-canvas {{
           width: 100%;
