@@ -71,13 +71,9 @@ def render_spline_scene(scene_url: str, title: str = "Interactive 3D", descripti
           box-s.wrapper {{
           width: 100%;
           height: {height}px;
-          background: #0a0f1a;
+          background: linear-gradient(135deg, #0a0f1a 0%, #0d1526 50%, #0a0f1a 100%);
           position: relative;
-          overflow: hidden;
-          border-radius: 0;
-          display: flex;
-          border: none;
-          box-shadow: none;
+          overflow: hidden;hadow: 0 0 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
         }}
 
         /* Ambient glow */
