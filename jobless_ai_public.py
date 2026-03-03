@@ -57,7 +57,6 @@ def render_spline_scene(scene_url: str, title: str = "Interactive 3D", descripti
     <html>
     <head>
       <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
       <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
       <style>
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
@@ -107,17 +106,6 @@ def render_spline_scene(scene_url: str, title: str = "Interactive 3D", descripti
           display: flex;
           flex-direction: column;
           justify-content: center;
-        }}
-
-        /* ── MOBILE: hide text panel, give robot 100% width ── */
-        @media (max-width: 600px) {{
-          .wrapper {{ flex-direction: column; height: auto !important; min-height: {height}px; }}
-          .left-panel {{ display: none; }}
-          .right-panel {{ flex: 1; min-height: {height}px; }}
-        }}
-        @media (min-width: 601px) and (max-width: 900px) {{
-          .left-panel {{ flex: 0 0 38%; padding: 16px 20px; }}
-          .left-panel h1 {{ font-size: 1.6rem; }}
         }}
         .label {{
           font-family: 'Inter', sans-serif;
@@ -1459,12 +1447,16 @@ class UIComponents:
             .main .block-container { padding-top: 0 !important; padding-left: 2rem !important; padding-right: 2rem !important; max-width: 100% !important; margin-top: -30px !important; }
             /* Kill Streamlit's default top header gap */
             [data-testid="stAppViewContainer"] > section > div:first-child { padding-top: 0 !important; }
-            header[data-testid="stHeader"] { height: 0 !important; min-height: 0 !important; visibility: hidden !important; background: #060c18 !important; }
+            header[data-testid="stHeader"] { height: 0 !important; min-height: 0 !important; background: #060c18 !important; overflow: visible !important; }
             #root > div:first-child { padding-top: 0 !important; }
-            .stApp > header { display: none !important; }
+            .stApp > header { height: 0 !important; overflow: visible !important; }
             div[data-testid="stToolbar"] { display: none !important; }
             div[data-testid="stDecoration"] { display: none !important; }
             div[data-testid="stStatusWidget"] { display: none !important; }
+            /* Keep Streamlit sidebar toggle fully clickable */
+            [data-testid="stSidebarCollapsedControl"],
+            [data-testid="stSidebarNavToggleButton"],
+            button[kind="header"] { visibility: visible !important; display: flex !important; z-index: 9999 !important; opacity: 1 !important; }
 
             /* ── TYPOGRAPHY ── */
             h1, h2, h3 { font-family: 'Space Grotesk', sans-serif !important; font-weight: 700 !important; letter-spacing: -0.02em !important; color: #e2e8f0 !important; }
@@ -1844,39 +1836,6 @@ class UIComponents:
             .resource-card .rc-name { font-family:'Space Grotesk',sans-serif; font-size:0.95rem; font-weight:600; color:#e2e8f0; margin-bottom:4px; }
             .resource-card .rc-desc { font-family:'Space Grotesk',sans-serif; font-size:0.78rem; color:#64748b; line-height:1.5; }
             .resource-card .rc-tag  { display:inline-block; margin-top:10px; font-family:'JetBrains Mono',monospace; font-size:0.62rem; padding:2px 8px; border-radius:4px; background:rgba(0,210,255,0.1); color:#38bdf8; border:1px solid rgba(0,210,255,0.2); }
-
-            /* ══════════════════════════════════════════
-               GLOBAL MOBILE RESPONSIVE FIXES
-               Screen 1: Home, Screen 2+: All tabs
-            ══════════════════════════════════════════ */
-            @media (max-width: 768px) {
-                /* Reduce main padding on mobile */
-                .main .block-container {
-                    padding-left: 0.75rem !important;
-                    padding-right: 0.75rem !important;
-                    margin-top: 0 !important;
-                }
-                /* Hide hamburger button on mobile (sidebar toggle) */
-                #jl-hamburger { display: flex !important; }
-                /* Stack Streamlit columns vertically */
-                [data-testid="stHorizontalBlock"] {
-                    flex-direction: column !important;
-                }
-                [data-testid="stHorizontalBlock"] > [data-testid="stVerticalBlock"] {
-                    width: 100% !important;
-                    min-width: 100% !important;
-                }
-                /* Tighten fonts for mobile */
-                h2 { font-size: 1.3rem !important; }
-                h3 { font-size: 1rem !important; }
-                /* Resource grid single column */
-                .resource-grid { grid-template-columns: 1fr !important; }
-            }
-            @media (max-width: 480px) {
-                h2 { font-size: 1.1rem !important; }
-                p, li { font-size: 0.88rem !important; }
-                .compare-header { font-size: 1.1rem !important; }
-            }
         </style>
         """
         st.markdown(css, unsafe_allow_html=True)
@@ -1940,6 +1899,30 @@ class UIComponents:
                         var panel   = pdoc.createElement('div'); panel.id   = 'jl-panel';
                         var lbl     = pdoc.createElement('div'); lbl.className = 'jl-nlbl'; lbl.textContent = 'Navigation';
                         panel.appendChild(lbl);
+
+                        // ── ⚙️ API Settings shortcut → opens Streamlit sidebar ──
+                        var settBtn = pdoc.createElement('div');
+                        settBtn.setAttribute('style', 'display:flex!important;align-items:center!important;gap:10px!important;padding:9px 14px!important;border-radius:10px!important;border:1px solid rgba(0,210,255,0.3)!important;cursor:pointer!important;font-family:sans-serif!important;font-size:0.86rem!important;font-weight:700!important;color:#00d2ff!important;margin-bottom:12px!important;background:rgba(0,210,255,0.09)!important;letter-spacing:0.02em!important;');
+                        settBtn.innerHTML = '&#9881;&#65039;&nbsp;&nbsp;API Key Settings';
+                        settBtn.addEventListener('click', function() {
+                            closePanel();
+                            setTimeout(function() {
+                                var candidates = [
+                                    pdoc.querySelector('[data-testid="stSidebarCollapsedControl"] button'),
+                                    pdoc.querySelector('[data-testid="stSidebarNavToggleButton"]'),
+                                    pdoc.querySelector('button[aria-expanded]'),
+                                    Array.from(pdoc.querySelectorAll('button')).find(function(b) {
+                                        var lc = (b.getAttribute('aria-label') || '').toLowerCase();
+                                        return lc.indexOf('sidebar') > -1 || lc.indexOf('navigation') > -1;
+                                    })
+                                ];
+                                for (var i=0; i<candidates.length; i++) {
+                                    if (candidates[i]) { candidates[i].click(); break; }
+                                }
+                            }, 120);
+                        });
+                        panel.appendChild(settBtn);
+
                         NAV_DEFS.forEach(function(nd) {
                             var item = pdoc.createElement('div');
                             item.className = 'jl-ni' + (nd[0] === curPage ? ' active' : '');
@@ -2035,22 +2018,188 @@ class UIComponents:
         components.html(cursor_js, height=1, scrolling=False)
 
     @staticmethod
+    @staticmethod
     def show_api_setup_banner():
-        html = (
-            '<div style="position:relative;overflow:hidden;border-radius:20px;margin-bottom:24px;padding:24px 28px;'
-            'background:linear-gradient(135deg,rgba(255,255,255,0.09) 0%,rgba(0,210,255,0.06) 60%,rgba(168,85,247,0.07) 100%);'
-            'box-shadow:0 8px 40px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.2),0 0 0 1px rgba(255,255,255,0.09);">'
-            '<div style="font-size:1.1rem;font-weight:800;margin-bottom:4px;background:linear-gradient(135deg,#fff 0%,#a8f0ff 50%,#c084fc 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">&#10022; Setup Required &mdash; Choose Your Free AI Provider</div>'
-            '<div style="color:rgba(255,255,255,0.4);font-size:0.74rem;letter-spacing:0.06em;margin-bottom:16px;">100% free &nbsp;&middot;&nbsp; no credit card &nbsp;&middot;&nbsp; no billing &nbsp;&middot;&nbsp; ever</div>'
-            '<div style="height:1px;margin-bottom:14px;background:linear-gradient(90deg,transparent,rgba(0,210,255,0.4),rgba(168,85,247,0.3),transparent);"></div>'
-            '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:9px;"><span style="background:rgba(66,133,244,0.18);border:1px solid rgba(66,133,244,0.45);border-radius:20px;padding:4px 13px;font-size:0.81rem;font-weight:700;color:#93c5fd;white-space:nowrap;">&#128309; Google Gemini</span><span style="color:rgba(255,255,255,0.38);font-size:0.74rem;">15 req/min &middot; 1500/day &middot; forever free</span><a href="https://aistudio.google.com/app/apikey" target="_blank" style="margin-left:auto;font-size:0.77rem;color:#7dd3fc;font-weight:700;text-decoration:none;border-bottom:1px solid rgba(125,211,252,0.3);white-space:nowrap;">aistudio.google.com &rarr;</a></div>'
-            '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:9px;"><span style="background:rgba(249,115,22,0.15);border:1px solid rgba(249,115,22,0.45);border-radius:20px;padding:4px 13px;font-size:0.81rem;font-weight:700;color:#fdba74;white-space:nowrap;">&#9889; Groq</span><span style="color:rgba(255,255,255,0.38);font-size:0.74rem;">Llama 3.3-70B &middot; ultra-fast &middot; free forever</span><a href="https://console.groq.com/keys" target="_blank" style="margin-left:auto;font-size:0.77rem;color:#fdba74;font-weight:700;text-decoration:none;border-bottom:1px solid rgba(253,186,116,0.3);white-space:nowrap;">console.groq.com &rarr;</a></div>'
-            '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;"><span style="background:rgba(20,184,166,0.15);border:1px solid rgba(20,184,166,0.45);border-radius:20px;padding:4px 13px;font-size:0.81rem;font-weight:700;color:#5eead4;white-space:nowrap;">&#127754; Cohere</span><span style="color:rgba(255,255,255,0.38);font-size:0.74rem;">Command-R+ &middot; generous free trial</span><a href="https://dashboard.cohere.com/api-keys" target="_blank" style="margin-left:auto;font-size:0.77rem;color:#5eead4;font-weight:700;text-decoration:none;border-bottom:1px solid rgba(94,234,212,0.3);white-space:nowrap;">dashboard.cohere.com &rarr;</a></div>'
-            '<div style="height:1px;margin-bottom:14px;background:linear-gradient(90deg,transparent,rgba(0,210,255,0.4),rgba(168,85,247,0.3),transparent);"></div>'
-            '<div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.13);border-radius:30px;padding:6px 18px;font-size:0.79rem;color:rgba(255,255,255,0.78);font-weight:600;">&#128072;&nbsp; Sidebar &rarr; pick provider &rarr; paste key &rarr; 30 seconds</div>'
-            '</div>'
-        )
-        st.markdown(html, unsafe_allow_html=True)
+        import streamlit.components.v1 as _cmp
+        _cmp.html("""<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:transparent;font-family:'Space Grotesk',sans-serif}
+.banner{display:flex;border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,0.09);box-shadow:0 8px 40px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.07);background:linear-gradient(135deg,rgba(255,255,255,0.06) 0%,rgba(0,210,255,0.04) 60%,rgba(168,85,247,0.05) 100%);height:300px}
+.L{flex:0 0 47%;padding:20px 20px 16px 20px;display:flex;flex-direction:column;justify-content:space-between;border-right:1px solid rgba(255,255,255,0.07);overflow:hidden}
+.title{font-size:.9rem;font-weight:800;background:linear-gradient(135deg,#fff 0%,#a8f0ff 50%,#c084fc 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:2px}
+.sub{color:rgba(255,255,255,.3);font-size:.62rem;letter-spacing:.05em;margin-bottom:9px;font-family:'Inter',sans-serif}
+.div{height:1px;margin-bottom:9px;background:linear-gradient(90deg,transparent,rgba(0,210,255,.35),rgba(168,85,247,.25),transparent)}
+.pr{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.pb{border-radius:20px;padding:3px 9px;font-size:.67rem;font-weight:700;white-space:nowrap;flex-shrink:0}
+.pd{color:rgba(255,255,255,.3);font-size:.62rem;font-family:'Inter',sans-serif;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl{font-size:.62rem;font-weight:700;text-decoration:none;white-space:nowrap;flex-shrink:0;opacity:.75}
+.pl:hover{opacity:1}
+.pill{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:30px;padding:5px 13px;font-size:.67rem;color:rgba(255,255,255,.75);font-weight:600;white-space:nowrap}
+.R{flex:1;position:relative;background:#060c18;overflow:hidden}
+.R::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.07) 2px,rgba(0,0,0,.07) 4px);pointer-events:none;z-index:20}
+.badge{position:absolute;top:9px;right:11px;font-family:'JetBrains Mono',monospace;font-size:.49rem;letter-spacing:.15em;color:rgba(0,210,255,.45);text-transform:uppercase;z-index:30}
+.sw{position:absolute;inset:0}
+.sc{position:absolute;inset:0;padding:14px 16px 28px 16px;display:flex;flex-direction:column;opacity:0;transform:translateX(22px);transition:opacity .55s ease,transform .55s ease;pointer-events:none}
+.sc.active{opacity:1;transform:translateX(0)}
+.sc.exit{opacity:0;transform:translateX(-22px)}
+.sl{font-family:'JetBrains Mono',monospace;font-size:.5rem;letter-spacing:.13em;text-transform:uppercase;color:rgba(0,210,255,.55);margin-bottom:5px;display:flex;align-items:center;gap:4px}
+.sd{width:5px;height:5px;border-radius:50%;background:#00d2ff;box-shadow:0 0 6px #00d2ff;flex-shrink:0;animation:p 1.5s ease-in-out infinite}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
+.st{font-size:.84rem;font-weight:700;color:#e2e8f0;margin-bottom:8px}
+.fi{background:rgba(255,255,255,.05);border:1px solid rgba(0,210,255,.22);border-radius:7px;padding:5px 9px;font-size:.64rem;color:#94a3b8;font-family:'Inter',sans-serif;margin-bottom:7px}
+.cur{display:inline-block;width:1.5px;height:9px;background:#00d2ff;margin-left:1px;vertical-align:middle;animation:bl .9s step-end infinite}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:0}}
+.rc{background:rgba(0,210,255,.05);border:1px solid rgba(0,210,255,.15);border-radius:8px;padding:6px 9px;margin-bottom:5px;opacity:0;transform:translateY(7px)}
+.rc.show{animation:ci .35s ease forwards}
+@keyframes ci{to{opacity:1;transform:translateY(0)}}
+.rt{font-size:.62rem;font-weight:700;color:#00d2ff;margin-bottom:3px}
+.bb{height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden}
+.bf{height:100%;border-radius:2px;background:linear-gradient(90deg,#00d2ff,#a855f7);width:0%;transition:width 1.1s cubic-bezier(.4,0,.2,1)}
+.rl{height:5px;border-radius:3px;background:rgba(255,255,255,.1);margin-bottom:5px;transform:scaleX(0);transform-origin:left}
+.rl.acc{background:rgba(0,210,255,.3);height:7px;margin-bottom:7px}
+.rl.go{animation:dl .4s ease forwards}
+@keyframes dl{to{transform:scaleX(1)}}
+.ab2{display:inline-flex;align-items:center;gap:4px;background:rgba(0,210,255,.1);border:1px solid rgba(0,210,255,.3);border-radius:6px;padding:3px 9px;font-size:.6rem;font-weight:700;color:#00d2ff;margin-top:6px;opacity:0;transition:opacity .5s ease}
+.qb{background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.3);border-radius:9px 9px 9px 3px;padding:7px 9px;font-size:.62rem;color:#c4b5fd;font-family:'Inter',sans-serif;line-height:1.5;margin-bottom:6px;opacity:0;transform:translateY(6px)}
+.qb.show{animation:fu .45s ease forwards}
+.ab3{background:rgba(0,210,255,.07);border:1px solid rgba(0,210,255,.2);border-radius:9px 9px 3px 9px;padding:7px 9px;font-size:.6rem;color:#7dd3fc;font-family:'Inter',sans-serif;line-height:1.5;margin-left:12px;opacity:0;transform:translateY(6px)}
+.ab3.show{animation:fu .45s ease .7s forwards}
+@keyframes fu{to{opacity:1;transform:translateY(0)}}
+.dots{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:25}
+.dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.18);transition:all .3s ease}
+.dot.active{width:15px;border-radius:3px;background:#00d2ff;box-shadow:0 0 8px rgba(0,210,255,.7)}
+@media(max-width:600px){.banner{flex-direction:column;height:auto}.L{flex:none;border-right:none;border-bottom:1px solid rgba(255,255,255,.07)}.R{min-height:250px}}
+</style>
+</head>
+<body>
+<div class="banner">
+<div class="L">
+  <div>
+    <div class="title">&#10022; Setup Required &mdash; Choose Your Free AI Provider</div>
+    <div class="sub">100% free &middot; no credit card &middot; no billing &middot; ever</div>
+    <div class="div"></div>
+    <div class="pr">
+      <span class="pb" style="background:rgba(66,133,244,.18);border:1px solid rgba(66,133,244,.45);color:#93c5fd">&#128309; Google Gemini</span>
+      <span class="pd">15 req/min &middot; 1500/day</span>
+      <a href="https://aistudio.google.com/app/apikey" target="_blank" class="pl" style="color:#7dd3fc">aistudio.google.com &rarr;</a>
+    </div>
+    <div class="pr">
+      <span class="pb" style="background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.45);color:#fdba74">&#9889; Groq</span>
+      <span class="pd">Llama 3.3-70B &middot; ultra-fast</span>
+      <a href="https://console.groq.com/keys" target="_blank" class="pl" style="color:#fdba74">console.groq.com &rarr;</a>
+    </div>
+    <div class="pr" style="margin-bottom:9px">
+      <span class="pb" style="background:rgba(20,184,166,.15);border:1px solid rgba(20,184,166,.45);color:#5eead4">&#127754; Cohere</span>
+      <span class="pd">Command-R+ &middot; free trial</span>
+      <a href="https://dashboard.cohere.com/api-keys" target="_blank" class="pl" style="color:#5eead4">dashboard.cohere.com &rarr;</a>
+    </div>
+    <div class="div"></div>
+  </div>
+  <div class="pill">&#128072; Sidebar &rarr; pick provider &rarr; paste key &rarr; 30 sec</div>
+</div>
+<div class="R">
+  <div class="badge">LIVE DEMO</div>
+  <div class="sw">
+    <div class="sc active" id="s0">
+      <div class="sl"><div class="sd"></div>Career Analysis</div>
+      <div class="st">Analyze Your Career Path</div>
+      <div class="fi">Python &middot; ML &middot; 2yrs @ TCS<span class="cur"></span></div>
+      <div class="rc" id="c0a"><div class="rt">Data Scientist</div><div class="bb"><div class="bf" id="b0a"></div></div></div>
+      <div class="rc" id="c0b"><div class="rt">ML Engineer</div><div class="bb"><div class="bf" id="b0b"></div></div></div>
+      <div class="rc" id="c0c"><div class="rt">AI Researcher</div><div class="bb"><div class="bf" id="b0c"></div></div></div>
+    </div>
+    <div class="sc" id="s1">
+      <div class="sl"><div class="sd"></div>Resume Builder</div>
+      <div class="st">ATS-Optimized Resume</div>
+      <div class="rl acc" id="rh"></div>
+      <div class="rl" id="r0" style="width:100%"></div>
+      <div class="rl" id="r1" style="width:78%"></div>
+      <div class="rl" id="r2" style="width:60%"></div>
+      <div class="rl" id="r3" style="width:92%"></div>
+      <div class="rl" id="r4" style="width:70%"></div>
+      <div class="rl" id="r5" style="width:85%"></div>
+      <div class="ab2" id="ats">&#10003; ATS Score: 94%</div>
+    </div>
+    <div class="sc" id="s2">
+      <div class="sl"><div class="sd"></div>Mock Interview</div>
+      <div class="st">Practice with AI</div>
+      <div class="qb" id="qb">"Tell me about solving a complex ML problem under tight deadline pressure."</div>
+      <div class="ab3" id="ab">&#10022; Strong STAR method detected &mdash; quantified impact, clear outcome. Score: 8.5/10</div>
+    </div>
+    <div class="sc" id="s3">
+      <div class="sl"><div class="sd"></div>PYQ Hub</div>
+      <div class="st">Previous Year Questions</div>
+      <div class="rc" id="c3a"><div class="rt">Google SWE &middot; 2024</div><div class="bb"><div class="bf" id="b3a"></div></div></div>
+      <div class="rc" id="c3b"><div class="rt">Microsoft DS &middot; 2024</div><div class="bb"><div class="bf" id="b3b"></div></div></div>
+      <div class="rc" id="c3c"><div class="rt">Amazon ML &middot; 2023</div><div class="bb"><div class="bf" id="b3c"></div></div></div>
+    </div>
+  </div>
+  <div class="dots">
+    <div class="dot active" id="d0"></div>
+    <div class="dot" id="d1"></div>
+    <div class="dot" id="d2"></div>
+    <div class="dot" id="d3"></div>
+  </div>
+</div>
+</div>
+<script>
+var cur=0;
+function anim(i){
+  if(i===0||i===3){
+    var p=i===0?'0':'3',bv=i===0?['80%','65%','90%']:['55%','90%','78%'];
+    ['a','b','c'].forEach(function(s,j){setTimeout(function(){var e=document.getElementById('c'+p+s);if(e)e.classList.add('show');},300+j*180);});
+    setTimeout(function(){['a','b','c'].forEach(function(s,j){var e=document.getElementById('b'+p+s);if(e)e.style.width=bv[j];});},900);
+  }
+  if(i===1){
+    ['rh','r0','r1','r2','r3','r4','r5'].forEach(function(id,j){setTimeout(function(){var e=document.getElementById(id);if(e)e.classList.add('go');},200+j*110);});
+    setTimeout(function(){var b=document.getElementById('ats');if(b)b.style.opacity='1';},200+7*110+250);
+  }
+  if(i===2){
+    var q=document.getElementById('qb'),a=document.getElementById('ab');
+    if(q){q.classList.remove('show');void q.offsetWidth;q.classList.add('show');}
+    if(a){a.classList.remove('show');void a.offsetWidth;a.classList.add('show');}
+  }
+}
+function reset(i){
+  if(i===0||i===3){
+    var p=i===0?'0':'3';
+    ['a','b','c'].forEach(function(s){var e=document.getElementById('c'+p+s);if(e){e.classList.remove('show');e.style.opacity='0';e.style.transform='translateY(7px)';}});
+    ['a','b','c'].forEach(function(s){var e=document.getElementById('b'+p+s);if(e)e.style.width='0%';});
+  }
+  if(i===1){
+    ['rh','r0','r1','r2','r3','r4','r5'].forEach(function(id){var e=document.getElementById(id);if(e)e.classList.remove('go');});
+    var b=document.getElementById('ats');if(b)b.style.opacity='0';
+  }
+  if(i===2){
+    var q=document.getElementById('qb'),a=document.getElementById('ab');
+    if(q){q.classList.remove('show');q.style.opacity='0';}
+    if(a){a.classList.remove('show');a.style.opacity='0';}
+  }
+}
+function go(n){
+  var p=cur,pe=document.getElementById('s'+p),ne=document.getElementById('s'+n);
+  var pd=document.getElementById('d'+p),nd=document.getElementById('d'+n);
+  if(pe){pe.classList.remove('active');pe.classList.add('exit');}
+  setTimeout(function(){if(pe)pe.classList.remove('exit');reset(p);},600);
+  setTimeout(function(){if(ne)ne.classList.add('active');if(pd)pd.classList.remove('active');if(nd)nd.classList.add('active');cur=n;anim(n);},300);
+}
+anim(0);
+setInterval(function(){go((cur+1)%4);},5500);
+
+// Relay mouse position to parent for custom cursor tracking
+document.addEventListener('mousemove', function(e) {
+  var rect = window.frameElement ? window.frameElement.getBoundingClientRect() : {left:0, top:0};
+  window.parent.postMessage({type:'ns-move', x: e.clientX + rect.left, y: e.clientY + rect.top}, '*');
+}, {passive: true});
+</script>
+</body>
+</html>""", height=310, scrolling=False)
+
 
 
 # ==================== TAB RENDER FUNCTIONS ====================
@@ -4367,12 +4516,11 @@ def _build_ai_pyq_pdf(company: str, role: str, sections: list) -> bytes:
 
 
 def main():
-    # Detect mobile via query param or default to collapsed sidebar on mobile
     st.set_page_config(
         page_title="JobLess AI",
         page_icon="🚀",
         layout="wide",
-        initial_sidebar_state="collapsed",   # ← MOBILE FIX: don't auto-open sidebar
+        initial_sidebar_state="expanded",
     )
 
     init_session_state()
@@ -4441,7 +4589,6 @@ def main():
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -4453,18 +4600,6 @@ html, body { background: #060c18 !important; background-color: #060c18 !importan
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   padding: 4px 2px 10px 2px;
-}
-/* Mobile: 2 columns */
-@media (max-width: 520px) {
-  .grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .card { padding: 12px 12px 10px 12px; }
-  .card-icon { font-size: 1.1rem; }
-  .card-title { font-size: 0.78rem; }
-  .card-desc { font-size: 0.67rem; }
-}
-/* Very small: 1 column */
-@media (max-width: 320px) {
-  .grid { grid-template-columns: 1fr; }
 }
 
 /* ── Spotlight card ── */
@@ -4694,8 +4829,7 @@ document.addEventListener('mousemove', function(e) {
 </script>
 </body>
 </html>"""
-        # On mobile 2-col grid needs more height; use scrolling=True as safe fallback
-        components.html(cards_html, height=380, scrolling=False)
+        components.html(cards_html, height=300, scrolling=False)
 
     # Section pages — render directly below the compact robot
     if page != 'home':
