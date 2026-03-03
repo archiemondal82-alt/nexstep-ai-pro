@@ -2028,9 +2028,9 @@ class UIComponents:
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:transparent;font-family:'Space Grotesk',sans-serif}
-.banner{display:flex;border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,0.09);box-shadow:0 8px 40px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.07);background:linear-gradient(135deg,rgba(255,255,255,0.06) 0%,rgba(0,210,255,0.04) 60%,rgba(168,85,247,0.05) 100%);height:300px}
-.L{flex:0 0 47%;padding:20px 20px 16px 20px;display:flex;flex-direction:column;justify-content:space-between;border-right:1px solid rgba(255,255,255,0.07);overflow:hidden}
+html,body{background:#060c18!important;background-color:#060c18!important;font-family:'Space Grotesk',sans-serif}
+.banner{display:flex;border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,0.09);box-shadow:0 8px 40px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.07);background:#060c18!important;height:300px}
+.L{flex:0 0 47%;padding:20px 20px 16px 20px;display:flex;flex-direction:column;justify-content:space-between;border-right:1px solid rgba(255,255,255,0.07);overflow:hidden;background:linear-gradient(135deg,rgba(255,255,255,0.06) 0%,rgba(0,210,255,0.04) 60%,rgba(168,85,247,0.05) 100%)!important;}
 .title{font-size:.9rem;font-weight:800;background:linear-gradient(135deg,#fff 0%,#a8f0ff 50%,#c084fc 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:2px}
 .sub{color:rgba(255,255,255,.3);font-size:.62rem;letter-spacing:.05em;margin-bottom:9px;font-family:'Inter',sans-serif}
 .div{height:1px;margin-bottom:9px;background:linear-gradient(90deg,transparent,rgba(0,210,255,.35),rgba(168,85,247,.25),transparent)}
