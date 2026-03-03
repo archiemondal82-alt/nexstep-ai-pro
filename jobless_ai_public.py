@@ -2416,8 +2416,23 @@ def _render_career_results(data: Dict):
         cert_badges = render_skill_badges(certs, "purple")
         tips_html = "".join(
             f'<div class="tip-item">{t}</div>' for t in job.get('interview_tips', []))
-        learn_html = "".join(
-            f'<div class="learn-item">{c}</div>' for c in job.get('learning_path', []))
+        learning_path = job.get('learning_path', [])
+        learn_html = "".join(f'<div class="learn-item">{x}</div>' for x in learning_path)
+        yt_query = "+".join((job["title"] + " " + " ".join(learning_path[:2])).split())
+        yt_url = f"https://www.youtube.com/results?search_query={yt_query}+tutorial"
+        yt_course_url = f"https://www.youtube.com/results?search_query={yt_query}+full+course"
+        if learning_path:
+            learn_html += f'''
+<div style="margin-top:10px;padding:10px 14px;background:rgba(255,50,50,0.06);border:1px solid rgba(255,80,80,0.2);border-radius:10px;display:flex;align-items:center;gap:12px;">
+  <span style="font-size:1.2rem">&#127910;</span>
+  <div>
+    <div style="font-size:0.7rem;font-weight:700;color:#f87171;margin-bottom:6px;font-family:JetBrains Mono,monospace;letter-spacing:.06em;text-transform:uppercase;">YouTube Resources</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <a href="{yt_url}" target="_blank" style="font-size:0.73rem;color:#fca5a5;text-decoration:none;background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.25);border-radius:6px;padding:3px 10px;">&#128269; Search Tutorials</a>
+      <a href="{yt_course_url}" target="_blank" style="font-size:0.73rem;color:#fca5a5;text-decoration:none;background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.25);border-radius:6px;padding:3px 10px;">&#127916; Full Courses</a>
+    </div>
+  </div>
+</div>'''
         steps_html = "".join(f'<li style="color:#94a3b8;font-size:.88rem;margin-bottom:5px;">{s}</li>'
                              for s in job.get('next_steps', []))
 
