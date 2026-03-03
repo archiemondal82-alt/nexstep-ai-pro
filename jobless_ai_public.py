@@ -100,7 +100,7 @@ def render_spline_scene(scene_url: str, title: str = "Interactive 3D", descripti
         /* Left text panel */
         .left-panel {{
           flex: 0 0 48%;
-          padding: 50px 48px;
+          padding: 20px 36px;
           position: relative;
           z-index: 10;
           display: flex;
@@ -4201,7 +4201,7 @@ def main():
         scene_url="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode",
         title="Interactive 3D",
         description="Meet your AI career assistant. Powered by cutting-edge AI models, JobLess AI helps you navigate your career journey with confidence.",
-        height=240 if page == 'home' else 200,
+        height=300 if page == 'home' else 200,
         show_get_started=(page == 'home')
     )
 
