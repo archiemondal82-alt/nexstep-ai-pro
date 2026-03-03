@@ -2812,507 +2812,192 @@ WORK EXPERIENCE
 
 
 
-_VOICE_INTERVIEW_HTML = """<!DOCTYPE html>
+
+# ──────────────────────────────────────────────────────────────────────────────
+# VOICE INTERVIEW — Python-driven (AI calls stay in Python, no CORS issues)
+# HTML component handles ONLY: TTS (AI speaks) + webcam + STT (mic capture)
+# ──────────────────────────────────────────────────────────────────────────────
+
+_VOICE_UI_HTML = """<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{background:#050a12;color:#e2e8f0;font-family:'DM Sans',sans-serif;overflow:hidden;height:100%}
-#app{display:flex;flex-direction:column;height:700px;background:#050a12}
+html,body{background:#050a12;color:#e2e8f0;font-family:'DM Sans',sans-serif;height:100%;overflow:hidden}
+#wrap{display:flex;gap:12px;padding:12px;height:260px}
 
-/* HEADER */
-.hdr{display:flex;align-items:center;gap:12px;padding:10px 16px;background:rgba(0,0,0,0.4);border-bottom:1px solid rgba(0,210,255,0.1);flex-shrink:0}
-.hdr-title{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:800;background:linear-gradient(90deg,#00d2ff,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hdr-role{font-family:'DM Mono',monospace;font-size:.62rem;color:rgba(0,210,255,.6);background:rgba(0,210,255,.08);border:1px solid rgba(0,210,255,.2);border-radius:20px;padding:2px 10px}
-.hdr-level{font-family:'DM Mono',monospace;font-size:.58rem;color:rgba(255,255,255,.35);background:rgba(255,255,255,.05);border-radius:20px;padding:2px 8px}
-.hdr-right{margin-left:auto;display:flex;align-items:center;gap:10px}
-.q-counter{font-family:'DM Mono',monospace;font-size:.7rem;color:#00d2ff;font-weight:500}
-.q-dots{display:flex;gap:4px}
-.q-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.15);transition:all .3s ease}
-.q-dot.done{background:#00d2ff;box-shadow:0 0 8px rgba(0,210,255,.6)}
-.q-dot.current{background:#a855f7;box-shadow:0 0 8px rgba(168,85,247,.6);animation:qdot 1s ease-in-out infinite}
-@keyframes qdot{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
-
-/* MAIN */
-.main{display:flex;flex:1;gap:0;overflow:hidden}
-
-/* WEBCAM PANEL */
-.cam-panel{flex:0 0 220px;display:flex;flex-direction:column;padding:12px;gap:8px;background:rgba(0,0,0,.2);border-right:1px solid rgba(255,255,255,.05)}
-.cam-wrap{position:relative;border-radius:12px;overflow:hidden;background:#0a0f1a;aspect-ratio:1;border:2px solid rgba(0,210,255,.15)}
-.cam-wrap video{width:100%;height:100%;object-fit:cover;display:block;transform:scaleX(-1)}
-.cam-wrap .no-cam{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:rgba(255,255,255,.2);font-size:.65rem;font-family:'DM Mono',monospace}
-.cam-wrap .no-cam .icon{font-size:1.8rem;opacity:.3}
-.rec-badge{position:absolute;top:7px;left:7px;display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.7);border-radius:20px;padding:2px 8px;backdrop-filter:blur(8px)}
+/* WEBCAM */
+.cam-col{flex:0 0 180px;display:flex;flex-direction:column;gap:8px}
+.cam-box{border-radius:12px;overflow:hidden;background:#0a0f1a;border:2px solid rgba(0,210,255,.2);aspect-ratio:1;position:relative}
+.cam-box video{width:100%;height:100%;object-fit:cover;display:block;transform:scaleX(-1)}
+.no-cam{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:rgba(255,255,255,.2);font-size:.6rem;font-family:'DM Mono',monospace}
+.no-cam span{font-size:1.6rem;opacity:.3}
+.rec-badge{position:absolute;top:6px;left:6px;display:flex;align-items:center;gap:3px;background:rgba(0,0,0,.7);border-radius:20px;padding:2px 7px}
 .rec-dot{width:5px;height:5px;border-radius:50%;background:#ef4444;animation:recdot 1.2s ease-in-out infinite}
-@keyframes recdot{0%,100%{opacity:1}50%{opacity:.3}}
-.rec-txt{font-family:'DM Mono',monospace;font-size:.48rem;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.1em}
-.score-history{display:flex;flex-direction:column;gap:5px;flex:1;overflow-y:auto}
-.score-history::-webkit-scrollbar{width:2px}
-.score-history::-webkit-scrollbar-thumb{background:rgba(0,210,255,.2);border-radius:2px}
-.score-item{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:6px 8px;display:flex;align-items:center;justify-content:space-between;opacity:0;transform:translateY(6px);transition:all .3s ease}
-.score-item.show{opacity:1;transform:translateY(0)}
-.score-item-q{font-family:'DM Mono',monospace;font-size:.58rem;color:rgba(255,255,255,.4)}
-.score-item-val{font-family:'Syne',sans-serif;font-size:.8rem;font-weight:700}
+@keyframes recdot{0%,100%{opacity:1}50%{opacity:.2}}
+.rec-txt{font-size:.48rem;font-family:'DM Mono',monospace;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.08em}
+
+.score-col{flex:1;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
+.score-col::-webkit-scrollbar{width:2px}
+.score-col::-webkit-scrollbar-thumb{background:rgba(0,210,255,.2);border-radius:2px}
+.sc-row{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:5px 10px;animation:fadeup .35s ease forwards}
+@keyframes fadeup{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.sc-q{font-family:'DM Mono',monospace;font-size:.6rem;color:rgba(255,255,255,.4)}
+.sc-v{font-family:'Syne',sans-serif;font-size:.85rem;font-weight:800}
 
 /* AI PANEL */
-.ai-panel{flex:1;display:flex;flex-direction:column;padding:14px;gap:10px;overflow:hidden}
+.ai-col{flex:1;display:flex;flex-direction:column;gap:8px}
+.ai-box{background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.2);border-radius:12px;padding:12px;display:flex;gap:12px;align-items:flex-start;flex:0 0 auto}
+.ai-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,rgba(168,85,247,.35),rgba(0,210,255,.2));border:2px solid rgba(168,85,247,.4);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.ai-avatar.glow{animation:avatarglow 1s ease-in-out infinite}
+@keyframes avatarglow{0%,100%{box-shadow:0 0 0 0 rgba(168,85,247,.5)}50%{box-shadow:0 0 0 8px rgba(168,85,247,.0)}}
+.ai-content{flex:1;min-width:0}
+.ai-lbl{font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(168,85,247,.6);margin-bottom:5px}
+.ai-txt{font-size:.82rem;color:#e2e8f0;line-height:1.55}
+.wv{display:flex;align-items:center;gap:2px;height:14px;margin-top:5px}
+.wv-b{width:3px;border-radius:2px;background:#a855f7;opacity:.3;height:4px}
+.wv-b.on{opacity:.9;animation:wvb .55s ease-in-out infinite}
+.wv-b:nth-child(1){animation-delay:0s;height:4px}
+.wv-b:nth-child(2){animation-delay:.08s;height:9px}
+.wv-b:nth-child(3){animation-delay:.14s;height:14px}
+.wv-b:nth-child(4){animation-delay:.18s;height:10px}
+.wv-b:nth-child(5){animation-delay:.22s;height:13px}
+.wv-b:nth-child(6){animation-delay:.18s;height:7px}
+.wv-b:nth-child(7){animation-delay:.1s;height:5px}
+@keyframes wvb{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.6)}}
 
-/* AI AVATAR + QUESTION */
-.ai-box{background:rgba(168,85,247,.05);border:1px solid rgba(168,85,247,.15);border-radius:14px;padding:14px;display:flex;gap:14px;align-items:flex-start;flex-shrink:0}
-.ai-avatar{flex-shrink:0;width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,rgba(168,85,247,.3),rgba(0,210,255,.2));border:2px solid rgba(168,85,247,.4);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
-.ai-avatar .icon{font-size:1.2rem}
-.ai-avatar.speaking{animation:avatarglow 1s ease-in-out infinite}
-@keyframes avatarglow{0%,100%{box-shadow:0 0 0 0 rgba(168,85,247,.4)}50%{box-shadow:0 0 0 8px rgba(168,85,247,.0)}}
-.ai-content{flex:1}
-.ai-label{font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(168,85,247,.6);margin-bottom:6px}
-.ai-question-txt{font-size:.88rem;color:#e2e8f0;line-height:1.6;font-weight:400}
-.waveform{display:flex;align-items:center;gap:2px;height:18px;margin-top:6px}
-.wv-bar{width:3px;border-radius:2px;background:#a855f7;opacity:.4}
-.wv-bar.active{animation:wvbar .6s ease-in-out infinite}
-.wv-bar:nth-child(1){animation-delay:.0s;height:4px}
-.wv-bar:nth-child(2){animation-delay:.1s;height:8px}
-.wv-bar:nth-child(3){animation-delay:.15s;height:14px}
-.wv-bar:nth-child(4){animation-delay:.2s;height:18px}
-.wv-bar:nth-child(5){animation-delay:.25s;height:12px}
-.wv-bar:nth-child(6){animation-delay:.3s;height:16px}
-.wv-bar:nth-child(7){animation-delay:.2s;height:8px}
-.wv-bar:nth-child(8){animation-delay:.1s;height:5px}
-@keyframes wvbar{0%,100%{opacity:.4;transform:scaleY(1)}50%{opacity:1;transform:scaleY(1.5)}}
-
-/* TRANSCRIPT BOX */
-.transcript-box{flex:1;background:rgba(0,210,255,.04);border:1px solid rgba(0,210,255,.12);border-radius:14px;padding:14px;display:flex;flex-direction:column;overflow:hidden}
-.transcript-label{font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(0,210,255,.5);margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.mic-pulse{width:5px;height:5px;border-radius:50%;background:#00d2ff;opacity:0;animation:micpulse 1s ease-in-out infinite}
-.mic-pulse.active{opacity:1}
-@keyframes micpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.6)}}
-.transcript-text{flex:1;font-size:.85rem;color:#94a3b8;line-height:1.7;overflow-y:auto;font-style:italic}
-.transcript-text.has-text{color:#e2e8f0;font-style:normal}
-.transcript-text::-webkit-scrollbar{width:2px}
-.transcript-text::-webkit-scrollbar-thumb{background:rgba(0,210,255,.2);border-radius:2px}
-.cursor-blink{display:inline-block;width:2px;height:14px;background:#00d2ff;vertical-align:middle;margin-left:2px;animation:cblink .9s step-end infinite}
-@keyframes cblink{0%,100%{opacity:1}50%{opacity:0}}
-
-/* CONTROLS */
-.controls{display:flex;align-items:center;gap:12px;padding:10px 16px;background:rgba(0,0,0,.4);border-top:1px solid rgba(255,255,255,.06);flex-shrink:0}
-.status-txt{font-family:'DM Mono',monospace;font-size:.6rem;color:rgba(255,255,255,.3);letter-spacing:.06em;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mic-btn{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#00d2ff,#0ea8d8);border:none;cursor:pointer;font-size:1.3rem;display:flex;align-items:center;justify-content:center;transition:all .2s ease;box-shadow:0 0 20px rgba(0,210,255,.3);flex-shrink:0;position:relative}
-.mic-btn:hover{transform:scale(1.08);box-shadow:0 0 30px rgba(0,210,255,.5)}
-.mic-btn.listening{background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:0 0 20px rgba(239,68,68,.4);animation:miclistening 1s ease-in-out infinite}
-@keyframes miclistening{0%,100%{box-shadow:0 0 20px rgba(239,68,68,.4)}50%{box-shadow:0 0 40px rgba(239,68,68,.7)}}
-.mic-btn.disabled{background:rgba(255,255,255,.08);box-shadow:none;cursor:not-allowed;opacity:.5}
-.submit-btn{padding:10px 20px;background:linear-gradient(135deg,rgba(168,85,247,.2),rgba(0,210,255,.15));border:1px solid rgba(168,85,247,.4);border-radius:25px;color:#e2e8f0;font-family:'DM Mono',monospace;font-size:.65rem;font-weight:500;cursor:pointer;transition:all .2s ease;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
-.submit-btn:hover:not(:disabled){background:linear-gradient(135deg,rgba(168,85,247,.35),rgba(0,210,255,.25));transform:translateY(-1px)}
-.submit-btn:disabled{opacity:.3;cursor:not-allowed}
-
-/* FEEDBACK TOAST */
-.feedback-toast{position:absolute;bottom:80px;right:16px;background:rgba(10,15,26,.95);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px 16px;max-width:280px;transform:translateY(20px);opacity:0;transition:all .4s ease;z-index:100;pointer-events:none;backdrop-filter:blur(12px)}
-.feedback-toast.show{transform:translateY(0);opacity:1}
-.ft-score{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;line-height:1}
-.ft-label{font-family:'DM Mono',monospace;font-size:.5rem;text-transform:uppercase;letter-spacing:.1em;opacity:.5;margin-bottom:4px}
-.ft-text{font-size:.75rem;color:#94a3b8;line-height:1.5;margin-top:6px}
-
-/* FINAL REPORT OVERLAY */
-.report-overlay{position:absolute;inset:0;background:rgba(5,10,18,.97);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px;overflow-y:auto;z-index:200;backdrop-filter:blur(12px)}
-.report-overlay::-webkit-scrollbar{width:4px}
-.report-overlay::-webkit-scrollbar-thumb{background:rgba(0,210,255,.2);border-radius:2px}
-.report-header{text-align:center;margin-bottom:20px;width:100%}
-.report-title{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;background:linear-gradient(90deg,#00d2ff,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px}
-.report-sub{font-size:.75rem;color:rgba(255,255,255,.35);font-family:'DM Mono',monospace}
-.report-scores{display:flex;gap:12px;justify-content:center;margin-bottom:20px;flex-wrap:wrap;width:100%}
-.rscore-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 18px;text-align:center;min-width:90px}
-.rscore-val{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;line-height:1}
-.rscore-lbl{font-family:'DM Mono',monospace;font-size:.52rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.1em;margin-top:2px}
-.report-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;margin-bottom:16px}
-.report-section{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px}
-.rs-title{font-family:'DM Mono',monospace;font-size:.55rem;text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px}
-.rs-item{font-size:.75rem;color:#94a3b8;line-height:1.5;padding:5px 8px;border-radius:6px;margin-bottom:4px}
-.report-btns{display:flex;gap:10px;justify-content:center;margin-top:8px;flex-wrap:wrap}
-.rpdf-btn{padding:11px 24px;background:linear-gradient(135deg,#00d2ff,#0ea8d8);color:#020b14;font-family:'DM Mono',monospace;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:none;border-radius:25px;cursor:pointer;transition:all .2s ease}
-.rpdf-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,210,255,.4)}
-.ragain-btn{padding:11px 24px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:#e2e8f0;font-family:'DM Mono',monospace;font-size:.7rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;border-radius:25px;cursor:pointer;transition:all .2s ease}
-.ragain-btn:hover{background:rgba(255,255,255,.1)}
-.q-breakdown{width:100%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px;margin-bottom:16px}
-.qb-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
-.qb-num{font-family:'DM Mono',monospace;font-size:.58rem;color:rgba(255,255,255,.4);min-width:24px}
-.qb-bar-wrap{flex:1;height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
-.qb-bar{height:100%;border-radius:2px;background:linear-gradient(90deg,#00d2ff,#a855f7);transition:width 1s ease}
-.qb-score{font-family:'DM Mono',monospace;font-size:.65rem;font-weight:500;min-width:36px;text-align:right}
-
-/* no speech support warning */
-.no-speech{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:12px 16px;font-size:.8rem;color:#fbbf24;text-align:center;margin:8px 16px}
+/* MIC / TRANSCRIPT */
+.mic-box{flex:1;background:rgba(0,210,255,.04);border:1px solid rgba(0,210,255,.12);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.mic-top{display:flex;align-items:center;gap:8px}
+.mic-lbl{font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(0,210,255,.5)}
+.live-dot{width:5px;height:5px;border-radius:50%;background:#ef4444;opacity:0;flex-shrink:0}
+.live-dot.on{opacity:1;animation:livedot 1s ease-in-out infinite}
+@keyframes livedot{0%,100%{opacity:1}50%{opacity:.2}}
+.transcript{flex:1;font-size:.78rem;color:#64748b;line-height:1.6;font-style:italic;overflow-y:auto}
+.transcript.has{color:#e2e8f0;font-style:normal}
+.transcript::-webkit-scrollbar{width:2px}
+.transcript::-webkit-scrollbar-thumb{background:rgba(0,210,255,.2);border-radius:2px}
+.mic-btn{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#00d2ff,#0ea8d8);border:none;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .2s;box-shadow:0 0 15px rgba(0,210,255,.3);flex-shrink:0}
+.mic-btn:hover{transform:scale(1.1)}
+.mic-btn.listening{background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:0 0 15px rgba(239,68,68,.4);animation:micon .9s ease-in-out infinite}
+@keyframes micon{0%,100%{box-shadow:0 0 15px rgba(239,68,68,.4)}50%{box-shadow:0 0 30px rgba(239,68,68,.7)}}
+.mic-btn.off{background:rgba(255,255,255,.08);box-shadow:none;cursor:not-allowed;opacity:.4}
+.clear-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:20px;color:#64748b;font-family:'DM Mono',monospace;font-size:.55rem;padding:3px 10px;cursor:pointer;letter-spacing:.05em}
+.clear-btn:hover{color:#e2e8f0}
+.no-speech-warn{font-size:.7rem;color:#f59e0b;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:6px 10px;text-align:center}
 </style>
 </head>
 <body>
-<div id="app" style="position:relative">
-
-<!-- HEADER -->
-<div class="hdr">
-  <div class="hdr-title">🎙️ AI Voice Interview</div>
-  <div class="hdr-role" id="hdrRole">__ROLE__</div>
-  <div class="hdr-level" id="hdrLevel">__LEVEL__</div>
-  <div class="hdr-right">
-    <div class="q-counter" id="qCounter">Q 0 / 6</div>
-    <div class="q-dots" id="qDots">
-      <div class="q-dot" id="qdot0"></div>
-      <div class="q-dot" id="qdot1"></div>
-      <div class="q-dot" id="qdot2"></div>
-      <div class="q-dot" id="qdot3"></div>
-      <div class="q-dot" id="qdot4"></div>
-      <div class="q-dot" id="qdot5"></div>
-    </div>
-  </div>
-</div>
-
-<!-- MAIN AREA -->
-<div class="main">
-
-  <!-- WEBCAM PANEL -->
-  <div class="cam-panel">
-    <div class="cam-wrap" id="camWrap">
-      <video id="webcamVideo" autoplay muted playsinline></video>
-      <div class="no-cam" id="noCam">
-        <div class="icon">📷</div>
-        <span>Camera off</span>
-      </div>
+<div id="wrap">
+  <!-- WEBCAM -->
+  <div class="cam-col">
+    <div class="cam-box" id="camBox">
+      <video id="vid" autoplay muted playsinline style="display:none"></video>
+      <div class="no-cam" id="noCam"><span>📷</span>Camera off</div>
       <div class="rec-badge" id="recBadge" style="display:none">
-        <div class="rec-dot"></div>
-        <span class="rec-txt">LIVE</span>
+        <div class="rec-dot"></div><span class="rec-txt">LIVE</span>
       </div>
     </div>
-    <div class="score-history" id="scoreHistory"></div>
+    <div class="score-col" id="scoreCol"></div>
   </div>
 
-  <!-- AI + TRANSCRIPT PANEL -->
-  <div class="ai-panel">
+  <!-- AI SPEAKING -->
+  <div class="ai-col">
     <div class="ai-box">
-      <div class="ai-avatar" id="aiAvatar">
-        <span class="icon">🤖</span>
-      </div>
+      <div class="ai-avatar" id="aiAvatar">🤖</div>
       <div class="ai-content">
-        <div class="ai-label">AI Interviewer</div>
-        <div class="ai-question-txt" id="aiQuestionTxt">Connecting to AI interviewer, please wait...</div>
-        <div class="waveform" id="waveform">
-          <div class="wv-bar"></div>
-          <div class="wv-bar"></div>
-          <div class="wv-bar"></div>
-          <div class="wv-bar"></div>
-          <div class="wv-bar"></div>
-          <div class="wv-bar"></div>
-          <div class="wv-bar"></div>
-          <div class="wv-bar"></div>
+        <div class="ai-lbl">AI Interviewer</div>
+        <div class="ai-txt" id="aiTxt">__QUESTION__</div>
+        <div class="wv" id="wv">
+          <div class="wv-b"></div><div class="wv-b"></div><div class="wv-b"></div>
+          <div class="wv-b"></div><div class="wv-b"></div><div class="wv-b"></div>
+          <div class="wv-b"></div>
         </div>
       </div>
     </div>
-
-    <div class="transcript-box">
-      <div class="transcript-label">
-        <div class="mic-pulse" id="micPulse"></div>
-        YOUR ANSWER
+    <div class="mic-box">
+      <div class="mic-top">
+        <div class="live-dot" id="liveDot"></div>
+        <div class="mic-lbl">YOUR ANSWER</div>
+        <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
+          <button class="clear-btn" onclick="clearTranscript()">Clear</button>
+          <button class="mic-btn off" id="micBtn" onclick="toggleMic()">🎤</button>
+        </div>
       </div>
-      <div class="transcript-text" id="transcriptText">
-        Press the microphone button below and speak your answer...
-      </div>
+      <div class="transcript" id="transcript">Press 🎤 to start speaking...</div>
     </div>
   </div>
-</div>
 
-<!-- CONTROLS -->
-<div class="controls">
-  <div class="status-txt" id="statusTxt">Initializing...</div>
-  <button class="mic-btn disabled" id="micBtn" onclick="toggleMic()">🎤</button>
-  <button class="submit-btn" id="submitBtn" disabled onclick="submitAnswer()">Submit Answer →</button>
-</div>
-
-<!-- FEEDBACK TOAST -->
-<div class="feedback-toast" id="feedbackToast">
-  <div class="ft-label">Score</div>
-  <div class="ft-score" id="ftScore">--</div>
-  <div class="ft-text" id="ftText"></div>
-</div>
-
-<!-- FINAL REPORT OVERLAY (hidden initially) -->
-<div class="report-overlay" id="reportOverlay" style="display:none">
-  <div class="report-header">
-    <div class="report-title">🎉 Interview Complete!</div>
-    <div class="report-sub" id="reportSub">__ROLE__ · __LEVEL__</div>
-  </div>
-  <div class="report-scores" id="reportScores"></div>
-  <div class="q-breakdown" id="qBreakdown">
-    <div style="font-family:'DM Mono',monospace;font-size:.55rem;text-transform:uppercase;letter-spacing:.12em;color:rgba(0,210,255,.5);margin-bottom:10px;">Question Scores</div>
-    <div id="qBreakdownRows"></div>
-  </div>
-  <div class="report-grid" id="reportGrid"></div>
-  <div class="report-btns">
-    <button class="rpdf-btn" onclick="downloadPDF()">📄 Download PDF Report</button>
-    <button class="ragain-btn" onclick="restartInterview()">🔄 Interview Again</button>
+  <!-- PER-Q SCORES (right col) -->
+  <div class="cam-col" id="scoresRight" style="overflow-y:auto;gap:4px">
+    __SCORES_HTML__
   </div>
 </div>
 
 <script>
-// ── CONFIGURATION (injected by Python) ───────────────────────────
-var API_KEY = "__APIKEY__";
-var PROVIDER = "__PROVIDER__";
-var MODEL = "__MODEL__";
-var ROLE = "__ROLE__";
-var LEVEL = "__LEVEL__";
-var TOTAL_QUESTIONS = 6;
-
-// ── STATE ────────────────────────────────────────────────────────
-var state = "INIT"; // INIT, AI_SPEAKING, USER_TURN, PROCESSING, COMPLETE
-var questionIndex = 0;
-var currentQuestion = "";
-var currentTranscript = "";
-var finalTranscript = "";
-var recognition = null;
+var QUESTION = "__QUESTION_JS__";
+var SCORES = __SCORES_JSON__;
 var synth = window.speechSynthesis;
+var recognition = null;
 var isListening = false;
-var interviewData = {
-  role: ROLE, level: LEVEL,
-  questions: [], answers: [], scores: [], feedbacks: [],
-  overallScore: 0, grade: "", verdict: "", strengths: [], weaknesses: []
-};
+var finalT = "", interimT = "";
 
-// ── INIT ─────────────────────────────────────────────────────────
-window.addEventListener('load', function() {
-  initWebcam();
-  initSpeech();
-  startInterview();
-});
+// ── INIT (inline, no onload needed) ──────────────────────────────
+initWebcam();
+initSpeech();
+speakQuestion(QUESTION);
 
 function initWebcam() {
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    document.getElementById('noCam').style.display = 'flex';
-    return;
-  }
-  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false })
-    .then(function(stream) {
-      var vid = document.getElementById('webcamVideo');
-      vid.srcObject = stream;
-      vid.style.display = 'block';
+  if (!navigator.mediaDevices) return;
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false})
+    .then(function(s){
+      var v = document.getElementById('vid');
+      v.srcObject = s; v.style.display = 'block';
       document.getElementById('noCam').style.display = 'none';
       document.getElementById('recBadge').style.display = 'flex';
-    })
-    .catch(function() {
-      document.getElementById('noCam').style.display = 'flex';
-    });
+    }).catch(function(){});
 }
 
 function initSpeech() {
-  var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRec) {
-    setStatus("⚠️ Voice not supported in this browser. Use Chrome or Edge.");
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    document.getElementById('transcript').innerHTML =
+      '<div class="no-speech-warn">⚠️ Speech recognition needs Chrome or Edge.<br>Type your answer in the box below.</div>';
     return;
   }
-  recognition = new SpeechRec();
+  recognition = new SR();
   recognition.continuous = true;
   recognition.interimResults = true;
   recognition.lang = 'en-US';
-
   recognition.onresult = function(e) {
-    var interim = '', final = '';
-    for (var i = e.resultIndex; i < e.results.length; i++) {
-      if (e.results[i].isFinal) final += e.results[i][0].transcript;
-      else interim += e.results[i][0].transcript;
+    var f='', im='';
+    for(var i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal) f += e.results[i][0].transcript;
+      else im += e.results[i][0].transcript;
     }
-    if (final) finalTranscript += final + ' ';
-    currentTranscript = finalTranscript + interim;
-    showTranscript(currentTranscript, true);
+    if(f) finalT += f + ' ';
+    interimT = im;
+    showTranscript();
   };
-
-  recognition.onerror = function(e) {
-    if (e.error !== 'no-speech') setStatus('Mic error: ' + e.error);
-  };
-  recognition.onend = function() {
-    if (isListening) {
-      try { recognition.start(); } catch(e) {}
-    }
-  };
+  recognition.onerror = function(e){ if(e.error!=='no-speech') console.log(e.error); };
+  recognition.onend = function(){ if(isListening){ try{recognition.start();}catch(e){} } };
+  document.getElementById('micBtn').classList.remove('off');
+  document.getElementById('micBtn').disabled = false;
 }
 
-// ── API CALL ─────────────────────────────────────────────────────
-async function callAI(messages) {
-  try {
-    if (PROVIDER === 'groq') {
-      var resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + API_KEY },
-        body: JSON.stringify({ model: MODEL, messages: messages, temperature: 0.7, max_tokens: 800 })
-      });
-      var data = await resp.json();
-      return data.choices[0].message.content;
-
-    } else if (PROVIDER === 'gemini') {
-      var gemMsgs = messages.filter(function(m) { return m.role !== 'system'; }).map(function(m) {
-        return { role: m.role === 'user' ? 'user' : 'model', parts: [{ text: m.content }] };
-      });
-      var sysMsg = messages.find(function(m) { return m.role === 'system'; });
-      var body = {
-        contents: gemMsgs,
-        generationConfig: { temperature: 0.7, maxOutputTokens: 800 }
-      };
-      if (sysMsg) body.systemInstruction = { parts: [{ text: sysMsg.content }] };
-      var resp = await fetch(
-        'https://generativelanguage.googleapis.com/v1beta/models/' + MODEL + ':generateContent?key=' + API_KEY,
-        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
-      );
-      var data = await resp.json();
-      return data.candidates[0].content.parts[0].text;
-
-    } else if (PROVIDER === 'cohere') {
-      var history = [];
-      for (var i = 1; i < messages.length - 1; i++) {
-        history.push({ role: messages[i].role === 'user' ? 'USER' : 'CHATBOT', message: messages[i].content });
-      }
-      var resp = await fetch('https://api.cohere.ai/v1/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + API_KEY },
-        body: JSON.stringify({
-          model: MODEL,
-          message: messages[messages.length - 1].content,
-          chat_history: history,
-          preamble: messages[0].content,
-          temperature: 0.7,
-          max_tokens: 800
-        })
-      });
-      var data = await resp.json();
-      return data.text;
-    }
-  } catch(e) {
-    return null;
-  }
-}
-
-// ── SYSTEM PROMPT ─────────────────────────────────────────────────
-var conversationHistory = [];
-
-function buildSystemPrompt() {
-  return 'You are a sharp, professional AI interviewer conducting a voice interview for the role of ' + ROLE + ' (' + LEVEL + ' level).\n\n' +
-    'RULES:\n' +
-    '- Ask exactly ' + TOTAL_QUESTIONS + ' interview questions total (behavioral + technical mix).\n' +
-    '- After each answer, evaluate it briefly and ask the next question.\n' +
-    '- Keep your spoken responses SHORT (2-3 sentences max) — this is voice.\n' +
-    '- On the final answer, wrap up with a complete evaluation.\n\n' +
-    'ALWAYS respond with valid JSON only, no markdown, in this exact format:\n' +
-    '{"speech":"what you say aloud","question":"the question you are asking (empty string if done)","score":75,"feedback":"1 sentence evaluation of their answer (null for first turn)","question_num":1,"is_complete":false}\n\n' +
-    'For the final response (after answer ' + TOTAL_QUESTIONS + ') use:\n' +
-    '{"speech":"closing remarks","question":"","score":80,"feedback":"final feedback","question_num":' + TOTAL_QUESTIONS + ',"is_complete":true,"overall_score":78,"grade":"B+","verdict":"Almost Ready","strengths":["...","..."],"weaknesses":["...","..."]}';
-}
-
-// ── INTERVIEW FLOW ────────────────────────────────────────────────
-async function startInterview() {
-  setStatus('Connecting to AI Interviewer...');
-  conversationHistory = [
-    { role: 'system', content: buildSystemPrompt() },
-    { role: 'user', content: 'BEGIN_INTERVIEW. Greet me briefly and ask question 1 of ' + TOTAL_QUESTIONS + '.' }
-  ];
-
-  setState('PROCESSING');
-  var raw = await callAI(conversationHistory);
-  if (!raw) { setStatus('❌ Failed to connect. Check your API key.'); return; }
-
-  var parsed = parseJSON(raw);
-  if (!parsed) { setStatus('❌ AI response error. Try again.'); return; }
-
-  conversationHistory.push({ role: 'assistant', content: raw });
-  currentQuestion = parsed.question || '';
-  interviewData.questions.push(currentQuestion);
-  updateQCounter(1);
-
-  setAIText(parsed.speech);
-  await speakText(parsed.speech, true);
-  setState('USER_TURN');
-  setStatus('🎤 Your turn — press the mic to speak');
-}
-
-async function submitAnswer() {
-  if (!finalTranscript.trim() && !currentTranscript.trim()) {
-    setStatus('⚠️ No answer detected. Please speak first.');
-    return;
-  }
-
-  var answer = (finalTranscript || currentTranscript).trim();
-  stopListening();
-  interviewData.answers.push(answer);
-
-  setState('PROCESSING');
-  setStatus('🧠 AI is evaluating...');
-  showTranscript(answer, false);
-
-  var userMsg = 'My answer to Q' + questionIndex + ': "' + answer + '".\nNow evaluate my answer and ';
-  if (questionIndex < TOTAL_QUESTIONS) {
-    userMsg += 'ask question ' + (questionIndex + 1) + ' of ' + TOTAL_QUESTIONS + '.';
-  } else {
-    userMsg += 'wrap up the interview with final evaluation.';
-  }
-
-  conversationHistory.push({ role: 'user', content: userMsg });
-  var raw = await callAI(conversationHistory);
-
-  if (!raw) { setStatus('❌ API error. Try again.'); setState('USER_TURN'); return; }
-
-  var parsed = parseJSON(raw);
-  if (!parsed) { setStatus('❌ Parse error.'); setState('USER_TURN'); return; }
-
-  conversationHistory.push({ role: 'assistant', content: raw });
-
-  // Record score
-  var score = parsed.score || 0;
-  interviewData.scores.push(score);
-  interviewData.feedbacks.push(parsed.feedback || '');
-  addScoreToHistory(questionIndex, score);
-  showFeedbackToast(score, parsed.feedback || '');
-
-  if (parsed.is_complete) {
-    // Final
-    interviewData.overallScore = parsed.overall_score || Math.round(interviewData.scores.reduce(function(a,b){return a+b;},0)/interviewData.scores.length);
-    interviewData.grade = parsed.grade || gradeFromScore(interviewData.overallScore);
-    interviewData.verdict = parsed.verdict || '';
-    interviewData.strengths = parsed.strengths || [];
-    interviewData.weaknesses = parsed.weaknesses || [];
-
-    setAIText(parsed.speech);
-    await speakText(parsed.speech, true);
-    setState('COMPLETE');
-    setTimeout(showFinalReport, 1800);
-  } else {
-    // Next question
-    questionIndex++;
-    currentQuestion = parsed.question || '';
-    interviewData.questions.push(currentQuestion);
-    updateQCounter(questionIndex + 1);
-    finalTranscript = '';
-    currentTranscript = '';
-    showTranscript('', false);
-
-    setAIText(parsed.speech);
-    await speakText(parsed.speech, true);
-    setState('USER_TURN');
-    setStatus('🎤 Your turn — press the mic to speak');
-  }
-}
-
-// ── MIC ───────────────────────────────────────────────────────────
 function toggleMic() {
-  if (state !== 'USER_TURN') return;
-  if (isListening) stopListening();
-  else startListening();
+  if (isListening) stopListening(); else startListening();
 }
 
 function startListening() {
   if (!recognition) return;
-  finalTranscript = '';
-  currentTranscript = '';
   isListening = true;
   try { recognition.start(); } catch(e) {}
   document.getElementById('micBtn').classList.add('listening');
   document.getElementById('micBtn').innerHTML = '⏹';
-  document.getElementById('micPulse').classList.add('active');
-  document.getElementById('submitBtn').disabled = false;
-  setStatus('🔴 Listening... press stop when done');
+  document.getElementById('liveDot').classList.add('on');
 }
 
 function stopListening() {
@@ -3320,317 +3005,493 @@ function stopListening() {
   if (recognition) try { recognition.stop(); } catch(e) {}
   document.getElementById('micBtn').classList.remove('listening');
   document.getElementById('micBtn').innerHTML = '🎤';
-  document.getElementById('micPulse').classList.remove('active');
-  setStatus('✅ Answer captured — press Submit when ready');
+  document.getElementById('liveDot').classList.remove('on');
 }
 
-// ── TTS ───────────────────────────────────────────────────────────
-function speakText(text, wait) {
-  return new Promise(function(resolve) {
-    if (!synth) { resolve(); return; }
-    synth.cancel();
-    var bars = document.querySelectorAll('.wv-bar');
-    bars.forEach(function(b) { b.classList.add('active'); });
-    document.getElementById('aiAvatar').classList.add('speaking');
+function clearTranscript() {
+  finalT = ''; interimT = '';
+  var el = document.getElementById('transcript');
+  el.textContent = 'Press 🎤 to start speaking...';
+  el.classList.remove('has');
+}
 
-    var utter = new SpeechSynthesisUtterance(text);
-    utter.rate = 0.95;
-    utter.pitch = 1.0;
-    utter.volume = 1.0;
+function showTranscript() {
+  var full = (finalT + interimT).trim();
+  var el = document.getElementById('transcript');
+  if (!full) { el.textContent='Press 🎤 to start speaking...'; el.classList.remove('has'); }
+  else { el.textContent = full; el.classList.add('has'); el.scrollTop = el.scrollHeight; }
+  // Send to parent via postMessage so Streamlit can pick it up via query_params trick
+  try { window.parent.postMessage({type:'voice_transcript', text: finalT.trim()}, '*'); } catch(e){}
+}
 
-    // Try to find a good English voice
-    var voices = synth.getVoices();
-    var pref = voices.find(function(v) { return v.name.includes('Google') && v.lang.startsWith('en'); })
-            || voices.find(function(v) { return v.lang.startsWith('en') && !v.localService; })
-            || voices.find(function(v) { return v.lang.startsWith('en'); });
-    if (pref) utter.voice = pref;
-
-    utter.onend = function() {
-      bars.forEach(function(b) { b.classList.remove('active'); });
-      document.getElementById('aiAvatar').classList.remove('speaking');
-      resolve();
+function speakQuestion(txt) {
+  if (!txt || !synth) return;
+  synth.cancel();
+  var u = new SpeechSynthesisUtterance(txt);
+  u.rate = 0.92; u.pitch = 1.0; u.volume = 1.0;
+  var voices = synth.getVoices();
+  var pref = voices.find(function(v){ return v.name.includes('Google') && v.lang.startsWith('en'); })
+          || voices.find(function(v){ return v.lang.startsWith('en-') && !v.localService; })
+          || voices.find(function(v){ return v.lang.startsWith('en'); });
+  if (pref) u.voice = pref;
+  var wvBars = document.querySelectorAll('.wv-b');
+  var avatar = document.getElementById('aiAvatar');
+  u.onstart = function() {
+    wvBars.forEach(function(b){ b.classList.add('on'); });
+    avatar.classList.add('glow');
+  };
+  u.onend = u.onerror = function() {
+    wvBars.forEach(function(b){ b.classList.remove('on'); });
+    avatar.classList.remove('glow');
+  };
+  // Voices may not be loaded yet — small delay
+  if (voices.length === 0) {
+    synth.onvoiceschanged = function() {
+      var v2 = synth.getVoices();
+      var p2 = v2.find(function(v){ return v.name.includes('Google') && v.lang.startsWith('en'); })
+             || v2.find(function(v){ return v.lang.startsWith('en'); });
+      if (p2) u.voice = p2;
+      synth.speak(u);
+      synth.onvoiceschanged = null;
     };
-    utter.onerror = function() {
-      bars.forEach(function(b) { b.classList.remove('active'); });
-      document.getElementById('aiAvatar').classList.remove('speaking');
-      resolve();
-    };
-    synth.speak(utter);
-    if (!wait) resolve();
-  });
-}
-
-// ── UI HELPERS ────────────────────────────────────────────────────
-function setState(s) {
-  state = s;
-  var micBtn = document.getElementById('micBtn');
-  var submitBtn = document.getElementById('submitBtn');
-  if (s === 'USER_TURN') {
-    micBtn.classList.remove('disabled');
-    micBtn.disabled = false;
   } else {
-    micBtn.classList.add('disabled');
-    micBtn.disabled = true;
-    submitBtn.disabled = true;
-    stopListening();
+    synth.speak(u);
   }
 }
 
-function setStatus(txt) {
-  document.getElementById('statusTxt').textContent = txt;
-}
-
-function setAIText(txt) {
-  document.getElementById('aiQuestionTxt').textContent = txt;
-}
-
-function showTranscript(txt, live) {
-  var el = document.getElementById('transcriptText');
-  if (!txt) {
-    el.innerHTML = 'Press the microphone button below and speak your answer...';
-    el.classList.remove('has-text');
-  } else {
-    el.innerHTML = txt + (live ? '<span class="cursor-blink"></span>' : '');
-    el.classList.add('has-text');
-  }
-}
-
-function updateQCounter(n) {
-  questionIndex = n - 1;
-  document.getElementById('qCounter').textContent = 'Q ' + n + ' / ' + TOTAL_QUESTIONS;
-  for (var i = 0; i < TOTAL_QUESTIONS; i++) {
-    var dot = document.getElementById('qdot' + i);
-    if (!dot) continue;
-    dot.className = 'q-dot';
-    if (i < n - 1) dot.classList.add('done');
-    else if (i === n - 1) dot.classList.add('current');
-  }
-}
-
-function addScoreToHistory(qIdx, score) {
-  var color = score >= 85 ? '#22c55e' : score >= 70 ? '#00d2ff' : score >= 55 ? '#f59e0b' : '#ef4444';
-  var el = document.createElement('div');
-  el.className = 'score-item';
-  el.innerHTML = '<span class="score-item-q">Q' + (qIdx) + '</span><span class="score-item-val" style="color:' + color + '">' + score + '</span>';
-  document.getElementById('scoreHistory').appendChild(el);
-  setTimeout(function() { el.classList.add('show'); }, 50);
-}
-
-function showFeedbackToast(score, text) {
-  var color = score >= 85 ? '#22c55e' : score >= 70 ? '#00d2ff' : score >= 55 ? '#f59e0b' : '#ef4444';
-  document.getElementById('ftScore').textContent = score;
-  document.getElementById('ftScore').style.color = color;
-  document.getElementById('ftText').textContent = text;
-  var toast = document.getElementById('feedbackToast');
-  toast.classList.add('show');
-  setTimeout(function() { toast.classList.remove('show'); }, 3500);
-}
-
-function showFinalReport() {
-  var avg = interviewData.overallScore;
-  var grade = interviewData.grade;
-  var gradeColor = grade.startsWith('A') ? '#22c55e' : grade.startsWith('B') ? '#00d2ff' : grade.startsWith('C') ? '#f59e0b' : '#ef4444';
-
-  // Score cards
-  var scoresHtml = [
-    '<div class="rscore-card"><div class="rscore-val" style="color:' + gradeColor + '">' + avg + '</div><div class="rscore-lbl">Overall</div></div>',
-    '<div class="rscore-card"><div class="rscore-val" style="color:' + gradeColor + '">' + grade + '</div><div class="rscore-lbl">Grade</div></div>',
-    '<div class="rscore-card"><div class="rscore-val" style="color:#a855f7">' + interviewData.questions.length + '</div><div class="rscore-lbl">Questions</div></div>',
-    '<div class="rscore-card"><div class="rscore-val" style="color:#f59e0b">' + (interviewData.verdict || 'See report') + '</div><div class="rscore-lbl" style="white-space:nowrap">Verdict</div></div>'
-  ].join('');
-  document.getElementById('reportScores').innerHTML = scoresHtml;
-
-  // Q breakdown
-  var rows = '';
-  interviewData.scores.forEach(function(s, i) {
-    var c = s >= 85 ? '#22c55e' : s >= 70 ? '#00d2ff' : s >= 55 ? '#f59e0b' : '#ef4444';
-    rows += '<div class="qb-row"><span class="qb-num">Q'+(i+1)+'</span><div class="qb-bar-wrap"><div class="qb-bar" style="width:'+s+'%;background:'+c+'"></div></div><span class="qb-score" style="color:'+c+'">'+s+'</span></div>';
+// Render score history
+(function(){
+  if (!SCORES || !SCORES.length) return;
+  var col = document.getElementById('scoresRight');
+  col.innerHTML = '<div style="font-family:DM Mono,monospace;font-size:.48rem;text-transform:uppercase;letter-spacing:.12em;color:rgba(0,210,255,.4);margin-bottom:4px;">Scores</div>';
+  SCORES.forEach(function(s, i){
+    var c = s>=85?'#22c55e':s>=70?'#00d2ff':s>=55?'#f59e0b':'#ef4444';
+    var d = document.createElement('div');
+    d.className = 'sc-row';
+    d.innerHTML = '<span class="sc-q">Q'+(i+1)+'</span><span class="sc-v" style="color:'+c+'">'+s+'</span>';
+    col.appendChild(d);
   });
-  document.getElementById('qBreakdownRows').innerHTML = rows;
-
-  // Strengths / weaknesses grid
-  var strengthsHtml = '<div class="report-section"><div class="rs-title" style="color:#22c55e">🌟 Strengths</div>' +
-    interviewData.strengths.map(function(s) { return '<div class="rs-item" style="background:rgba(34,197,94,.06);border-left:2px solid #22c55e">'+s+'</div>'; }).join('') + '</div>';
-  var weakHtml = '<div class="report-section"><div class="rs-title" style="color:#ef4444">⚠️ To Improve</div>' +
-    interviewData.weaknesses.map(function(s) { return '<div class="rs-item" style="background:rgba(239,68,68,.06);border-left:2px solid #ef4444">'+s+'</div>'; }).join('') + '</div>';
-  document.getElementById('reportGrid').innerHTML = strengthsHtml + weakHtml;
-
-  document.getElementById('reportOverlay').style.display = 'flex';
-}
-
-// ── PDF DOWNLOAD ──────────────────────────────────────────────────
-function downloadPDF() {
-  var jspdf = window.jspdf;
-  if (!jspdf) { alert('PDF library not loaded. Please try again.'); return; }
-  var doc = new jspdf.jsPDF({ unit: 'mm', format: 'a4' });
-  var W = 210, margin = 18, y = 20;
-
-  // Header
-  doc.setFillColor(5, 10, 18);
-  doc.rect(0, 0, W, 40, 'F');
-  doc.setTextColor(0, 210, 255);
-  doc.setFontSize(20);
-  doc.setFont('helvetica', 'bold');
-  doc.text('JobLess AI — Interview Report', margin, 18);
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(148, 163, 184);
-  doc.text('Role: ' + ROLE + '  |  Level: ' + LEVEL + '  |  Date: ' + new Date().toLocaleDateString(), margin, 28);
-  doc.text('Powered by JobLess AI · joblessai.streamlit.app', margin, 35);
-  y = 50;
-
-  // Overall scores
-  doc.setFillColor(15, 23, 42);
-  doc.roundedRect(margin, y, W - 2*margin, 24, 3, 3, 'F');
-  doc.setTextColor(0, 210, 255);
-  doc.setFontSize(28);
-  doc.setFont('helvetica', 'bold');
-  doc.text(String(interviewData.overallScore), margin + 10, y + 17);
-  doc.setFontSize(9);
-  doc.setTextColor(100, 116, 139);
-  doc.text('Overall Score', margin + 10, y + 22);
-  doc.setFontSize(28);
-  doc.setTextColor(168, 85, 247);
-  doc.text(interviewData.grade, margin + 40, y + 17);
-  doc.setFontSize(9);
-  doc.setTextColor(100, 116, 139);
-  doc.text('Grade', margin + 40, y + 22);
-  if (interviewData.verdict) {
-    doc.setFontSize(10);
-    doc.setTextColor(226, 232, 240);
-    doc.text('Verdict: ' + interviewData.verdict, margin + 70, y + 14);
-  }
-  y += 32;
-
-  // Q breakdown
-  doc.setTextColor(0, 210, 255);
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Question-by-Question Breakdown', margin, y);
-  y += 7;
-  interviewData.questions.forEach(function(q, i) {
-    if (y > 250) { doc.addPage(); y = 20; }
-    var s = interviewData.scores[i] || 0;
-    var fb = interviewData.feedbacks[i] || '';
-    doc.setFillColor(20, 28, 42);
-    doc.roundedRect(margin, y, W - 2*margin, 18 + (fb ? 6 : 0), 2, 2, 'F');
-    doc.setTextColor(148, 163, 184);
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Q' + (i+1) + ': ' + (q.length > 80 ? q.substring(0,80)+'...' : q), margin + 3, y + 6);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Score: ' + s + '/100', W - margin - 25, y + 6);
-    if (fb) {
-      doc.setTextColor(100, 116, 139);
-      doc.setFontSize(7);
-      doc.text(fb.length > 100 ? fb.substring(0,100)+'...' : fb, margin + 3, y + 13);
-    }
-    var a = interviewData.answers[i] || '';
-    if (a) {
-      doc.setTextColor(71, 85, 105);
-      doc.setFontSize(6.5);
-      doc.text('Answer: ' + (a.length > 120 ? a.substring(0,120)+'...' : a), margin + 3, y + (fb ? 20 : 14));
-    }
-    y += 24 + (fb ? 4 : 0);
-  });
-
-  // Strengths & weaknesses
-  if (y > 240) { doc.addPage(); y = 20; }
-  y += 4;
-  if (interviewData.strengths.length) {
-    doc.setTextColor(34, 197, 94);
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Top Strengths', margin, y);
-    y += 6;
-    interviewData.strengths.forEach(function(s) {
-      doc.setTextColor(148, 163, 184);
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'normal');
-      doc.text('• ' + s, margin + 3, y);
-      y += 6;
-    });
-  }
-  y += 4;
-  if (interviewData.weaknesses.length) {
-    doc.setTextColor(239, 68, 68);
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Areas to Improve', margin, y);
-    y += 6;
-    interviewData.weaknesses.forEach(function(w) {
-      doc.setTextColor(148, 163, 184);
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'normal');
-      doc.text('• ' + w, margin + 3, y);
-      y += 6;
-    });
-  }
-
-  // Footer
-  doc.setFillColor(5, 10, 18);
-  doc.rect(0, 282, W, 15, 'F');
-  doc.setTextColor(71, 85, 105);
-  doc.setFontSize(7);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Generated by JobLess AI · ' + new Date().toLocaleString(), margin, 290);
-
-  doc.save('JoblessAI_Interview_' + ROLE.replace(/[\s]+/g,'_') + '_' + new Date().toISOString().split('T')[0] + '.pdf');
-}
-
-// ── HELPERS ───────────────────────────────────────────────────────
-function parseJSON(raw) {
-  try {
-    var clean = raw.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
-    return JSON.parse(clean);
-  } catch(e) {
-    var m = raw.match(/\{[\s\S]*\}/);
-    if (m) try { return JSON.parse(m[0]); } catch(e2) {}
-    return null;
-  }
-}
-
-function gradeFromScore(s) {
-  if (s >= 90) return 'A+';
-  if (s >= 80) return 'A';
-  if (s >= 75) return 'B+';
-  if (s >= 65) return 'B';
-  if (s >= 55) return 'C+';
-  if (s >= 45) return 'C';
-  return 'D';
-}
-
-function restartInterview() {
-  document.getElementById('reportOverlay').style.display = 'none';
-  interviewData = { role: ROLE, level: LEVEL, questions: [], answers: [], scores: [], feedbacks: [], overallScore: 0, grade: '', verdict: '', strengths: [], weaknesses: [] };
-  questionIndex = 0;
-  document.getElementById('scoreHistory').innerHTML = '';
-  for (var i = 0; i < TOTAL_QUESTIONS; i++) {
-    var d = document.getElementById('qdot'+i);
-    if (d) d.className = 'q-dot';
-  }
-  showTranscript('', false);
-  startInterview();
-}
-
-// Relay mouse to parent
-document.addEventListener('mousemove', function(e) {
-  var rect = window.frameElement ? window.frameElement.getBoundingClientRect() : {left:0,top:0};
-  window.parent.postMessage({type:'ns-move', x: e.clientX+rect.left, y: e.clientY+rect.top}, '*');
-}, {passive:true});
+})();
 </script>
 </body>
 </html>"""
 
-def _render_voice_interview_agent(ai_handler, selected_model):
+
+def _build_voice_ui_html(question_text: str, scores: list) -> str:
+    """Build the TTS+webcam+STT HTML component with current question injected."""
+    import json
+    q_safe = question_text.replace('"', '&quot;').replace("'", '&#39;').replace('\n', ' ')
+    q_js   = question_text.replace('\\', '\\\\').replace('"', '\\"').replace('\n', ' ')
+    scores_html = ""
+    scores_json = json.dumps(scores)
+    return (_VOICE_UI_HTML
+            .replace("__QUESTION__", q_safe)
+            .replace("__QUESTION_JS__", q_js)
+            .replace("__SCORES_HTML__", scores_html)
+            .replace("__SCORES_JSON__", scores_json))
+
+
+def _voice_score_color(score: int) -> str:
+    if score >= 85: return "#22c55e"
+    if score >= 70: return "#00d2ff"
+    if score >= 55: return "#f59e0b"
+    return "#ef4444"
+
+
+def _render_voice_interview_agent(ai_handler, selected_model: str):
+    """Python-driven voice interview. AI calls stay in Python (no CORS). HTML only does TTS+STT+webcam."""
     import streamlit.components.v1 as _cmp
-    api_key = ai_handler.config.get_api_key()
-    provider_display = ai_handler.config.get_provider()
-    provider = PROVIDER_INTERNAL.get(provider_display, "gemini")
-    role = st.session_state.get("voice_mi_role", "Software Engineer")
+
+    role  = st.session_state.get("voice_mi_role",  "Software Engineer")
     level = st.session_state.get("voice_mi_level", "Fresher")
-    html = _VOICE_INTERVIEW_HTML.replace("__APIKEY__", api_key).replace("__PROVIDER__", provider).replace("__MODEL__", selected_model or "").replace("__ROLE__", role).replace("__LEVEL__", level)
-    _cmp.html(html, height=720, scrolling=False)
+
+    # ── Step 0: Generate questions once ──────────────────────────
+    if "voice_questions" not in st.session_state or not st.session_state.voice_questions:
+        with st.spinner("🧠 Generating your interview questions..."):
+            qs = ai_handler.generate_interview_questions(role, level, selected_model)
+        if not qs:
+            st.error("❌ Failed to generate questions. Check your API key in the sidebar.")
+            if st.button("🔄 Try Again"):
+                st.rerun()
+            return
+        # Trim to 6 questions max for voice mode
+        st.session_state.voice_questions  = qs[:6]
+        st.session_state.voice_q_index    = 0
+        st.session_state.voice_answers    = {}
+        st.session_state.voice_scores     = {}
+        st.session_state.voice_feedbacks  = {}
+        st.session_state.voice_done       = False
+        st.rerun()
+
+    questions  = st.session_state.voice_questions
+    q_idx      = st.session_state.voice_q_index
+    answers    = st.session_state.voice_answers
+    scores     = st.session_state.voice_scores
+    feedbacks  = st.session_state.voice_feedbacks
+    total      = len(questions)
+    done       = st.session_state.get("voice_done", False)
+
+    # ── FINAL REPORT ─────────────────────────────────────────────
+    if done:
+        _render_voice_final_report(ai_handler, selected_model, role, level, questions, answers, scores, feedbacks)
+        return
+
+    # ── HEADER ────────────────────────────────────────────────────
+    prog = q_idx / total
+    prog_color = "#22c55e" if prog >= 1 else "#a855f7" if prog >= 0.5 else "#00d2ff"
+    dot_html = "".join(
+        f'<div style="width:9px;height:9px;border-radius:50%;background:'
+        f'{"#00d2ff;box-shadow:0 0 6px rgba(0,210,255,.7)" if i < q_idx else ("#a855f7;box-shadow:0 0 6px rgba(168,85,247,.7)" if i == q_idx else "rgba(255,255,255,.12)")}"></div>'
+        for i in range(total)
+    )
+    st.markdown(f"""
+    <div style="display:flex;align-items:center;gap:14px;padding:10px 16px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.06);border-radius:14px;margin-bottom:12px;">
+      <div style="font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;background:linear-gradient(90deg,#00d2ff,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">🎙️ AI Voice Interview</div>
+      <div style="font-family:'DM Mono',monospace;font-size:.65rem;color:rgba(0,210,255,.7);background:rgba(0,210,255,.08);border:1px solid rgba(0,210,255,.2);border-radius:20px;padding:2px 10px;">{role}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:.6rem;color:rgba(255,255,255,.3);background:rgba(255,255,255,.05);border-radius:20px;padding:2px 8px;">{level}</div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+        <span style="font-family:'DM Mono',monospace;font-size:.7rem;color:{prog_color};">Q {q_idx+1} / {total}</span>
+        <div style="display:flex;gap:5px;align-items:center">{dot_html}</div>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── Current question ──────────────────────────────────────────
+    current_q = questions[q_idx]
+    q_text = current_q.get("question", "")
+    cat    = current_q.get("category", "General")
+    diff   = current_q.get("difficulty", "Medium")
+    cat_colors = {"Behavioral":"#00d2ff","Technical":"#a855f7","Problem Solving":"#f59e0b",
+                  "Situational":"#22c55e","Culture Fit":"#ec4899","Role-specific Scenario":"#f97316"}
+    cat_col = cat_colors.get(cat, "#00d2ff")
+    diff_badge = {"Easy":"🟢","Medium":"🟡","Hard":"🔴"}.get(diff,"🟡")
+
+    # ── HTML panel: TTS speaks question + webcam + STT ───────────
+    scores_list = [scores.get(str(i), 0) for i in range(q_idx) if str(i) in scores]
+    _cmp.html(_build_voice_ui_html(q_text, scores_list), height=280, scrolling=False)
+
+    # ── Question metadata ─────────────────────────────────────────
+    st.markdown(f"""
+    <div style="background:rgba(168,85,247,.05);border:1px solid rgba(168,85,247,.15);border-radius:12px;padding:12px 16px;margin:8px 0;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">
+        <span style="background:{cat_col}20;color:{cat_col};padding:2px 9px;border-radius:20px;font-size:.75rem;">{cat}</span>
+        <span style="background:rgba(255,255,255,.05);color:#94a3b8;padding:2px 9px;border-radius:20px;font-size:.75rem;">{diff_badge} {diff}</span>
+      </div>
+      <div style="color:#e2e8f0;font-size:.95rem;font-weight:500;line-height:1.6;">❓ {q_text}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── Answer input ──────────────────────────────────────────────
+    st.markdown('<div style="font-family:DM Mono,monospace;font-size:.65rem;color:rgba(0,210,255,.7);text-transform:uppercase;letter-spacing:.12em;margin:8px 0 4px;">📝 Your Answer <span style="color:#64748b;font-size:.55rem;text-transform:none;letter-spacing:0;"> — speak above then type/paste here, or just type directly</span></div>', unsafe_allow_html=True)
+    answer_val = answers.get(str(q_idx), "")
+    user_answer = st.text_area(
+        "Answer", value=answer_val, height=130,
+        placeholder="Speak your answer using the mic above, then paste/type it here...",
+        key=f"voice_answer_{q_idx}",
+        label_visibility="collapsed"
+    )
+
+    # ── Action buttons ────────────────────────────────────────────
+    btn_c1, btn_c2, btn_c3 = st.columns([2, 2, 1])
+    with btn_c1:
+        hint = current_q.get("hint", "")
+        if hint:
+            with st.expander("💡 Show Hint"):
+                st.markdown(f'<div style="color:#94a3b8;font-size:.88rem;">{hint}</div>', unsafe_allow_html=True)
+    with btn_c2:
+        submit_label = "Submit & Finish →" if q_idx == total - 1 else f"Submit Answer → Q{q_idx+2}"
+        if st.button(submit_label, type="primary", use_container_width=True, key=f"voice_submit_{q_idx}"):
+            if not user_answer.strip():
+                st.warning("⚠️ Please speak or type your answer first.")
+            else:
+                st.session_state.voice_answers[str(q_idx)] = user_answer.strip()
+                with st.spinner("🧠 Evaluating your answer..."):
+                    fb = ai_handler.evaluate_interview_answer(
+                        q_text, user_answer.strip(),
+                        current_q.get("ideal_answer_points", []),
+                        role, current_q.get("companies", []), selected_model
+                    )
+                if fb:
+                    st.session_state.voice_scores[str(q_idx)]    = fb.get("score", 0)
+                    st.session_state.voice_feedbacks[str(q_idx)] = fb
+                if q_idx + 1 >= total:
+                    st.session_state.voice_done = True
+                else:
+                    st.session_state.voice_q_index = q_idx + 1
+                st.rerun()
+    with btn_c3:
+        if st.button("🔄 Restart", use_container_width=True, key="voice_restart"):
+            for k in ("voice_questions","voice_q_index","voice_answers","voice_scores","voice_feedbacks","voice_done","voice_interview_active"):
+                st.session_state.pop(k, None)
+            st.rerun()
+
+
+def _render_voice_final_report(ai_handler, selected_model, role, level, questions, answers, scores, feedbacks):
+    """Final verdict screen for voice interview with per-Q breakdown + PDF."""
+    import json, base64
+    import streamlit.components.v1 as _cmp
+
+    total = len(questions)
+    avg_score = round(sum(scores.get(str(i), 0) for i in range(total)) / max(total, 1))
+    grade = ("A+" if avg_score>=90 else "A" if avg_score>=85 else "B+" if avg_score>=80
+             else "B" if avg_score>=75 else "C+" if avg_score>=70 else "C" if avg_score>=60 else "D")
+    grade_col = {"A+":"#22c55e","A":"#22c55e","B+":"#00d2ff","B":"#00d2ff",
+                 "C+":"#f59e0b","C":"#f59e0b","D":"#ef4444"}.get(grade,"#00d2ff")
+
+    # Final verdict from AI
+    if st.session_state.get("voice_final_verdict") is None:
+        all_co = []
+        for q in questions: all_co.extend(q.get("companies",[]))
+        with st.spinner("🧠 Generating final verdict..."):
+            vd = ai_handler.generate_final_verdict(role, level, list(dict.fromkeys(all_co))[:4],
+                                                    list(feedbacks.values()), selected_model)
+        st.session_state.voice_final_verdict = vd or {}
+
+    vd = st.session_state.get("voice_final_verdict", {})
+    strengths   = vd.get("top_strengths", [])
+    weaknesses  = vd.get("top_weaknesses", [])
+    action_plan = vd.get("priority_action_plan", [])
+    headline    = vd.get("headline", "")
+    motive      = vd.get("motivational_close", "")
+    can_crack   = vd.get("can_crack_company", "Borderline")
+    crack_msg   = vd.get("crack_verdict_message", "")
+    crack_colors = {"Yes, apply now!":"#22c55e","Almost there":"#00d2ff","Borderline":"#f59e0b","Not yet — keep practising":"#ef4444"}
+    cc = crack_colors.get(can_crack, "#f59e0b")
+
+    # ── Score header ──────────────────────────────────────────────
+    st.markdown(f"""
+    <div style="background:linear-gradient(135deg,rgba(5,10,20,.95),rgba(15,23,42,.9));border:2px solid {grade_col}30;border-radius:20px;padding:24px 28px;margin-bottom:20px;">
+      <div style="text-align:center;margin-bottom:6px;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(0,210,255,.4);">🎙️ Voice Interview Complete</div>
+      <div style="display:flex;gap:16px;align-items:stretch;flex-wrap:wrap;justify-content:center;margin-bottom:18px;">
+        <div style="text-align:center;background:{grade_col}10;border:2px solid {grade_col}30;border-radius:12px;padding:16px 22px;">
+          <div style="font-size:2.8rem;font-weight:900;color:{grade_col};font-family:'Orbitron',sans-serif;line-height:1">{avg_score}</div>
+          <div style="color:#64748b;font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;margin-top:2px">Avg Score</div>
+        </div>
+        <div style="text-align:center;background:{grade_col}10;border:2px solid {grade_col}30;border-radius:12px;padding:16px 22px;">
+          <div style="font-size:2.8rem;font-weight:900;color:{grade_col};font-family:'Orbitron',sans-serif;line-height:1">{grade}</div>
+          <div style="color:#64748b;font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;margin-top:2px">Grade</div>
+        </div>
+        <div style="background:{cc}10;border:2px solid {cc}30;border-radius:12px;padding:16px 20px;flex:1;min-width:180px;">
+          <div style="color:{cc};font-size:1rem;font-weight:800;line-height:1.3">{can_crack}</div>
+          <div style="color:#64748b;font-size:.65rem;margin-top:2px">Company Crack Verdict</div>
+          {f'<div style="color:#cbd5e1;font-size:.82rem;margin-top:8px;line-height:1.5">{crack_msg}</div>' if crack_msg else ''}
+        </div>
+        {f'<div style="background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:16px 20px;flex:2;min-width:200px;display:flex;align-items:center"><div style="color:#e2e8f0;font-size:.88rem;line-height:1.5;font-style:italic">&quot;{headline}&quot;</div></div>' if headline else ''}
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── Per-Q breakdown ───────────────────────────────────────────
+    st.markdown('<div style="color:#00d2ff;font-weight:700;font-size:.85rem;letter-spacing:.05em;margin:0 0 10px">📊 QUESTION BREAKDOWN</div>', unsafe_allow_html=True)
+    for i, q in enumerate(questions):
+        sc = scores.get(str(i), 0)
+        fb = feedbacks.get(str(i), {})
+        sc_col = _voice_score_color(sc)
+        verdict = fb.get("verdict","")
+        one_liner = fb.get("one_line_reaction","")
+        st.markdown(f"""
+        <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px 16px;margin-bottom:8px;display:flex;gap:14px;align-items:flex-start">
+          <div style="text-align:center;background:{sc_col}12;border:2px solid {sc_col}30;border-radius:10px;padding:8px 12px;flex-shrink:0">
+            <div style="font-size:1.4rem;font-weight:900;color:{sc_col};font-family:'Orbitron',sans-serif;line-height:1">{sc}</div>
+            <div style="color:#64748b;font-size:.55rem;text-transform:uppercase;letter-spacing:.08em">/100</div>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="color:#94a3b8;font-size:.8rem;margin-bottom:3px;font-weight:500">Q{i+1}: {q.get('question','')[:90]}...</div>
+            {f'<div style="color:{sc_col};font-size:.75rem;font-weight:600">{verdict}</div>' if verdict else ''}
+            {f'<div style="color:#64748b;font-size:.75rem;font-style:italic;margin-top:2px">&quot;{one_liner}&quot;</div>' if one_liner else ''}
+          </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # ── Strengths / Weaknesses ────────────────────────────────────
+    sv_col, wv_col = st.columns(2)
+    with sv_col:
+        if strengths:
+            st.markdown('<div style="color:#22c55e;font-weight:700;font-size:.85rem;letter-spacing:.05em;margin:12px 0 8px">🌟 TOP STRENGTHS</div>', unsafe_allow_html=True)
+            for s in strengths:
+                st.markdown(f'<div style="background:rgba(34,197,94,.07);border-left:3px solid #22c55e;border-radius:8px;padding:8px 12px;margin-bottom:6px;color:#94a3b8;font-size:.85rem;line-height:1.5">{s}</div>', unsafe_allow_html=True)
+    with wv_col:
+        if weaknesses:
+            st.markdown('<div style="color:#ef4444;font-weight:700;font-size:.85rem;letter-spacing:.05em;margin:12px 0 8px">⚠️ TOP WEAKNESSES</div>', unsafe_allow_html=True)
+            for w in weaknesses:
+                st.markdown(f'<div style="background:rgba(239,68,68,.07);border-left:3px solid #ef4444;border-radius:8px;padding:8px 12px;margin-bottom:6px;color:#94a3b8;font-size:.85rem;line-height:1.5">{w}</div>', unsafe_allow_html=True)
+
+    if action_plan:
+        st.markdown('<div style="color:#00d2ff;font-weight:700;font-size:.85rem;letter-spacing:.05em;margin:12px 0 8px">🎯 PRIORITY ACTION PLAN</div>', unsafe_allow_html=True)
+        for i, step in enumerate(action_plan, 1):
+            st.markdown(f'<div style="display:flex;gap:10px;align-items:flex-start;background:rgba(0,210,255,.05);border:1px solid rgba(0,210,255,.1);border-radius:10px;padding:10px 14px;margin-bottom:6px"><div style="background:rgba(0,210,255,.15);color:#00d2ff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:900;flex-shrink:0">{i}</div><div style="color:#cbd5e1;font-size:.88rem;line-height:1.5">{step}</div></div>', unsafe_allow_html=True)
+
+    if motive:
+        st.markdown(f'<div style="background:linear-gradient(135deg,rgba(168,85,247,.08),rgba(0,210,255,.06));border:1px solid rgba(168,85,247,.2);border-radius:12px;padding:16px 20px;margin-top:12px;text-align:center"><div style="font-size:1.4rem;margin-bottom:6px">💬</div><div style="color:#e2e8f0;font-size:.9rem;line-height:1.7;font-style:italic">&quot;{motive}&quot;</div></div>', unsafe_allow_html=True)
+
+    # ── PDF Download ──────────────────────────────────────────────
+    st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+    pdf_col, restart_col = st.columns([2, 1])
+    with pdf_col:
+        if st.button("📄 Download PDF Report", type="primary", use_container_width=True, key="voice_pdf"):
+            _generate_voice_pdf(role, level, avg_score, grade, questions, answers, scores, feedbacks, strengths, weaknesses, can_crack)
+    with restart_col:
+        if st.button("🔄 New Interview", use_container_width=True, key="voice_restart_final"):
+            for k in ("voice_questions","voice_q_index","voice_answers","voice_scores",
+                      "voice_feedbacks","voice_done","voice_interview_active","voice_final_verdict"):
+                st.session_state.pop(k, None)
+            st.rerun()
+
+
+def _generate_voice_pdf(role, level, avg_score, grade, questions, answers, scores, feedbacks, strengths, weaknesses, can_crack):
+    """Generate and offer PDF download of the interview report."""
+    try:
+        from fpdf import FPDF
+        _fpdf_ok = True
+    except ImportError:
+        _fpdf_ok = False
+
+    if not _fpdf_ok:
+        # Fallback: create a plain text report as download
+        lines = [
+            "JOBLESS AI — VOICE INTERVIEW REPORT",
+            "=" * 50,
+            f"Role: {role}  |  Level: {level}",
+            f"Overall Score: {avg_score}/100  |  Grade: {grade}",
+            f"Verdict: {can_crack}",
+            f"Date: {__import__('datetime').datetime.now().strftime('%Y-%m-%d %H:%M')}",
+            "", "─" * 50, "QUESTION BREAKDOWN", "─" * 50,
+        ]
+        for i, q in enumerate(questions):
+            sc = scores.get(str(i), 0)
+            fb = feedbacks.get(str(i), {})
+            lines += [
+                f"\nQ{i+1} (Score: {sc}/100): {q.get('question','')}",
+                f"Your Answer: {answers.get(str(i), 'N/A')}",
+                f"Feedback: {fb.get('one_line_reaction','')}",
+            ]
+        if strengths:
+            lines += ["", "─" * 50, "STRENGTHS"] + [f"• {s}" for s in strengths]
+        if weaknesses:
+            lines += ["", "─" * 50, "AREAS TO IMPROVE"] + [f"• {w}" for w in weaknesses]
+        lines += ["", "─" * 50, "Generated by JobLess AI"]
+        txt = "\n".join(lines)
+        import base64
+        b64 = base64.b64encode(txt.encode()).decode()
+        fname = f"JoblessAI_Interview_{role.replace(' ','_')}_{__import__('datetime').datetime.now().strftime('%Y%m%d')}.txt"
+        st.markdown(f'<a href="data:text/plain;base64,{b64}" download="{fname}"><button style="padding:10px 22px;background:linear-gradient(135deg,#00d2ff,#0ea8d8);color:#020b14;font-weight:700;border:none;border-radius:25px;cursor:pointer;font-size:.85rem">⬇️ Download Report (TXT)</button></a>', unsafe_allow_html=True)
+        return
+
+    # fpdf2 available — generate proper PDF
+    try:
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_auto_page_break(auto=True, margin=15)
+        # Header
+        pdf.set_fill_color(5, 10, 18)
+        pdf.rect(0, 0, 210, 40, 'F')
+        pdf.set_text_color(0, 210, 255)
+        pdf.set_font("Helvetica", "B", 18)
+        pdf.set_xy(15, 12)
+        pdf.cell(0, 8, "JobLess AI - Voice Interview Report", ln=True)
+        pdf.set_font("Helvetica", "", 9)
+        pdf.set_text_color(148, 163, 184)
+        pdf.set_x(15)
+        pdf.cell(0, 6, f"Role: {role}  |  Level: {level}  |  Date: {__import__('datetime').datetime.now().strftime('%Y-%m-%d')}", ln=True)
+        pdf.set_y(48)
+        # Score block
+        pdf.set_fill_color(15, 23, 42)
+        pdf.rect(15, pdf.get_y(), 180, 22, 'F')
+        pdf.set_text_color(0, 210, 255)
+        pdf.set_font("Helvetica", "B", 24)
+        pdf.set_xy(25, pdf.get_y() + 4)
+        pdf.cell(35, 12, str(avg_score))
+        pdf.set_font("Helvetica", "", 8)
+        pdf.set_text_color(100, 116, 139)
+        pdf.set_xy(25, pdf.get_y())
+        pdf.cell(35, 6, "Overall Score")
+        pdf.set_text_color(168, 85, 247)
+        pdf.set_font("Helvetica", "B", 24)
+        pdf.set_xy(70, 52)
+        pdf.cell(30, 12, grade)
+        pdf.set_text_color(100, 116, 139)
+        pdf.set_font("Helvetica", "", 8)
+        pdf.set_xy(70, 64)
+        pdf.cell(30, 6, "Grade")
+        pdf.set_text_color(226, 232, 240)
+        pdf.set_font("Helvetica", "B", 10)
+        pdf.set_xy(110, 54)
+        pdf.cell(80, 8, f"Verdict: {can_crack}", ln=True)
+        pdf.set_y(78)
+        # Q breakdown
+        pdf.set_text_color(0, 210, 255)
+        pdf.set_font("Helvetica", "B", 12)
+        pdf.set_x(15)
+        pdf.cell(0, 8, "Question Breakdown", ln=True)
+        for i, q in enumerate(questions):
+            sc = scores.get(str(i), 0)
+            fb = feedbacks.get(str(i), {})
+            if pdf.get_y() > 250: pdf.add_page()
+            pdf.set_fill_color(20, 28, 42)
+            y0 = pdf.get_y()
+            pdf.rect(15, y0, 180, 22, 'F')
+            pdf.set_text_color(148, 163, 184)
+            pdf.set_font("Helvetica", "B", 8)
+            pdf.set_xy(18, y0 + 3)
+            q_txt = q.get('question', '')
+            pdf.cell(140, 5, (q_txt[:80] + "...") if len(q_txt) > 80 else q_txt)
+            pdf.set_text_color(0, 210, 255)
+            pdf.set_xy(160, y0 + 3)
+            pdf.cell(30, 5, f"Score: {sc}/100")
+            ans_txt = answers.get(str(i), "")
+            if ans_txt:
+                pdf.set_text_color(100, 116, 139)
+                pdf.set_font("Helvetica", "", 7)
+                pdf.set_xy(18, y0 + 10)
+                pdf.cell(172, 5, ("Answer: " + ans_txt[:100] + "...") if len(ans_txt) > 100 else "Answer: " + ans_txt)
+            fb_txt = fb.get("one_line_reaction","") or fb.get("verdict","")
+            if fb_txt:
+                pdf.set_text_color(71, 85, 105)
+                pdf.set_font("Helvetica", "", 6.5)
+                pdf.set_xy(18, y0 + 17)
+                pdf.cell(172, 4, (fb_txt[:110] + "...") if len(fb_txt) > 110 else fb_txt)
+            pdf.set_y(y0 + 25)
+        # Strengths
+        if strengths:
+            if pdf.get_y() > 240: pdf.add_page()
+            pdf.set_text_color(34, 197, 94)
+            pdf.set_font("Helvetica", "B", 11)
+            pdf.set_x(15)
+            pdf.cell(0, 8, "Top Strengths", ln=True)
+            for s in strengths:
+                pdf.set_text_color(148, 163, 184)
+                pdf.set_font("Helvetica", "", 9)
+                pdf.set_x(18)
+                pdf.cell(0, 6, f"• {s}", ln=True)
+        # Weaknesses
+        if weaknesses:
+            if pdf.get_y() > 240: pdf.add_page()
+            pdf.set_text_color(239, 68, 68)
+            pdf.set_font("Helvetica", "B", 11)
+            pdf.set_x(15)
+            pdf.cell(0, 8, "Areas to Improve", ln=True)
+            for w in weaknesses:
+                pdf.set_text_color(148, 163, 184)
+                pdf.set_font("Helvetica", "", 9)
+                pdf.set_x(18)
+                pdf.cell(0, 6, f"• {w}", ln=True)
+        # Footer
+        pdf.set_fill_color(5, 10, 18)
+        pdf.rect(0, 282, 210, 15, 'F')
+        pdf.set_text_color(71, 85, 105)
+        pdf.set_font("Helvetica", "", 7)
+        pdf.set_xy(15, 286)
+        pdf.cell(0, 5, f"Generated by JobLess AI · {__import__('datetime').datetime.now().strftime('%Y-%m-%d %H:%M')}")
+
+        pdf_bytes = bytes(pdf.output())
+        import base64
+        b64 = base64.b64encode(pdf_bytes).decode()
+        fname = f"JoblessAI_Interview_{role.replace(' ','_')}_{__import__('datetime').datetime.now().strftime('%Y%m%d')}.pdf"
+        st.markdown(f'<a href="data:application/pdf;base64,{b64}" download="{fname}"><button style="padding:10px 22px;background:linear-gradient(135deg,#00d2ff,#0ea8d8);color:#020b14;font-weight:700;border:none;border-radius:25px;cursor:pointer;font-size:.85rem;letter-spacing:.05em">⬇️ Download PDF Report</button></a>', unsafe_allow_html=True)
+        st.success("✅ PDF ready — click the button above to download!")
+    except Exception as e:
+        st.error(f"PDF generation failed: {e}. Try the TXT fallback.")
+
 
 def render_tab_mock_interview(ai_handler: AIHandler, selected_model: str):
     """Tab 6 — Mock Interview Simulator (Text + Voice modes)."""
