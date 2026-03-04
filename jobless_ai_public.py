@@ -2837,14 +2837,6 @@ html,body{background:#050a12;color:#e2e8f0;font-family:'DM Sans',sans-serif;heig
 @keyframes recdot{0%,100%{opacity:1}50%{opacity:.2}}
 .rec-txt{font-size:.48rem;font-family:'DM Mono',monospace;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.08em}
 
-.score-col{flex:1;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
-.score-col::-webkit-scrollbar{width:2px}
-.score-col::-webkit-scrollbar-thumb{background:rgba(0,210,255,.2);border-radius:2px}
-.sc-row{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:5px 10px;animation:fadeup .35s ease forwards}
-@keyframes fadeup{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-.sc-q{font-family:'DM Mono',monospace;font-size:.6rem;color:rgba(255,255,255,.4)}
-.sc-v{font-family:'Syne',sans-serif;font-size:.85rem;font-weight:800}
-
 /* AI PANEL */
 .ai-col{flex:1;display:flex;flex-direction:column;gap:8px}
 .ai-box{background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.2);border-radius:12px;padding:12px;display:flex;gap:12px;align-items:flex-start;flex:0 0 auto}
@@ -2873,7 +2865,7 @@ html,body{background:#050a12;color:#e2e8f0;font-family:'DM Sans',sans-serif;heig
 .live-dot{width:5px;height:5px;border-radius:50%;background:#ef4444;opacity:0;flex-shrink:0}
 .live-dot.on{opacity:1;animation:livedot 1s ease-in-out infinite}
 @keyframes livedot{0%,100%{opacity:1}50%{opacity:.2}}
-.transcript{flex:1;font-size:.78rem;color:#64748b;line-height:1.6;font-style:italic;overflow-y:auto}
+.transcript{flex:1;font-size:.78rem;color:#64748b;line-height:1.6;font-style:italic;overflow-y:auto;padding:8px;background:rgba(255,255,255,.02);border-radius:8px}
 .transcript.has{color:#e2e8f0;font-style:normal}
 .transcript::-webkit-scrollbar{width:2px}
 .transcript::-webkit-scrollbar-thumb{background:rgba(0,210,255,.2);border-radius:2px}
@@ -2898,7 +2890,6 @@ html,body{background:#050a12;color:#e2e8f0;font-family:'DM Sans',sans-serif;heig
         <div class="rec-dot"></div><span class="rec-txt">LIVE</span>
       </div>
     </div>
-    <div class="score-col" id="scoreCol"></div>
   </div>
 
   <!-- AI SPEAKING -->
@@ -2927,22 +2918,17 @@ html,body{background:#050a12;color:#e2e8f0;font-family:'DM Sans',sans-serif;heig
       <div class="transcript" id="transcript">Press 🎤 to start speaking...</div>
     </div>
   </div>
-
-  <!-- PER-Q SCORES (right col) -->
-  <div class="cam-col" id="scoresRight" style="overflow-y:auto;gap:4px">
-    __SCORES_HTML__
-  </div>
 </div>
+
+<input type="hidden" id="transcriptData" value="">
 
 <script>
 var QUESTION = "__QUESTION_JS__";
-var SCORES = __SCORES_JSON__;
 var synth = window.speechSynthesis;
 var recognition = null;
 var isListening = false;
 var finalT = "", interimT = "";
 
-// ── INIT (inline, no onload needed) ──────────────────────────────
 initWebcam();
 initSpeech();
 speakQuestion(QUESTION);
@@ -3011,15 +2997,34 @@ function clearTranscript() {
   var el = document.getElementById('transcript');
   el.textContent = 'Press 🎤 to start speaking...';
   el.classList.remove('has');
+  document.getElementById('transcriptData').value = '';
+  updateParent();
 }
 
 function showTranscript() {
   var full = (finalT + interimT).trim();
   var el = document.getElementById('transcript');
-  if (!full) { el.textContent='Press 🎤 to start speaking...'; el.classList.remove('has'); }
-  else { el.textContent = full; el.classList.add('has'); el.scrollTop = el.scrollHeight; }
-  // Send to parent via postMessage so Streamlit can pick it up via query_params trick
-  try { window.parent.postMessage({type:'voice_transcript', text: finalT.trim()}, '*'); } catch(e){}
+  if (!full) { 
+    el.textContent='Press 🎤 to start speaking...'; 
+    el.classList.remove('has'); 
+  } else { 
+    el.textContent = full; 
+    el.classList.add('has'); 
+    el.scrollTop = el.scrollHeight;
+  }
+  document.getElementById('transcriptData').value = finalT.trim();
+  updateParent();
+}
+
+function updateParent() {
+  var text = finalT.trim();
+  try {
+    window.parent.postMessage({
+      type: 'streamlit:setComponentValue',
+      key: 'voice_transcript',
+      value: text
+    }, '*');
+  } catch(e){}
 }
 
 function speakQuestion(txt) {
@@ -3042,7 +3047,6 @@ function speakQuestion(txt) {
     wvBars.forEach(function(b){ b.classList.remove('on'); });
     avatar.classList.remove('glow');
   };
-  // Voices may not be loaded yet — small delay
   if (voices.length === 0) {
     synth.onvoiceschanged = function() {
       var v2 = synth.getVoices();
@@ -3056,20 +3060,6 @@ function speakQuestion(txt) {
     synth.speak(u);
   }
 }
-
-// Render score history
-(function(){
-  if (!SCORES || !SCORES.length) return;
-  var col = document.getElementById('scoresRight');
-  col.innerHTML = '<div style="font-family:DM Mono,monospace;font-size:.48rem;text-transform:uppercase;letter-spacing:.12em;color:rgba(0,210,255,.4);margin-bottom:4px;">Scores</div>';
-  SCORES.forEach(function(s, i){
-    var c = s>=85?'#22c55e':s>=70?'#00d2ff':s>=55?'#f59e0b':'#ef4444';
-    var d = document.createElement('div');
-    d.className = 'sc-row';
-    d.innerHTML = '<span class="sc-q">Q'+(i+1)+'</span><span class="sc-v" style="color:'+c+'">'+s+'</span>';
-    col.appendChild(d);
-  });
-})();
 </script>
 </body>
 </html>"""
@@ -3270,6 +3260,23 @@ def _render_voice_interview_agent(ai_handler, selected_model: str):
     # ── HTML panel: TTS speaks question + webcam + STT ───────────
     _cmp.html(_build_voice_ui_html(q_text, []),
               height=280, scrolling=False)
+    
+    # AUTO-TYPING: Check for transcript from HTML component and auto-populate
+    st.markdown("""
+    <script>
+    window.addEventListener('message', function(event) {
+        if (event.data.type === 'streamlit:setComponentValue' && event.data.key === 'voice_transcript') {
+            var transcript = event.data.value;
+            // Find the text area and update it
+            var textareas = document.getElementsByTagName('textarea');
+            if (textareas.length > 0) {
+                textareas[textareas.length - 1].value = transcript;
+                textareas[textareas.length - 1].dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        }
+    });
+    </script>
+    """, unsafe_allow_html=True)
 
     # ── Question metadata ─────────────────────────────────────────
     st.markdown(f"""
