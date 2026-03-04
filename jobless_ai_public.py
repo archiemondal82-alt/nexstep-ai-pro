@@ -4359,58 +4359,60 @@ def _render_conversational_interview(ai_handler, selected_model: str):
     )
     _cmp.html(avatar_html, height=450, scrolling=False)
 
-    # ── Bridge: capture voice transcript OR typed answer ─────────────────
+    # ── Answer input + Submit — simple and direct ────────────────────────
     st.markdown(
         '<div style="font-family:DM Mono,monospace;font-size:.62rem;color:rgba(0,210,255,.6);'
         'text-transform:uppercase;letter-spacing:.1em;margin:10px 0 4px;">'
-        '📝 Your Answer <span style="color:#334155;font-size:.55rem;text-transform:none;'
-        'letter-spacing:0;"> — spoken transcript auto-appears here, or type directly</span></div>',
+        '📝 Your Answer '
+        '<span style="color:#475569;font-size:.55rem;text-transform:none;letter-spacing:0;">'
+        '— copy your spoken text from above, or just type here</span></div>',
         unsafe_allow_html=True
     )
+
     user_answer = st.text_area(
-        "answer", key="conv_voice_answer",
-        placeholder="Your spoken answer appears here automatically. You can also type directly.",
-        height=100, label_visibility="collapsed"
+        "answer",
+        key="conv_voice_answer",
+        placeholder="Type or paste your answer here, then click Submit...",
+        height=110,
+        label_visibility="collapsed"
     )
 
-    # Action buttons
     b1, b2, b3 = st.columns([2, 2, 1])
+    submit_clicked = False
     wrap_up = False
+    skip = False
+
     with b1:
-        if st.button("✅ Submit Answer", key="conv_submit_voice",
-                     use_container_width=True, type="primary"):
-            pass  # handled below
+        submit_clicked = st.button(
+            "✅ Submit Answer", key="conv_submit_voice",
+            use_container_width=True, type="primary"
+        )
     with b2:
-        if st.button("🏁 Wrap up — give me my review", key="conv_wrapup_voice",
-                     use_container_width=True):
-            wrap_up = True
+        wrap_up = st.button(
+            "🏁 Wrap up — give me my review", key="conv_wrapup_voice",
+            use_container_width=True
+        )
     with b3:
-        if st.button("🔁 Skip Q", key="conv_skip", use_container_width=True):
-            user_answer = "[Skipped this question]"
+        skip = st.button("⏭️ Skip", key="conv_skip", use_container_width=True)
 
-    # Handle submit
-    submit_clicked = st.session_state.get("FormSubmitter:conv_submit_voice", False)
-    final_input = ""
+    # Determine final input — clean and explicit
+    final_input = None
     if wrap_up:
-        final_input = "That's all from my side. No more questions. Please wrap up and give me my full Head of Talent review."
-    elif (st.session_state.get("conv_submit_voice") or submit_clicked) and user_answer and user_answer.strip():
-        final_input = user_answer.strip()
-    elif user_answer and user_answer.strip() and "[Skipped" in user_answer:
-        final_input = user_answer
+        final_input = "That's all from my side. No more questions. Please wrap up and give me my full Head of Talent review now."
+    elif skip:
+        final_input = "I'll skip this question."
+    elif submit_clicked:
+        ans = (user_answer or "").strip()
+        if not ans:
+            st.warning("⚠️ Please type your answer first, then click Submit.")
+        else:
+            final_input = ans
 
-    # Check if submit button was actually pressed this rerun
-    # Streamlit button returns True only on the rerun it was clicked
-    btn_pressed = any([
-        wrap_up,
-        (user_answer and user_answer.strip() and st.session_state.get("_conv_last_answer","") != user_answer.strip())
-    ])
-
-    if final_input:
-        st.session_state["_conv_last_answer"] = final_input
+    if final_input is not None:
         st.session_state.conv_interview_messages.append(
             {"role": "user", "content": final_input}
         )
-        with st.spinner("🤖 Your interviewer is responding..."):
+        with st.spinner("🤖 Interviewer is responding..."):
             ai_reply = ai_handler.chat_interview_turn(
                 messages=st.session_state.conv_interview_messages,
                 role=role, level=level, model_name=selected_model,
@@ -4426,34 +4428,6 @@ def _render_conversational_interview(ai_handler, selected_model: str):
         if any(t in ai_reply.lower() for t in review_triggers):
             st.session_state.conv_interview_done = True
         st.rerun()
-
-    # ── Browser → Streamlit voice submit bridge ──────────────────────────
-    # Inject a tiny JS listener that catches the postMessage from the iframe
-    # and fills the textarea + clicks Submit automatically
-    _cmp.html("""
-    <script>
-    window.addEventListener('message', function(e) {
-      if (!e.data) return;
-      // Auto-fill transcript into the textarea
-      if (e.data.type === 'jl-voice-transcript' || e.data.type === 'jl-voice-submit') {
-        var txt = e.data.text || '';
-        if (!txt) return;
-        // Find Streamlit textareas in parent
-        try {
-          var tas = window.parent.document.querySelectorAll('textarea');
-          tas.forEach(function(ta) {
-            if (ta.placeholder && ta.placeholder.includes('spoken answer')) {
-              var nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-                window.HTMLTextAreaElement.prototype, 'value').set;
-              nativeInputValueSetter.call(ta, txt);
-              ta.dispatchEvent(new Event('input', { bubbles: true }));
-            }
-          });
-        } catch(err) {}
-      }
-    });
-    </script>
-    """, height=0)
 
 
 def render_tab_mock_interview(ai_handler: AIHandler, selected_model: str):
