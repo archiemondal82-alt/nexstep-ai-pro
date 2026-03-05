@@ -109,11 +109,11 @@ def render_spline_scene(scene_url: str, title: str = "Interactive 3D", descripti
           justify-content: center;
         }}
         .label {{
-          font-family: 'Epilogue', sans-serif;
+          font-family: 'Inter', sans-serif;
           font-size: 0.7rem;
           letter-spacing: 0.18em;
           text-transform: uppercase;
-          color: rgba(47, 111, 255, 0.55);
+          color: rgba(0, 210, 255, 0.55);
           margin-bottom: 18px;
           display: flex;
           align-items: center;
@@ -124,14 +124,14 @@ def render_spline_scene(scene_url: str, title: str = "Interactive 3D", descripti
           display: inline-block;
           width: 6px; height: 6px;
           border-radius: 50%;
-          background: #2F6FFF;
-          box-shadow: 0 0 8px #2F6FFF;
+          background: #0047FF;
+          box-shadow: 0 0 8px #0047FF;
           animation: pulse 2s ease-in-out infinite;
         }}
         @keyframes pulse {{ 0%,100%{{opacity:1}} 50%{{opacity:0.4}} }}
 
         .left-panel h1 {{
-          font-family: 'Syne', sans-serif;
+          font-family: 'Inter', sans-serif;
           font-size: 2.6rem;
           font-weight: 700;
           color: #ffffff;
@@ -141,7 +141,7 @@ def render_spline_scene(scene_url: str, title: str = "Interactive 3D", descripti
         }}
         .left-panel p {{
           color: #8a9bb5;
-          font-family: 'Epilogue', sans-serif;
+          font-family: 'Inter', sans-serif;
           font-size: 0.95rem;
           line-height: 1.7;
           max-width: 340px;
@@ -152,9 +152,9 @@ def render_spline_scene(scene_url: str, title: str = "Interactive 3D", descripti
           align-items: center;
           gap: 8px;
           padding: 13px 28px;
-          background: #2F6FFF;
+          background: #0047FF;
           color: #020b14;
-          font-family: 'Syne', sans-serif;
+          font-family: 'Inter', sans-serif;
           font-size: 0.82rem;
           font-weight: 700;
           letter-spacing: 0.1em;
@@ -162,13 +162,13 @@ def render_spline_scene(scene_url: str, title: str = "Interactive 3D", descripti
           border-radius: 50px;
           border: none;
           cursor: none;
-          box-shadow: 0 0 24px rgba(47,111,255,0.35), 0 4px 16px rgba(0,0,0,0.3);
+          box-shadow: 0 0 24px rgba(0,71,255,0.35), 0 4px 16px rgba(0,0,0,0.3);
           transition: all 0.2s ease;
           width: fit-content;
         }}
         .btn:hover {{
           background: #33dbff;
-          box-shadow: 0 0 40px rgba(47,111,255,0.6), 0 4px 20px rgba(0,0,0,0.4);
+          box-shadow: 0 0 40px rgba(0,71,255,0.6), 0 4px 20px rgba(0,0,0,0.4);
           transform: translateY(-2px);
         }}
 
@@ -199,8 +199,8 @@ def render_spline_scene(scene_url: str, title: str = "Interactive 3D", descripti
         }}
         .spinner {{
           width: 36px; height: 36px;
-          border: 2px solid rgba(47,111,255,0.15);
-          border-top-color: #2F6FFF;
+          border: 2px solid rgba(0,71,255,0.15);
+          border-top-color: #0047FF;
           border-radius: 50%;
           animation: spin 0.9s linear infinite;
         }}
@@ -220,8 +220,7 @@ def render_spline_scene(scene_url: str, title: str = "Interactive 3D", descripti
     </head>
     <body>
       <div class="wrapper">
-        <div class="glow-left"></div>
-        <div class="glow-right"></div>
+        <canvas id="shader-bg" style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1;"></canvas>
 
         <!-- Left content -->
         <div class="left-panel">
@@ -263,6 +262,188 @@ def render_spline_scene(scene_url: str, title: str = "Interactive 3D", descripti
         }} catch(e) {{
           loading.innerHTML = '<span style="color:#666;font-family:Inter,sans-serif;font-size:13px;">3D scene unavailable</span>';
         }}
+      </script>
+
+      <!-- WebGL Shader Background Logic -->
+      <script>
+      (function() {{
+        // Core Shader Settings
+        const defaultShaderSource = `#version 300 es
+        precision highp float;
+        out vec4 O;
+        uniform vec2 resolution;
+        uniform float time;
+        #define FC gl_FragCoord.xy
+        #define T time
+        #define R resolution
+        #define MN min(R.x,R.y)
+        float rnd(vec2 p) {{ p=fract(p*vec2(12.9898,78.233)); p+=dot(p,p+34.56); return fract(p.x*p.y); }}
+        float noise(in vec2 p) {{ vec2 i=floor(p), f=fract(p), u=f*f*(3.-2.*f); float a=rnd(i), b=rnd(i+vec2(1,0)), c=rnd(i+vec2(0,1)), d=rnd(i+1.); return mix(mix(a,b,u.x),mix(c,d,u.x),u.y); }}
+        float fbm(vec2 p) {{ float t=.0, a=1.; mat2 m=mat2(1.,-.5,.2,1.2); for (int i=0; i<5; i++) {{ t+=a*noise(p); p*=2.*m; a*=.5; }} return t; }}
+        float clouds(vec2 p) {{ float d=1., t=.0; for (float i=.0; i<3.; i++) {{ float a=d*fbm(i*10.+p.x*.2+.2*(1.+i)*p.y+d+i*i+p); t=mix(t,d,a); d=a; p*=2./(i+1.); }} return t; }}
+        void main(void) {{
+            vec2 uv=(FC-.5*R)/MN,st=uv*vec2(2,1);
+            vec3 col=vec3(0);
+            float bg=clouds(vec2(st.x+T*.5,-st.y));
+            // BLUE/AQUA COLOR TONE MODIFICATION HERE
+            uv*=1.-.3*(sin(T*.2)*.5+.5);
+            for (float i=1.; i<12.; i++) {{
+                uv+=.1*cos(i*vec2(.1+.01*i, .8)+i*i+T*.5+.1*uv.x);
+                vec2 p=uv;
+                float d=length(p);
+                // Changing the fundamental color to blue matrix tones
+                col+=.00125/d*(cos(sin(i)*vec3(0.1,0.5,1.0))+1.);
+                float b=noise(i+p+bg*1.731);
+                col+=.002*b/length(max(p,vec2(b*p.x*.02,p.y)));
+                col=mix(col,vec3(bg*.05,bg*.15,bg*.25),d);
+            }}
+            O=vec4(col,1);
+        }}`;
+
+        class WebGLRenderer {{
+            constructor(canvas, scale) {{
+                this.canvas = canvas;
+                this.scale = scale;
+                this.gl = canvas.getContext('webgl2');
+                this.gl.viewport(0, 0, canvas.width * scale, canvas.height * scale);
+                this.shaderSource = defaultShaderSource;
+                this.vertexSrc = `#version 300 es\\nprecision highp float;\\nin vec4 position;\\nvoid main(){{gl_Position=position;}}`;
+                this.vertices = [-1, 1, -1, -1, 1, 1, 1, -1];
+                this.mouseMove = [0, 0];
+                this.mouseCoords = [0, 0];
+                this.pointerCoords = [0, 0];
+                this.nbrOfPointers = 0;
+            }}
+            updateShader(source) {{ this.reset(); this.shaderSource = source; this.setup(); this.init(); }}
+            updateMove(deltas) {{ this.mouseMove = deltas; }}
+            updateMouse(coords) {{ this.mouseCoords = coords; }}
+            updatePointerCoords(coords) {{ this.pointerCoords = coords; }}
+            updatePointerCount(nbr) {{ this.nbrOfPointers = nbr; }}
+            updateScale(scale) {{ this.scale = scale; this.gl.viewport(0, 0, this.canvas.width * scale, this.canvas.height * scale); }}
+            compile(shader, source) {{
+                const gl = this.gl;
+                gl.shaderSource(shader, source);
+                gl.compileShader(shader);
+                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) console.error('Shader error:', gl.getShaderInfoLog(shader));
+            }}
+            test(source) {{
+                const gl = this.gl;
+                const shader = gl.createShader(gl.FRAGMENT_SHADER);
+                gl.shaderSource(shader, source);
+                gl.compileShader(shader);
+                let result = gl.getShaderParameter(shader, gl.COMPILE_STATUS) ? null : gl.getShaderInfoLog(shader);
+                gl.deleteShader(shader);
+                return result;
+            }}
+            reset() {{
+                const gl = this.gl;
+                if (this.program && !gl.getProgramParameter(this.program, gl.DELETE_STATUS)) {{
+                    if (this.vs) {{ gl.detachShader(this.program, this.vs); gl.deleteShader(this.vs); }}
+                    if (this.fs) {{ gl.detachShader(this.program, this.fs); gl.deleteShader(this.fs); }}
+                    gl.deleteProgram(this.program);
+                }}
+            }}
+            setup() {{
+                const gl = this.gl;
+                this.vs = gl.createShader(gl.VERTEX_SHADER);
+                this.fs = gl.createShader(gl.FRAGMENT_SHADER);
+                this.compile(this.vs, this.vertexSrc);
+                this.compile(this.fs, this.shaderSource);
+                this.program = gl.createProgram();
+                gl.attachShader(this.program, this.vs);
+                gl.attachShader(this.program, this.fs);
+                gl.linkProgram(this.program);
+            }}
+            init() {{
+                const gl = this.gl;
+                const program = this.program;
+                this.buffer = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
+                const position = gl.getAttribLocation(program, 'position');
+                gl.enableVertexAttribArray(position);
+                gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+                program.resolution = gl.getUniformLocation(program, 'resolution');
+                program.time = gl.getUniformLocation(program, 'time');
+                program.move = gl.getUniformLocation(program, 'move');
+                program.touch = gl.getUniformLocation(program, 'touch');
+                program.pointerCount = gl.getUniformLocation(program, 'pointerCount');
+                program.pointers = gl.getUniformLocation(program, 'pointers');
+            }}
+            render(now = 0) {{
+                const gl = this.gl;
+                const program = this.program;
+                if (!program) return;
+                gl.clearColor(0, 0, 0, 1);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+                gl.useProgram(program);
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+                gl.uniform2f(program.resolution, this.canvas.width, this.canvas.height);
+                gl.uniform1f(program.time, now * 1e-3);
+                gl.uniform2f(program.move, ...this.mouseMove);
+                gl.uniform2f(program.touch, ...this.mouseCoords);
+                gl.uniform1i(program.pointerCount, this.nbrOfPointers);
+                gl.uniform2fv(program.pointers, this.pointerCoords);
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            }}
+        }}
+
+        class PointerHandler {{
+            constructor(element, scale) {{
+                this.scale = scale;
+                this.active = false;
+                this.pointers = new Map();
+                this.lastCoords = [0, 0];
+                this.moves = [0, 0];
+                const map = (x, y) => [x * this.scale, element.height - y * this.scale];
+                element.addEventListener('pointerdown', e => {{ this.active = true; this.pointers.set(e.pointerId, map(e.clientX, e.clientY)); }});
+                element.addEventListener('pointerup', e => {{ if (this.count === 1) this.lastCoords = this.first; this.pointers.delete(e.pointerId); this.active = this.pointers.size > 0; }});
+                element.addEventListener('pointerleave', e => {{ if (this.count === 1) this.lastCoords = this.first; this.pointers.delete(e.pointerId); this.active = this.pointers.size > 0; }});
+                element.addEventListener('pointermove', e => {{ if (!this.active) return; this.lastCoords = [e.clientX, e.clientY]; this.pointers.set(e.pointerId, map(e.clientX, e.clientY)); this.moves = [this.moves[0] + e.movementX, this.moves[1] + e.movementY]; }});
+            }}
+            get count() {{ return this.pointers.size; }}
+            get move() {{ return this.moves; }}
+            get coords() {{ return this.pointers.size > 0 ? Array.from(this.pointers.values()).flat() : [0, 0]; }}
+            get first() {{ return this.pointers.values().next().value || this.lastCoords; }}
+        }}
+
+        const canvas = document.getElementById('shader-bg');
+        let animationFrameRef;
+        let renderer, pointers;
+
+        function resize() {{
+            const wrapper = document.querySelector('.wrapper');
+            const dpr = Math.max(1, 0.5 * window.devicePixelRatio);
+            canvas.width = wrapper.clientWidth * dpr;
+            canvas.height = wrapper.clientHeight * dpr;
+            if (renderer) renderer.updateScale(dpr);
+        }}
+
+        function loop(now) {{
+            renderer.updateMouse(pointers.first);
+            renderer.updatePointerCount(pointers.count);
+            renderer.updatePointerCoords(pointers.coords);
+            renderer.updateMove(pointers.move);
+            renderer.render(now);
+            animationFrameRef = requestAnimationFrame(loop);
+        }}
+
+        function init() {{
+            const dpr = Math.max(1, 0.5 * window.devicePixelRatio);
+            renderer = new WebGLRenderer(canvas, dpr);
+            pointers = new PointerHandler(canvas, dpr);
+            renderer.setup();
+            renderer.init();
+            resize();
+            if (renderer.test(defaultShaderSource) === null) {{
+                renderer.updateShader(defaultShaderSource);
+            }}
+            loop(0);
+            window.addEventListener('resize', resize);
+        }}
+
+        init();
+      }})();
       </script>
     </body>
     </html>
@@ -353,7 +534,7 @@ body {
   background: #060b14!important;
   overflow: clip; /* modern browsers */
   overflow: hidden; /* legacy fallback — overridden above in supporting browsers */
-  font-family: 'Epilogue', sans-serif;
+  font-family: 'Inter', sans-serif;
   padding: 0; margin: 0;
 }
 
@@ -637,13 +818,13 @@ body {
         </defs>
         <g id="extrudeGroup"></g>
         <text id="mainText"
-          font-family="'Bebas Neue', sans-serif"
+          font-family="'Inter', sans-serif"
           font-weight="400"
           fill="url(#faceGrad)"
           filter="url(#lighting)"
           dominant-baseline="auto">JobLess AI</text>
         <text id="shimmerText"
-          font-family="'Bebas Neue', sans-serif"
+          font-family="'Inter', sans-serif"
           font-weight="400"
           fill="url(#shimmerGrad)"
           opacity="0.9"
@@ -705,7 +886,7 @@ document.fonts.ready.then(function() {
     var g  = Math.round(18  + (1-p)*35);
     var b2 = Math.round(28  + (1-p)*55);
     var a  = 0.5 + (1-p)*0.4;
-    t.setAttribute('font-family', "'Bebas Neue', sans-serif");
+    t.setAttribute('font-family', "'Inter', sans-serif");
     t.setAttribute('font-weight', '400');
     t.setAttribute('font-size', FS);
     t.setAttribute('x', ox);
@@ -1490,8 +1671,8 @@ def render_match_ring(score: int) -> str:
     r = 36
     circ = 2 * 3.14159 * r
     fill = circ - (circ * score / 100)
-    color = "#2F6FFF" if score >= 80 else (
-        "#a855f7" if score >= 60 else "#f59e0b")
+    color = "#0047FF" if score >= 80 else (
+        "#FFFFFF" if score >= 60 else "#f59e0b")
     return f"""
     <div class="match-ring-wrap">
       <div class="match-ring">
@@ -1534,265 +1715,219 @@ class UIComponents:
     def apply_custom_css():
         css = """
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Epilogue:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Space+Mono:wght@400;700&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+        
+            /* Animations */
+            @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+            @keyframes scan { 0% { left: -100% } 100% { left: 200% } }
+        
+            /* Globals */
+            html, body {
+                background: #060606 !important;
+                color: #FAFAF7 !important;
+                font-family: 'Inter', sans-serif !important;
+                cursor: none !important;
+            }
+            .stApp, .stApp > div, [data-testid="stAppViewContainer"], [data-testid="stAppViewBlockContainer"], .main, .block-container, section.main > div {
+                background: #060606 !important;
+                font-family: 'Inter', sans-serif !important;
+                color: #FAFAF7 !important;
+            }
+        
+            /* Typography */
+            h1, h2, h3, h4, h5, h6 {
+                font-family: 'Inter', sans-serif !important;
+                font-weight: 700 !important;
+                letter-spacing: -0.03em !important;
+                color: #FFFFFF !important;
+            }
+            h2 { font-size: 1.8rem !important; }
+            h3 { font-size: 1.2rem !important; font-weight: 600 !important; color: #0047FF !important; }
+            p, li { font-weight: 300 !important; color: #b3b3b3 !important; line-height: 1.7 !important; }
+        
+            /* Streamlit padding resets */
+            .main .block-container { padding-top: 1rem !important; padding-left: 2rem !important; padding-right: 2rem !important; max-width: 100% !important; margin-top: -30px !important; }
+            header[data-testid="stHeader"] { background: #060606 !important; }
+            div[data-testid="stToolbar"], div[data-testid="stDecoration"], div[data-testid="stStatusWidget"] { display: none !important; }
 
-        @keyframes fadeUp       { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes shimmer      { 0%{background-position:-300% center} 100%{background-position:300% center} }
-        @keyframes borderRotate { 0%{background-position:0% 0%} 100%{background-position:300% 300%} }
-        @keyframes slideInLeft  { from{transform:perspective(800px) rotateY(-12deg) translateX(-50px);opacity:0} to{transform:perspective(800px) rotateY(0deg) translateX(0);opacity:1} }
-        @keyframes scaleIn      { from{transform:perspective(600px) scale(0.88) rotateX(8deg);opacity:0} to{transform:perspective(600px) scale(1) rotateX(0deg);opacity:1} }
-
-        /* APP BACKGROUND */
-        html, body { background: #09090C !important; background-color: #09090C !important; }
-        .stApp, .stApp > div,
-        [data-testid="stAppViewContainer"], [data-testid="stAppViewBlockContainer"],
-        [data-testid="stMain"], [data-testid="stMainBlockContainer"],
-        .main, .block-container, section.main > div {
-            background: #09090C !important; background-color: #09090C !important; color: white !important;
-        }
-        .stApp { font-family: 'Epilogue', sans-serif !important; cursor: none !important; }
-        .main .block-container { padding-top: 0 !important; padding-left: 2rem !important; padding-right: 2rem !important; max-width: 100% !important; margin-top: -30px !important; }
-        [data-testid="stAppViewContainer"] > section > div:first-child { padding-top: 0 !important; }
-        header[data-testid="stHeader"] { height: 0 !important; min-height: 0 !important; background: #09090C !important; overflow: visible !important; }
-        #root > div:first-child { padding-top: 0 !important; }
-        .stApp > header { height: 0 !important; overflow: visible !important; }
-        div[data-testid="stToolbar"]      { display: none !important; }
-        div[data-testid="stDecoration"]   { display: none !important; }
-        div[data-testid="stStatusWidget"] { display: none !important; }
-        [data-testid="stSidebarCollapsedControl"],
-        [data-testid="stSidebarNavToggleButton"],
-        button[kind="header"] { visibility: visible !important; display: flex !important; z-index: 9999 !important; opacity: 1 !important; }
-
-        /* TYPOGRAPHY */
-        h1, h2, h3 { font-family: 'Syne', sans-serif !important; font-weight: 700 !important; letter-spacing: -0.03em !important; color: #F0EDE8 !important; }
-        h2 { font-size: 1.7rem !important; }
-        h3 { font-size: 0.62rem !important; font-weight: 400 !important; font-family: 'Space Mono', monospace !important; letter-spacing: 0.20em !important; text-transform: uppercase !important; color: #7A7A78 !important; }
-        label, .stRadio label, .stCheckbox label, .stSelectbox label, .stTextInput label, .stTextArea label {
-            font-family: 'Space Mono', monospace !important; font-size: 0.58rem !important; letter-spacing: 0.16em !important; text-transform: uppercase !important; color: #7A7A78 !important;
-        }
-        p, li { font-family: 'Epilogue', sans-serif !important; font-size: 0.95rem !important; font-weight: 300 !important; line-height: 1.75 !important; color: #7A7A78 !important; }
-        [data-testid="stMarkdownContainer"] p { font-family: 'Epilogue', sans-serif !important; font-weight: 300 !important; font-size: 0.93rem !important; line-height: 1.75 !important; color: #7A7A78 !important; }
-        strong, b { font-weight: 700 !important; color: #F0EDE8 !important; }
-        hr { border: none !important; height: 1px !important; background: rgba(240,237,232,0.11) !important; margin: 24px 0 !important; }
-
-        /* SIDEBAR */
-        [data-testid="stSidebar"] { background: #111116 !important; border-right: 1px solid rgba(240,237,232,0.10) !important; box-shadow: none !important; }
-        [data-testid="stSidebar"] > div:first-child { padding-top: 0 !important; }
-        [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
-            font-family: 'Space Mono', monospace !important; font-size: 0.52rem !important; letter-spacing: 0.22em !important;
-            text-transform: uppercase !important; color: #3E3E3C !important;
-            margin: 20px 0 8px 0 !important; padding-bottom: 7px !important; border-bottom: 1px solid rgba(240,237,232,0.07) !important;
-        }
-        [data-testid="stSidebar"] hr { background: rgba(240,237,232,0.07) !important; border-color: rgba(240,237,232,0.07) !important; margin: 10px 0 !important; }
-        [data-testid="stSidebar"] p, [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p { font-size: 0.82rem !important; color: #7A7A78 !important; }
-        [data-testid="stSidebar"] .stSelectbox > div > div {
-            background: #18181E !important; border: 1px solid rgba(240,237,232,0.11) !important; border-radius: 4px !important;
-            color: #F0EDE8 !important; font-family: 'Epilogue', sans-serif !important; font-size: 0.88rem !important; transition: border-color 0.18s ease !important;
-        }
-        [data-testid="stSidebar"] .stSelectbox > div > div:hover { border-color: rgba(240,237,232,0.25) !important; }
-        [data-testid="stSidebar"] .stSelectbox > div > div:focus-within { border-color: #2F6FFF !important; box-shadow: 0 0 0 3px rgba(47,111,255,0.15) !important; }
-        [data-testid="stSidebar"] .stTextInput > div > div > input {
-            background: #18181E !important; border: 1px solid rgba(240,237,232,0.11) !important; border-radius: 4px !important;
-            color: #F0EDE8 !important; font-family: 'Epilogue', sans-serif !important; font-size: 0.88rem !important;
-        }
-        [data-testid="stSidebar"] .stTextInput > div > div > input:focus { border-color: #2F6FFF !important; box-shadow: 0 0 0 3px rgba(47,111,255,0.15) !important; }
-        [data-testid="stSidebar"] .stExpander { background: #18181E !important; border: 1px solid rgba(240,237,232,0.11) !important; border-radius: 4px !important; }
-
-        /* SIDEBAR NAV BUTTONS */
-        [data-testid="stSidebar"] .stButton > button {
-            background: transparent !important; border: none !important; border-bottom: 1px solid rgba(240,237,232,0.07) !important;
-            border-radius: 0 !important; color: #7A7A78 !important; font-family: 'Space Mono', monospace !important;
-            font-size: 0.60rem !important; letter-spacing: 0.12em !important; text-transform: uppercase !important;
-            font-weight: 400 !important; padding: 12px 4px !important; text-align: left !important; width: 100% !important;
-            box-shadow: none !important; animation: none !important; justify-content: flex-start !important; transition: color 0.15s ease !important;
-        }
-        [data-testid="stSidebar"] .stButton > button:hover {
-            color: #F0EDE8 !important; background: transparent !important; box-shadow: none !important; transform: none !important; border-bottom-color: rgba(240,237,232,0.25) !important;
-        }
-
-        /* TABS */
-        .stTabs [data-baseweb="tab-list"] {
-            background: transparent !important; border-radius: 0 !important; padding: 0 !important;
-            border: none !important; border-bottom: 1px solid rgba(240,237,232,0.11) !important; gap: 0 !important;
-        }
-        .stTabs [data-baseweb="tab"] {
-            font-family: 'Space Mono', monospace !important; font-size: 0.58rem !important; letter-spacing: 0.14em !important;
-            text-transform: uppercase !important; border-radius: 0 !important; color: #3E3E3C !important;
-            transition: color 0.15s ease !important; padding: 13px 18px !important;
-            border-bottom: 2px solid transparent !important; margin-bottom: -1px !important; background: transparent !important;
-        }
-        .stTabs [data-baseweb="tab"]:hover { color: #F0EDE8 !important; background: transparent !important; }
-        .stTabs [aria-selected="true"] { background: transparent !important; color: #5A8FFF !important; border-bottom: 2px solid #2F6FFF !important; box-shadow: none !important; }
-
-        /* BUTTONS */
-        .stButton > button {
-            font-family: 'Syne', sans-serif !important; font-weight: 700 !important; letter-spacing: 0.04em !important;
-            font-size: 0.82rem !important; background: #2F6FFF !important; border-radius: 4px !important;
-            border: none !important; color: #ffffff !important; padding: 10px 24px !important;
-            box-shadow: none !important; transition: all 0.18s ease !important;
-        }
-        .stButton > button:hover { background: #4880FF !important; transform: translateY(-2px) !important; box-shadow: 0 8px 24px rgba(47,111,255,0.35) !important; }
-        .stButton > button:active { transform: translateY(0px) !important; }
-        .stDownloadButton > button {
-            font-family: 'Syne', sans-serif !important; font-weight: 700 !important; font-size: 0.80rem !important;
-            letter-spacing: 0.04em !important; background: transparent !important; border: 1px solid rgba(240,237,232,0.25) !important;
-            border-radius: 4px !important; color: #F0EDE8 !important; padding: 9px 22px !important; transition: all 0.15s ease !important;
-        }
-        .stDownloadButton > button:hover { background: #2F6FFF !important; border-color: #2F6FFF !important; color: #fff !important; box-shadow: 0 6px 20px rgba(47,111,255,0.30) !important; }
-
-        /* INPUTS */
-        .stTextInput > div > div > input, .stTextArea > div > div > textarea {
-            background: #111116 !important; border: 1px solid rgba(240,237,232,0.11) !important; border-radius: 4px !important;
-            color: #F0EDE8 !important; font-family: 'Epilogue', sans-serif !important; font-size: 0.95rem !important;
-            transition: all 0.25s ease !important; caret-color: #2F6FFF !important;
-        }
-        .stTextInput > div > div > input:focus, .stTextArea > div > div > textarea:focus {
-            border-color: #2F6FFF !important; box-shadow: 0 0 0 2px rgba(47,111,255,0.15) !important; background: #18181E !important;
-        }
-        .stTextInput > div > div > input::placeholder, .stTextArea > div > div > textarea::placeholder { color: #3E3E3C !important; }
-        .stSelectbox > div > div, .stMultiSelect > div > div {
-            background: #111116 !important; border: 1px solid rgba(240,237,232,0.11) !important; border-radius: 4px !important;
-            font-family: 'Epilogue', sans-serif !important; color: #F0EDE8 !important; transition: border-color 0.2s ease !important;
-        }
-        .stSelectbox > div > div:hover, .stMultiSelect > div > div:hover { border-color: rgba(240,237,232,0.25) !important; }
-        .stSelectbox > div > div:focus-within, .stMultiSelect > div > div:focus-within { border-color: #2F6FFF !important; box-shadow: 0 0 0 2px rgba(47,111,255,0.15) !important; }
-        .stFileUploader > div { background: #111116 !important; border: 1.5px dashed rgba(240,237,232,0.15) !important; border-radius: 4px !important; transition: border-color 0.18s ease !important; }
-        .stFileUploader > div:hover { border-color: #2F6FFF !important; background: #18181E !important; }
-
-        /* EXPANDERS */
-        .stExpander { border: 1px solid rgba(240,237,232,0.11) !important; border-radius: 4px !important; background: #111116 !important; transition: border-color 0.18s ease !important; }
-        .stExpander:hover { border-color: rgba(240,237,232,0.22) !important; }
-        .stExpander details summary { font-family: 'Syne', sans-serif !important; font-size: 0.9rem !important; font-weight: 700 !important; letter-spacing: -0.01em !important; color: #F0EDE8 !important; padding: 14px 16px !important; }
-        .stExpander details summary:hover { color: #5A8FFF !important; }
-        .stExpander [data-testid="stExpanderDetails"] { border-top: 1px solid rgba(240,237,232,0.07) !important; padding: 16px !important; }
-
-        /* ALERTS */
-        .stAlert { border-radius: 4px !important; animation: fadeUp 0.4s ease-out !important; font-family: 'Epilogue', sans-serif !important; }
-        [data-testid="stSuccess"] { background: rgba(74,222,128,0.07) !important; border: 1px solid rgba(74,222,128,0.22) !important; border-left: 3px solid #4ADE80 !important; border-radius: 4px !important; }
-        [data-testid="stError"], [data-testid="stException"] { background: rgba(248,113,113,0.07) !important; border: 1px solid rgba(248,113,113,0.22) !important; border-left: 3px solid #F87171 !important; border-radius: 4px !important; }
-        [data-testid="stWarning"] { background: rgba(245,158,11,0.07) !important; border: 1px solid rgba(245,158,11,0.22) !important; border-left: 3px solid #F59E0B !important; border-radius: 4px !important; }
-        [data-testid="stInfo"] { background: rgba(47,111,255,0.07) !important; border: 1px solid rgba(47,111,255,0.22) !important; border-left: 3px solid #2F6FFF !important; border-radius: 4px !important; }
-
-        /* PROGRESS */
-        .stProgress > div > div > div { background: #2F6FFF !important; background-image: none !important; border-radius: 2px !important; box-shadow: 0 0 8px rgba(47,111,255,0.4) !important; }
-        .stProgress > div > div { background: rgba(240,237,232,0.07) !important; border-radius: 2px !important; }
-
-        /* SCROLLBAR */
-        ::-webkit-scrollbar { width: 3px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #2F6FFF; border-radius: 0; }
-        iframe { border: none !important; }
-
-        /* RESULT CARD */
-        .result-card {
-            background: #111116 !important; backdrop-filter: none !important;
-            border-radius: 4px !important; border: 1px solid rgba(240,237,232,0.11) !important;
-            border-left: 3px solid #2F6FFF !important; padding: 26px 26px 26px 22px !important;
-            margin-bottom: 16px; animation: fadeUp 0.45s ease-out; transition: all 0.2s ease; position: relative; overflow: hidden;
-        }
-        .result-card::before { content: none !important; }
-        .result-card:hover { border-color: rgba(240,237,232,0.22) !important; border-left-color: #5A8FFF !important; transform: translateX(3px); box-shadow: -4px 0 20px rgba(47,111,255,0.20); }
-        .result-card h3 { font-family: 'Syne', sans-serif !important; font-size: 1rem !important; font-weight: 700 !important; text-transform: none !important; color: #F0EDE8 !important; margin-bottom: 10px; letter-spacing: -0.02em !important; }
-
-        /* SKILL BADGES */
-        .skill-badge { display:inline-block; padding:3px 11px; border-radius:3px; font-family:'Space Mono',monospace !important; font-size:0.60rem !important; font-weight:400; letter-spacing:0.07em; text-transform:uppercase; margin:3px; border:1px solid rgba(47,111,255,0.30); background:rgba(47,111,255,0.09); color:#5A8FFF; transition:all 0.2s ease; cursor:default; }
-        .skill-badge:hover { background:rgba(47,111,255,0.18); border-color:#2F6FFF; transform:translateY(-1px); }
-        .skill-badge.purple { border-color:rgba(167,139,250,0.30); background:rgba(167,139,250,0.09); color:#A78BFA; }
-        .skill-badge.green  { border-color:rgba(74,222,128,0.30);  background:rgba(74,222,128,0.09);  color:#4ADE80; }
-
-        /* MATCH RING */
-        .match-ring-wrap { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; }
-        .match-ring { position:relative; width:88px; height:88px; }
-        .match-ring svg { transform:rotate(-90deg); }
-        .match-ring .ring-bg   { fill:none; stroke:rgba(240,237,232,0.08); stroke-width:7; }
-        .match-ring .ring-fill { fill:none; stroke-width:7; stroke-linecap:round; transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1); filter:drop-shadow(0 0 6px currentColor); }
-        .match-ring .ring-text { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:'Syne',sans-serif; }
-        .match-ring .ring-pct  { font-size:1.3rem; font-weight:800; line-height:1; color:#F0EDE8; letter-spacing:-0.04em; }
-        .match-ring .ring-label { font-family:'Space Mono',monospace; font-size:0.58rem; color:#7A7A78; letter-spacing:0.08em; text-transform:uppercase; }
-
-        /* JOB LINKS */
-        .job-links-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
-        .job-link-btn { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:3px; font-family:'Space Mono',monospace; font-size:0.58rem; font-weight:400; letter-spacing:0.07em; text-transform:uppercase; text-decoration:none!important; transition:all 0.18s ease; border:1px solid; }
-        .job-link-btn:hover { transform:translateY(-2px); text-decoration:none!important; }
-        .job-link-btn.linkedin  { background:rgba(10,102,194,0.12);  border-color:rgba(10,102,194,0.4);  color:#60a5fa; }
-        .job-link-btn.linkedin:hover  { background:rgba(10,102,194,0.25);  box-shadow:0 6px 18px rgba(10,102,194,0.20); }
-        .job-link-btn.naukri    { background:rgba(255,96,22,0.10);   border-color:rgba(255,96,22,0.35);   color:#fb923c; }
-        .job-link-btn.naukri:hover    { background:rgba(255,96,22,0.22);   box-shadow:0 6px 18px rgba(255,96,22,0.18); }
-        .job-link-btn.indeed    { background:rgba(37,154,0,0.10);    border-color:rgba(37,154,0,0.35);    color:#4ade80; }
-        .job-link-btn.indeed:hover    { background:rgba(37,154,0,0.22);    box-shadow:0 6px 18px rgba(37,154,0,0.16); }
-        .job-link-btn.glassdoor { background:rgba(15,164,107,0.10);  border-color:rgba(15,164,107,0.35);  color:#34d399; }
-        .job-link-btn.glassdoor:hover { background:rgba(15,164,107,0.22);  box-shadow:0 6px 18px rgba(15,164,107,0.16); }
-        .job-link-btn.remoteok  { background:rgba(167,139,250,0.10); border-color:rgba(167,139,250,0.35); color:#c084fc; }
-        .job-link-btn.remoteok:hover  { background:rgba(167,139,250,0.22); box-shadow:0 6px 18px rgba(167,139,250,0.16); }
-
-        /* HAMBURGER NAV */
-        #jl-hamburger { position:fixed; top:16px; right:16px; z-index:99999; width:40px; height:40px; background:#111116; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid rgba(240,237,232,0.12); border-radius:4px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; cursor:pointer !important; transition:all 0.2s ease; box-shadow:0 4px 24px rgba(0,0,0,0.4); }
-        #jl-hamburger:hover { background:#18181E; border-color:rgba(240,237,232,0.25); }
-        #jl-hamburger span { display:block; width:16px; height:1.5px; background:#7A7A78; border-radius:0; transition:all 0.25s ease; }
-        #jl-hamburger:hover span { background:#F0EDE8; }
-        #jl-hamburger.open span:nth-child(1) { transform:translateY(6.5px) rotate(45deg); }
-        #jl-hamburger.open span:nth-child(2) { opacity:0; transform:scaleX(0); }
-        #jl-hamburger.open span:nth-child(3) { transform:translateY(-6.5px) rotate(-45deg); }
-        #jl-nav-panel { position:fixed; top:0; right:0; width:240px; height:100vh; background:#111116; backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-left:1px solid rgba(240,237,232,0.10); z-index:99998; transform:translateX(100%); transition:transform 0.3s cubic-bezier(0.16,1,0.3,1); padding:72px 16px 24px 16px; display:flex; flex-direction:column; gap:0; box-shadow:-8px 0 40px rgba(0,0,0,0.5); overflow-y:auto; }
-        #jl-nav-panel.open { transform:translateX(0); }
-        #jl-nav-panel .nav-label { font-family:'Space Mono',monospace; font-size:0.50rem; letter-spacing:0.22em; text-transform:uppercase; color:#3E3E3C; margin:0 0 12px 0; padding-bottom:8px; border-bottom:1px solid rgba(240,237,232,0.07); }
-        #jl-nav-panel .nav-item { display:flex; align-items:center; gap:10px; padding:12px 6px; border:none; border-bottom:1px solid rgba(240,237,232,0.07); border-radius:0; cursor:pointer !important; font-family:'Epilogue',sans-serif; font-size:0.86rem; font-weight:400; color:#7A7A78; transition:color 0.15s ease; text-decoration:none; }
-        #jl-nav-panel .nav-item:hover { color:#F0EDE8; }
-        #jl-nav-panel .nav-item.active { color:#5A8FFF; font-weight:600; }
-        #jl-nav-panel .nav-divider { height:1px; background:rgba(240,237,232,0.07); margin:10px 0; }
-        #jl-nav-panel .settings-btn { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:4px; border:1px solid #2F6FFF; cursor:pointer !important; font-family:'Syne',sans-serif; font-size:0.78rem; font-weight:700; color:#5A8FFF; background:rgba(47,111,255,0.12); transition:all 0.18s ease; margin-top:10px; }
-        #jl-nav-panel .settings-btn:hover { background:#2F6FFF; color:#ffffff; }
-        #jl-nav-overlay { position:fixed; inset:0; z-index:99997; display:none; }
-        #jl-nav-overlay.open { display:block; }
-
-        /* METRICS */
-        [data-testid="stMetric"] { background:#111116 !important; border:1px solid rgba(240,237,232,0.11) !important; border-top:3px solid #2F6FFF !important; border-radius:4px !important; padding:18px 20px !important; }
-        [data-testid="stMetric"] [data-testid="stMetricLabel"] { font-family:'Space Mono',monospace !important; font-size:0.50rem !important; letter-spacing:0.18em !important; text-transform:uppercase !important; color:#7A7A78 !important; }
-        [data-testid="stMetric"] [data-testid="stMetricValue"] { font-family:'Syne',sans-serif !important; font-size:1.7rem !important; font-weight:800 !important; color:#F0EDE8 !important; letter-spacing:-0.04em !important; }
-
-        /* CHAT */
-        [data-testid="stChatMessage"] { background:#111116 !important; border:1px solid rgba(240,237,232,0.11) !important; border-radius:4px !important; margin-bottom:7px !important; }
-        [data-testid="stChatMessageContent"] p { font-family:'Epilogue',sans-serif !important; font-size:0.9rem !important; font-weight:300 !important; line-height:1.75 !important; color:#F0EDE8 !important; }
-        [data-testid="stChatInput"] > div { background:#111116 !important; border:1px solid rgba(240,237,232,0.11) !important; border-radius:4px !important; }
-        [data-testid="stChatInput"] > div:focus-within { border-color:#2F6FFF !important; box-shadow:0 0 0 2px rgba(47,111,255,0.15) !important; }
-
-        /* DATA TABLE */
-        .stDataFrame, .stTable { border:1px solid rgba(240,237,232,0.11) !important; border-radius:4px !important; overflow:hidden !important; }
-        .stDataFrame th { font-family:'Space Mono',monospace !important; font-size:0.52rem !important; letter-spacing:0.14em !important; text-transform:uppercase !important; color:#7A7A78 !important; background:#18181E !important; border-bottom:1px solid rgba(240,237,232,0.11) !important; padding:10px 14px !important; }
-        .stDataFrame td { font-family:'Epilogue',sans-serif !important; font-size:0.84rem !important; font-weight:300 !important; color:#F0EDE8 !important; border-bottom:1px solid rgba(240,237,232,0.07) !important; padding:9px 14px !important; }
-
-        /* SPINNER */
-        .stSpinner > div { border-top-color: #2F6FFF !important; }
-        footer { visibility:hidden !important; }
-
-        /* MISC COMPONENT CLASSES */
-        .stats-row { display:flex; gap:14px; margin:18px 0; flex-wrap:wrap; }
-        .stat-card { flex:1; min-width:100px; background:#111116; border:1px solid rgba(240,237,232,0.11); border-top:3px solid #2F6FFF; border-radius:4px; padding:16px 18px; text-align:left; transition:border-color 0.15s ease; }
-        .stat-card:hover { border-color:rgba(240,237,232,0.22); }
-        .stat-card .stat-num { font-family:'Syne',sans-serif; font-size:2rem; font-weight:800; letter-spacing:-0.04em; line-height:1; color:#F0EDE8; display:block; }
-        .stat-card .stat-lbl { font-family:'Space Mono',monospace; font-size:0.52rem; color:#7A7A78; text-transform:uppercase; letter-spacing:0.14em; margin-top:5px; display:block; }
-        .hist-card { background:#111116; border:1px solid rgba(240,237,232,0.11); border-left:3px solid #2F6FFF; border-radius:4px; padding:16px 20px; margin-bottom:10px; transition:all 0.15s ease; }
-        .hist-card:hover { border-left-color:#5A8FFF; transform:translateX(3px); }
-        .tip-item  { display:flex; gap:10px; align-items:flex-start; padding:9px 12px; border-radius:4px; background:rgba(167,139,250,0.07); border:1px solid rgba(167,139,250,0.18); margin-bottom:7px; font-size:0.87rem; color:#A78BFA; font-family:'Epilogue',sans-serif; }
-        .tip-item::before  { content:"→"; flex-shrink:0; opacity:0.6; }
-        .learn-item { display:flex; gap:10px; align-items:center; padding:9px 12px; border-radius:4px; background:rgba(74,222,128,0.06); border:1px solid rgba(74,222,128,0.18); margin-bottom:7px; font-size:0.87rem; color:#4ADE80; font-family:'Epilogue',sans-serif; }
-        .learn-item::before { content:"◎"; flex-shrink:0; opacity:0.7; }
-        .compare-header { font-family:'Syne',sans-serif; font-size:1.2rem; font-weight:800; letter-spacing:-0.03em; color:#F0EDE8; margin-bottom:6px; }
-        .compare-cell { background:#111116; border:1px solid rgba(240,237,232,0.11); border-radius:4px; padding:16px; height:100%; }
-        .resource-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; margin:12px 0; }
-        .resource-card { background:#111116; border:1px solid rgba(240,237,232,0.11); border-radius:4px; padding:18px; transition:all 0.18s ease; text-decoration:none; display:block; }
-        .resource-card:hover { border-color:rgba(240,237,232,0.22); border-top-color:#2F6FFF; transform:translateY(-2px); text-decoration:none; }
-        .resource-card .rc-icon { font-size:1.6rem; margin-bottom:8px; }
-        .resource-card .rc-name { font-family:'Syne',sans-serif; font-size:0.95rem; font-weight:700; color:#F0EDE8; margin-bottom:4px; letter-spacing:-0.01em; }
-        .resource-card .rc-desc { font-family:'Epilogue',sans-serif; font-size:0.78rem; font-weight:300; color:#7A7A78; line-height:1.55; }
-        .resource-card .rc-tag  { display:inline-block; margin-top:10px; font-family:'Space Mono',monospace; font-size:0.58rem; letter-spacing:0.07em; text-transform:uppercase; padding:2px 8px; border-radius:3px; background:rgba(47,111,255,0.10); color:#5A8FFF; border:1px solid rgba(47,111,255,0.28); }
+            /* Sidebar — styled as overlay so it doesn't shift main content */
+            [data-testid="stSidebar"] {
+                background: rgba(8,12,24,0.96) !important;
+                backdrop-filter: blur(18px) !important;
+                -webkit-backdrop-filter: blur(18px) !important;
+                border-right: 1px solid rgba(0,71,255,0.2) !important;
+                box-shadow: 4px 0 40px rgba(0,0,0,0.5) !important;
+            }
+            /* Keep main content full-width always */
+            [data-testid="stAppViewContainer"] { margin-left: 0 !important; width: 100% !important; }
+            [data-testid="stMain"] { margin-left: 0 !important; width: 100% !important; }
+            [data-testid="stSidebar"] > div:first-child { padding-top: 0 !important; }
+            [data-testid="stSidebar"] hr { border-color: rgba(255,255,255,0.06) !important; margin: 16px 0 !important; }
+            [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
+                font-family: 'Space Mono', monospace !important; font-size: 0.75rem !important; color: #7a7a7a !important; text-transform: uppercase !important; letter-spacing: 0.12em !important; margin: 16px 0 8px 0 !important;
+            }
+        
+            /* Tabs */
+            .stTabs [data-baseweb="tab-list"] {
+                background: rgba(255,255,255,0.03) !important;
+                border-radius: 8px !important;
+                padding: 6px !important;
+                border: 1px solid rgba(255,255,255,0.06) !important;
+                gap: 4px !important;
+            }
+            .stTabs [data-baseweb="tab"] {
+                font-family: 'Inter', sans-serif !important;
+                font-size: 0.85rem !important;
+                font-weight: 500 !important;
+                color: #7a7a7a !important;
+                border-radius: 6px !important;
+                transition: all 0.2s ease !important;
+                padding: 10px 16px !important;
+            }
+            .stTabs [data-baseweb="tab"]:hover {
+                background: rgba(255,255,255,0.05) !important;
+                color: #FAFAF7 !important;
+            }
+            .stTabs [aria-selected="true"] {
+                background: rgba(255,255,255,0.08) !important;
+                color: #ffffff !important;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+            }
+        
+            /* Cards & Glassmorphism */
+            .result-card, .stat-card, .hist-card, .resource-card, .stExpander {
+                background: rgba(255,255,255,0.02) !important;
+                backdrop-filter: blur(12px) !important;
+                border: 1px solid rgba(255,255,255,0.08) !important;
+                border-radius: 12px !important;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.2) !important;
+                transition: all 0.3s cubic-bezier(0.16,1,0.3,1) !important;
+                position: relative; overflow: hidden;
+            }
+            .result-card { padding: 24px !important; animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1); margin-bottom: 20px; }
+            .result-card:hover, .stat-card:hover, .hist-card:hover, .resource-card:hover, .stExpander:hover {
+                border-color: rgba(0,71,255,0.4) !important;
+                transform: translateY(-4px) !important;
+                box-shadow: 0 16px 48px rgba(0,0,0,0.4) !important;
+                background: rgba(255,255,255,0.04) !important;
+            }
+            .result-card::after {
+                content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+                background: linear-gradient(90deg, #0047FF, transparent); opacity: 0; transition: opacity 0.3s ease;
+            }
+            .result-card:hover::after { opacity: 1; }
+        
+            /* Buttons */
+            .stButton > button {
+                font-family: 'Inter', sans-serif !important;
+                font-weight: 600 !important;
+                letter-spacing: 0.05em !important;
+                background: #0047FF !important;
+                color: #FFFFFF !important;
+                border-radius: 6px !important;
+                border: none !important;
+                padding: 10px 24px !important;
+                transition: all 0.2s ease !important;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+            }
+            .stButton > button:hover {
+                background: #003BCC !important;
+                transform: translateY(-2px) !important;
+                box-shadow: 0 8px 24px rgba(0,71,255,0.4) !important;
+            }
+        
+            /* Inputs */
+            .stTextInput > div > div > input, .stTextArea > div > div > textarea, .stSelectbox > div > div, .stMultiSelect > div > div {
+                background: rgba(255,255,255,0.03) !important;
+                border: 1px solid rgba(255,255,255,0.1) !important;
+                border-radius: 8px !important;
+                color: #FAFAF7 !important;
+                font-family: 'Inter', sans-serif !important;
+                font-size: 0.95rem !important;
+                transition: border-color 0.2s ease, background 0.2s ease !important;
+            }
+            .stTextInput > div > div > input:focus, .stTextArea > div > div > textarea:focus, .stSelectbox > div > div:focus-within {
+                border-color: #0047FF !important;
+                background: rgba(0,71,255,0.05) !important;
+                box-shadow: 0 0 0 3px rgba(0,71,255,0.1) !important;
+            }
+            label, .stRadio label, .stCheckbox label, .stSelectbox label, .stTextInput label, .stTextArea label {
+                font-family: 'Space Mono', monospace !important;
+                font-size: 0.72rem !important;
+                letter-spacing: 0.1em !important;
+                color: #7a7a7a !important;
+                text-transform: uppercase !important;
+            }
+            
+            /* Dividers */
+            hr { border: none !important; border-top: 1px solid rgba(255,255,255,0.08) !important; margin: 32px 0 !important; background: transparent !important; }
+        
+            /* Badge Pills */
+            .skill-badge {
+                display: inline-block; padding: 4px 12px; border-radius: 4px;
+                font-family: 'Space Mono', monospace; font-size: 0.7rem; font-weight: 400; letter-spacing: 0.04em;
+                margin: 4px; background: rgba(0,71,255,0.15); color: #7AABFF;
+                border: 1px solid rgba(0,71,255,0.3); transition: all 0.2s ease; cursor: default;
+            }
+            .skill-badge:hover { background: rgba(0,71,255,0.25); border-color: #0047FF; color: #fff; transform: translateY(-1px); }
+            .skill-badge.purple { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); color: #c084fc; }
+            .skill-badge.green { background: rgba(52,211,153,0.1); border-color: rgba(52,211,153,0.3); color: #6ee7b7; }
+        
+            /* Match Ring */
+            .match-ring-wrap { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; }
+            .match-ring { position:relative; width:80px; height:80px; }
+            .match-ring svg { transform:rotate(-90deg); }
+            .match-ring .ring-bg { fill:none; stroke:rgba(255,255,255,0.05); stroke-width:5; }
+            .match-ring .ring-fill { fill:none; stroke-width:5; stroke-linecap:round; transition:stroke-dashoffset 1.2s cubic-bezier(.16,1,.3,1); filter:drop-shadow(0 0 4px currentColor); }
+            .match-ring .ring-text { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+            .match-ring .ring-pct { font-size:1.4rem; font-weight:700; color:#fff; line-height:1; }
+            .match-ring .ring-label { font-size:0.55rem; color:rgba(255,255,255,0.4); letter-spacing:0.1em; text-transform:uppercase; font-family:'Space Mono', monospace; margin-top: 2px;}
+        
+            /* Components */
+            .stats-row { display:flex; gap:16px; margin:20px 0; flex-wrap:wrap; }
+            .stat-card { padding: 24px 20px; text-align: left; }
+            .stat-card .stat-num { font-size: 2.2rem; font-weight: 700; color: #FAFAF7; line-height: 1; margin-bottom: 8px;}
+            .stat-card .stat-lbl { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: #7a7a7a; text-transform: uppercase; letter-spacing: 0.1em; }
+            .hist-card { padding: 20px; margin-bottom: 16px; border-radius: 10px; text-decoration: none; }
+            .resource-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin: 16px 0; }
+            .resource-card { padding: 24px; text-decoration: none; display: block; }
+            .resource-card .rc-icon { font-size: 1.8rem; margin-bottom: 12px; }
+            .resource-card .rc-name { font-size: 1.05rem; font-weight: 600; color: #FAFAF7; margin-bottom: 6px; }
+            .resource-card .rc-desc { font-size: 0.85rem; color: #7a7a7a; line-height: 1.6; }
+            .resource-card .rc-tag { display: inline-block; margin-top: 14px; font-family: 'Space Mono', monospace; font-size: 0.65rem; padding: 4px 10px; border-radius: 4px; background: rgba(255,255,255,0.05); color: #FAFAF7; border: 1px solid rgba(255,255,255,0.1); }
+            .tip-item  { display:flex; gap:10px; align-items:flex-start; padding:12px; border-radius:8px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); margin-bottom:8px; font-size:0.88rem; color:#d8b4fe; }
+            .learn-item { display:flex; gap:10px; align-items:center; padding:12px; border-radius:8px; background:rgba(52,211,153,0.05); border:1px solid rgba(52,211,153,0.15); margin-bottom:8px; font-size:0.88rem; color:#6ee7b7; }
+            .compare-header { font-family:'Inter',sans-serif; font-size:1.4rem; letter-spacing:0; color:#FAFAF7; margin-bottom:12px; }
+            .compare-cell { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:12px; padding:20px; height:100%; }
+        
+            /* Progress Bar */
+            .stProgress > div > div > div { background: #0047FF !important; border-radius: 4px !important; }
+        
+            /* Job Links */
+            .job-links-row { display:flex; flex-wrap:wrap; gap:10px; margin-top:16px; }
+            .job-link-btn { display:inline-flex; align-items:center; gap:8px; padding:8px 16px; border-radius:6px; font-size:0.8rem; font-weight:500; text-decoration:none!important; border:1px solid; transition:all 0.2s ease; background:rgba(255,255,255,0.03); color:#FAFAF7; border-color:rgba(255,255,255,0.1); }
+            .job-link-btn:hover { background: rgba(0,71,255,0.1); border-color: #0047FF; transform: translateY(-2px); }
+        
+            /* Custom Hamburger Menu overrides for minimal theme */
+            #jl-hamburger {
+                background: rgba(10,10,10,0.65); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            }
+            #jl-hamburger:hover { background: rgba(0,71,255,0.2); border-color: #0047FF; }
+            #jl-hamburger span { background: #FFFFFF; }
+            #jl-nav-panel {
+                background: rgba(10,10,10,0.95); border-left: 1px solid rgba(255,255,255,0.06); box-shadow: -8px 0 40px rgba(0,0,0,0.8);
+            }
+            #jl-nav-panel .nav-label { color: #7a7a7a; }
+            #jl-nav-panel .nav-item:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: #fff; }
+            #jl-nav-panel .nav-item.active { background: rgba(0,71,255,0.1); border-color: #0047FF; color: #fff; }
+            #jl-nav-panel .settings-btn { border-color: rgba(255,255,255,0.1); color: #FAFAF7; background: rgba(255,255,255,0.05); }
+            #jl-nav-panel .settings-btn:hover { background: rgba(0,71,255,0.2); border-color: #0047FF; }
         </style>
+        
         """
         st.markdown(css, unsafe_allow_html=True)
 
         # ── Custom cursor + hidden-nav wiring + hamburger ─────────────────
-
-
         cursor_js = """
         <script>
         (function() {
@@ -1804,35 +1939,42 @@ class UIComponents:
                 try {
                     var P = window.parent, pdoc = P.document;
                     if (!pdoc || !pdoc.body) { setTimeout(init, 80); return; }
-                    if (P.__cursorRunning && pdoc.getElementById('ns-dot')) return;
-                    P.__cursorRunning = true;
+
+                    // Force cleanup of old injected elements on Streamlit auto-reruns
+                    ['nexstep-injected-css', 'jl-sidebar-btn', 'jl-overlay', 'jl-panel', 'jl-hbg', 'jl-hamburger', 'ns-dot', 'ns-ring'].forEach(function(i){ pdoc.querySelectorAll('#' + i).forEach(function(e){ e.remove(); }); });
+                    if (P.__jlNavObserver) { P.__jlNavObserver.disconnect(); P.__jlNavObserver = null; }
+                    var oldStyles = pdoc.head.querySelectorAll('style');
+                    for(var i=0; i<oldStyles.length; i++) {
+                        if(oldStyles[i].textContent && oldStyles[i].textContent.indexOf('stSidebar')>-1 && !oldStyles[i].id) oldStyles[i].remove();
+                    }
+
 
                     // ── CSS: cursor + ghost hide + hamburger ──────────────
                     if (!pdoc.getElementById('nexstep-injected-css')) {
                         var s = pdoc.createElement('style'); s.id = 'nexstep-injected-css';
                         s.textContent = [
                             '* { cursor: none !important; }',
-                            '#ns-dot { position:fixed!important; left:0!important; top:0!important; width:10px!important; height:10px!important; background:#2F6FFF!important; border-radius:50%!important; pointer-events:none!important; z-index:2147483647!important; will-change:transform!important; box-shadow:0 0 10px #2F6FFF,0 0 24px rgba(47,111,255,.5)!important; transition:width .15s,height .15s,background .15s!important; mix-blend-mode:screen!important; }',
-                            '#ns-dot.ns-click { width:5px!important; height:5px!important; background:#A78BFA!important; box-shadow:0 0 12px #A78BFA!important; }',
-                            '#ns-ring { position:fixed!important; left:0!important; top:0!important; width:34px!important; height:34px!important; border:1.5px solid rgba(47,111,255,.6)!important; border-radius:50%!important; pointer-events:none!important; z-index:2147483646!important; will-change:transform!important; transition:width .2s ease,height .2s ease,border-color .2s ease,background .2s ease!important; }',
-                            '#ns-ring.ns-hover { width:56px!important; height:56px!important; border-color:#A78BFA!important; background:rgba(168,85,247,.06)!important; }',
+                            '#ns-dot { position:fixed!important; left:0!important; top:0!important; width:10px!important; height:10px!important; background:#0047FF!important; border-radius:50%!important; pointer-events:none!important; z-index:2147483647!important; will-change:transform!important; box-shadow:0 0 10px #0047FF,0 0 24px rgba(0,71,255,.5)!important; transition:width .15s,height .15s,background .15s!important; mix-blend-mode:screen!important; }',
+                            '#ns-dot.ns-click { width:5px!important; height:5px!important; background:#FFFFFF!important; box-shadow:0 0 12px #FFFFFF!important; }',
+                            '#ns-ring { position:fixed!important; left:0!important; top:0!important; width:34px!important; height:34px!important; border:1.5px solid rgba(0,71,255,.6)!important; border-radius:50%!important; pointer-events:none!important; z-index:2147483646!important; will-change:transform!important; transition:width .2s ease,height .2s ease,border-color .2s ease,background .2s ease!important; }',
+                            '#ns-ring.ns-hover { width:56px!important; height:56px!important; border-color:#FFFFFF!important; background:rgba(255,255,255,.06)!important; }',
                             '.jl-ghost-btn { position:fixed!important; top:-9999px!important; left:-9999px!important; width:1px!important; height:1px!important; overflow:hidden!important; opacity:0!important; pointer-events:none!important; }',
-                            /* hamburger button */
-                            '#jl-hbg { position:fixed!important; top:14px!important; right:14px!important; z-index:2147483640!important; width:42px!important; height:42px!important; background:rgba(6,12,24,0.65)!important; backdrop-filter:blur(12px)!important; -webkit-backdrop-filter:blur(12px)!important; border:1px solid rgba(47,111,255,0.25)!important; border-radius:4px!important; display:flex!important; flex-direction:column!important; align-items:center!important; justify-content:center!important; gap:5px!important; cursor:pointer!important; transition:all 0.2s ease!important; box-shadow:0 4px 20px rgba(0,0,0,0.5)!important; }',
-                            '#jl-hbg:hover { background:rgba(47,111,255,0.15)!important; border-color:rgba(47,111,255,0.6)!important; box-shadow:0 0 20px rgba(47,111,255,0.25)!important; }',
-                            '#jl-hbg span { display:block!important; width:17px!important; height:1.5px!important; background:#2F6FFF!important; border-radius:2px!important; transition:all 0.25s ease!important; pointer-events:none!important; }',
+                            /* hamburger button — top right */
+                            '#jl-hbg { position:fixed!important; top:14px!important; right:14px!important; z-index:2147483640!important; width:42px!important; height:42px!important; background:rgba(6,12,24,0.65)!important; backdrop-filter:blur(12px)!important; -webkit-backdrop-filter:blur(12px)!important; border:1px solid rgba(0,71,255,0.25)!important; border-radius:11px!important; display:flex!important; flex-direction:column!important; align-items:center!important; justify-content:center!important; gap:5px!important; cursor:pointer!important; transition:all 0.2s ease!important; box-shadow:0 4px 20px rgba(0,0,0,0.5)!important; }',
+                            '#jl-hbg:hover { background:rgba(0,71,255,0.15)!important; border-color:rgba(0,71,255,0.6)!important; box-shadow:0 0 20px rgba(0,71,255,0.25)!important; }',
+                            '#jl-hbg span { display:block!important; width:17px!important; height:1.5px!important; background:#0047FF!important; border-radius:2px!important; transition:all 0.25s ease!important; pointer-events:none!important; }',
                             '#jl-hbg.open span:nth-child(1) { transform:translateY(6.5px) rotate(45deg)!important; }',
                             '#jl-hbg.open span:nth-child(2) { opacity:0!important; transform:scaleX(0)!important; }',
                             '#jl-hbg.open span:nth-child(3) { transform:translateY(-6.5px) rotate(-45deg)!important; }',
                             /* nav panel */
-                            '#jl-panel { position:fixed!important; top:0!important; right:0!important; width:230px!important; height:100vh!important; background:rgba(5,9,18,0.97)!important; backdrop-filter:blur(24px)!important; -webkit-backdrop-filter:blur(24px)!important; border-left:1px solid rgba(47,111,255,0.12)!important; z-index:2147483639!important; transform:translateX(100%)!important; transition:transform 0.3s cubic-bezier(0.16,1,0.3,1)!important; padding:68px 16px 24px!important; display:flex!important; flex-direction:column!important; gap:3px!important; box-shadow:-8px 0 40px rgba(0,0,0,0.6)!important; overflow-y:auto!important; }',
+                            '#jl-panel { position:fixed!important; top:0!important; right:0!important; width:230px!important; height:100vh!important; background:rgba(5,9,18,0.97)!important; backdrop-filter:blur(24px)!important; -webkit-backdrop-filter:blur(24px)!important; border-left:1px solid rgba(0,71,255,0.12)!important; z-index:2147483639!important; transform:translateX(100%)!important; transition:transform 0.3s cubic-bezier(0.16,1,0.3,1)!important; padding:68px 16px 24px!important; display:flex!important; flex-direction:column!important; gap:3px!important; box-shadow:-8px 0 40px rgba(0,0,0,0.6)!important; overflow-y:auto!important; }',
                             '#jl-panel.open { transform:translateX(0)!important; }',
                             '#jl-overlay { position:fixed!important; inset:0!important; z-index:2147483638!important; display:none!important; }',
                             '#jl-overlay.open { display:block!important; }',
-                            '.jl-nlbl { font-family:monospace!important; font-size:0.58rem!important; letter-spacing:0.2em!important; text-transform:uppercase!important; color:rgba(47,111,255,0.35)!important; margin:0 0 10px 4px!important; }',
-                            '.jl-ni { display:flex!important; align-items:center!important; gap:10px!important; padding:10px 14px!important; border-radius:4px!important; border:1px solid transparent!important; cursor:pointer!important; font-family:sans-serif!important; font-size:0.88rem!important; font-weight:500!important; color:#64748b!important; transition:all 0.18s ease!important; margin-bottom:2px!important; }',
-                            '.jl-ni:hover { background:rgba(47,111,255,0.08)!important; border-color:rgba(47,111,255,0.18)!important; color:#e2e8f0!important; }',
-                            '.jl-ni.active { background:rgba(47,111,255,0.11)!important; border-color:rgba(47,111,255,0.28)!important; color:#2F6FFF!important; font-weight:600!important; }'
+                            '.jl-nlbl { font-family:monospace!important; font-size:0.58rem!important; letter-spacing:0.2em!important; text-transform:uppercase!important; color:rgba(0,71,255,0.35)!important; margin:0 0 10px 4px!important; }',
+                            '.jl-ni { display:flex!important; align-items:center!important; gap:10px!important; padding:10px 14px!important; border-radius:10px!important; border:1px solid transparent!important; cursor:pointer!important; font-family:sans-serif!important; font-size:0.88rem!important; font-weight:500!important; color:#7a7a7a!important; transition:all 0.18s ease!important; margin-bottom:2px!important; }',
+                            '.jl-ni:hover { background:rgba(0,71,255,0.08)!important; border-color:rgba(0,71,255,0.18)!important; color:#FAFAF7!important; }',
+                            '.jl-ni.active { background:rgba(0,71,255,0.11)!important; border-color:rgba(0,71,255,0.28)!important; color:#0047FF!important; font-weight:600!important; }'
                         ].join('');
                         pdoc.head.appendChild(s);
                     }
@@ -1847,33 +1989,11 @@ class UIComponents:
                         ];
                         var curPage = (new URLSearchParams(P.location.search)).get('page') || 'home';
 
+                        // ── Right-Side Nav Hamburger & Panel ──
                         var overlay = pdoc.createElement('div'); overlay.id = 'jl-overlay';
                         var panel   = pdoc.createElement('div'); panel.id   = 'jl-panel';
                         var lbl     = pdoc.createElement('div'); lbl.className = 'jl-nlbl'; lbl.textContent = 'Navigation';
                         panel.appendChild(lbl);
-
-                        // ── ⚙️ API Settings shortcut → opens Streamlit sidebar ──
-                        var settBtn = pdoc.createElement('div');
-                        settBtn.setAttribute('style', 'display:flex!important;align-items:center!important;gap:10px!important;padding:9px 14px!important;border-radius:4px!important;border:1px solid rgba(47,111,255,0.3)!important;cursor:pointer!important;font-family:sans-serif!important;font-size:0.86rem!important;font-weight:700!important;color:#2F6FFF!important;margin-bottom:12px!important;background:rgba(47,111,255,0.09)!important;letter-spacing:0.02em!important;');
-                        settBtn.innerHTML = '&#9881;&#65039;&nbsp;&nbsp;API Key Settings';
-                        settBtn.addEventListener('click', function() {
-                            closePanel();
-                            setTimeout(function() {
-                                var candidates = [
-                                    pdoc.querySelector('[data-testid="stSidebarCollapsedControl"] button'),
-                                    pdoc.querySelector('[data-testid="stSidebarNavToggleButton"]'),
-                                    pdoc.querySelector('button[aria-expanded]'),
-                                    Array.from(pdoc.querySelectorAll('button')).find(function(b) {
-                                        var lc = (b.getAttribute('aria-label') || '').toLowerCase();
-                                        return lc.indexOf('sidebar') > -1 || lc.indexOf('navigation') > -1;
-                                    })
-                                ];
-                                for (var i=0; i<candidates.length; i++) {
-                                    if (candidates[i]) { candidates[i].click(); break; }
-                                }
-                            }, 120);
-                        });
-                        panel.appendChild(settBtn);
 
                         NAV_DEFS.forEach(function(nd) {
                             var item = pdoc.createElement('div');
@@ -1984,24 +2104,24 @@ class UIComponents:
 html,body{background:#050a12!important;overflow:hidden;font-family:'DM Sans',sans-serif}
 .wrap{display:flex;height:340px;gap:0;position:relative}
 .L{flex:0 0 44%;padding:22px 24px 18px 24px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;border-right:1px solid rgba(255,255,255,0.06)}
-.L::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 10% 0%,rgba(47,111,255,0.07) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 90% 100%,rgba(168,85,247,0.06) 0%,transparent 60%),linear-gradient(160deg,#070d1a 0%,#060b16 100%);z-index:0}
-.L::after{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(47,111,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(47,111,255,0.025) 1px,transparent 1px);background-size:28px 28px;z-index:0;mask-image:radial-gradient(ellipse 100% 100% at 50% 50%,black 40%,transparent 100%)}
+.L::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 10% 0%,rgba(0,71,255,0.07) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 90% 100%,rgba(255,255,255,0.06) 0%,transparent 60%),linear-gradient(160deg,#070d1a 0%,#060b16 100%);z-index:0}
+.L::after{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(0,71,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,71,255,0.025) 1px,transparent 1px);background-size:28px 28px;z-index:0;mask-image:radial-gradient(ellipse 100% 100% at 50% 50%,black 40%,transparent 100%)}
 .L>*{position:relative;z-index:2}
-.ltag{display:inline-flex;align-items:center;gap:6px;background:rgba(47,111,255,0.08);border:1px solid rgba(47,111,255,0.2);border-radius:20px;padding:3px 10px;margin-bottom:12px}
-.ltag-dot{width:5px;height:5px;border-radius:50%;background:#2F6FFF;box-shadow:0 0 8px #2F6FFF;animation:glow 2s ease-in-out infinite}
-@keyframes glow{0%,100%{opacity:1;box-shadow:0 0 8px #2F6FFF}50%{opacity:.5;box-shadow:0 0 4px #2F6FFF}}
-.ltag-txt{font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(47,111,255,0.7)}
+.ltag{display:inline-flex;align-items:center;gap:6px;background:rgba(0,71,255,0.08);border:1px solid rgba(0,71,255,0.2);border-radius:20px;padding:3px 10px;margin-bottom:12px}
+.ltag-dot{width:5px;height:5px;border-radius:50%;background:#0047FF;box-shadow:0 0 8px #0047FF;animation:glow 2s ease-in-out infinite}
+@keyframes glow{0%,100%{opacity:1;box-shadow:0 0 8px #0047FF}50%{opacity:.5;box-shadow:0 0 4px #0047FF}}
+.ltag-txt{font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(0,71,255,0.7)}
 .ltitle{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;background:linear-gradient(125deg,#ffffff 0%,#a8f0ff 45%,#c084fc 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.25;margin-bottom:4px}
 .lsub{font-size:.62rem;color:rgba(255,255,255,0.28);letter-spacing:.04em;font-weight:300;margin-bottom:14px}
-.ldiv{height:1px;margin-bottom:14px;background:linear-gradient(90deg,transparent,rgba(47,111,255,.3),rgba(168,85,247,.2),transparent);position:relative}
-.ldiv::after{content:'';position:absolute;top:-1px;left:30%;width:20px;height:3px;background:#2F6FFF;border-radius:2px;filter:blur(3px);animation:divslide 3s ease-in-out infinite}
+.ldiv{height:1px;margin-bottom:14px;background:linear-gradient(90deg,transparent,rgba(0,71,255,.3),rgba(255,255,255,.2),transparent);position:relative}
+.ldiv::after{content:'';position:absolute;top:-1px;left:30%;width:20px;height:3px;background:#0047FF;border-radius:2px;filter:blur(3px);animation:divslide 3s ease-in-out infinite}
 @keyframes divslide{0%,100%{left:10%;opacity:.8}50%{left:70%;opacity:1}}
-.prow{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:7px 10px;border-radius:4px;border:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.03);transition:all .25s ease;cursor:default;animation:prowIn .5s ease both}
+.prow{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:7px 10px;border-radius:10px;border:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.03);transition:all .25s ease;cursor:default;animation:prowIn .5s ease both}
 .prow:nth-child(1){animation-delay:.1s}
 .prow:nth-child(2){animation-delay:.2s}
 .prow:nth-child(3){animation-delay:.3s}
 @keyframes prowIn{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
-.prow:hover{border-color:rgba(47,111,255,0.2);background:rgba(47,111,255,0.05);transform:translateX(3px)}
+.prow:hover{border-color:rgba(0,71,255,0.2);background:rgba(0,71,255,0.05);transform:translateX(3px)}
 .pbadge{border-radius:6px;padding:2px 8px;font-size:.6rem;font-weight:700;flex-shrink:0;font-family:'Syne',sans-serif}
 .pmeta{flex:1;overflow:hidden}
 .pname{font-size:.68rem;font-weight:600;color:rgba(255,255,255,.8);line-height:1;margin-bottom:1px}
@@ -2011,82 +2131,82 @@ html,body{background:#050a12!important;overflow:hidden;font-family:'DM Sans',san
 .lpill{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:30px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);animation:pillIn .6s ease .5s both}
 @keyframes pillIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .lpill-txt{font-size:.65rem;color:rgba(255,255,255,.6);font-weight:500;letter-spacing:.03em}
-.lpill-accent{color:#2F6FFF;font-weight:700}
+.lpill-accent{color:#0047FF;font-weight:700}
 .R{flex:1;position:relative;overflow:hidden;background:linear-gradient(155deg,#060c1a 0%,#050911 100%)}
 .R::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:40;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.06) 3px,rgba(0,0,0,0.06) 4px)}
 .blob{position:absolute;border-radius:50%;pointer-events:none;filter:blur(40px);opacity:.3}
-.blob1{width:180px;height:180px;background:radial-gradient(#2F6FFF,transparent);top:-40px;right:-20px;animation:b1 8s ease-in-out infinite}
-.blob2{width:140px;height:140px;background:radial-gradient(#a855f7,transparent);bottom:-30px;left:10px;animation:b2 10s ease-in-out infinite}
+.blob1{width:180px;height:180px;background:radial-gradient(#0047FF,transparent);top:-40px;right:-20px;animation:b1 8s ease-in-out infinite}
+.blob2{width:140px;height:140px;background:radial-gradient(#FFFFFF,transparent);bottom:-30px;left:10px;animation:b2 10s ease-in-out infinite}
 @keyframes b1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-20px,15px) scale(1.1)}}
 @keyframes b2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(15px,-20px) scale(.9)}}
-.livebadge{position:absolute;top:12px;right:14px;z-index:50;display:flex;align-items:center;gap:5px;background:rgba(0,0,0,0.5);border:1px solid rgba(47,111,255,0.25);border-radius:20px;padding:3px 10px;backdrop-filter:blur(8px)}
-.livebadge-dot{width:5px;height:5px;border-radius:50%;background:#2F6FFF;box-shadow:0 0 8px #2F6FFF;animation:lp 1.4s ease-in-out infinite}
+.livebadge{position:absolute;top:12px;right:14px;z-index:50;display:flex;align-items:center;gap:5px;background:rgba(0,0,0,0.5);border:1px solid rgba(0,71,255,0.25);border-radius:20px;padding:3px 10px;backdrop-filter:blur(8px)}
+.livebadge-dot{width:5px;height:5px;border-radius:50%;background:#0047FF;box-shadow:0 0 8px #0047FF;animation:lp 1.4s ease-in-out infinite}
 @keyframes lp{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.6}}
-.livebadge-txt{font-family:'DM Mono',monospace;font-size:.48rem;letter-spacing:.18em;color:rgba(47,111,255,.75);text-transform:uppercase}
+.livebadge-txt{font-family:'DM Mono',monospace;font-size:.48rem;letter-spacing:.18em;color:rgba(0,71,255,.75);text-transform:uppercase}
 .tabs{position:absolute;bottom:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:center;gap:4px;padding:8px 10px;background:linear-gradient(0deg,rgba(5,10,18,.95) 0%,transparent 100%)}
 .tab{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.04);font-size:.56rem;font-weight:600;color:rgba(255,255,255,.35);cursor:pointer;transition:all .25s ease;font-family:'DM Mono',monospace;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
-.tab.active{background:rgba(47,111,255,.12);border-color:rgba(47,111,255,.35);color:#2F6FFF;box-shadow:0 0 14px rgba(47,111,255,.15)}
+.tab.active{background:rgba(0,71,255,.12);border-color:rgba(0,71,255,.35);color:#0047FF;box-shadow:0 0 14px rgba(0,71,255,.15)}
 .tab-icon{font-size:.65rem}
 .slides{position:absolute;inset:0;bottom:38px}
 .slide{position:absolute;inset:0;padding:18px 18px 10px 18px;display:flex;flex-direction:column;opacity:0;transform:translateY(14px) scale(.98);transition:opacity .5s cubic-bezier(.4,0,.2,1),transform .5s cubic-bezier(.4,0,.2,1);pointer-events:none}
 .slide.active{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
 .slide.exit{opacity:0;transform:translateY(-10px) scale(.98)}
 .slabel{display:flex;align-items:center;gap:6px;margin-bottom:10px}
-.slabel-dot{width:4px;height:4px;border-radius:50%;background:#2F6FFF;box-shadow:0 0 6px #2F6FFF;animation:glow 1.5s ease-in-out infinite}
-.slabel-txt{font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(47,111,255,.55)}
+.slabel-dot{width:4px;height:4px;border-radius:50%;background:#0047FF;box-shadow:0 0 6px #0047FF;animation:glow 1.5s ease-in-out infinite}
+.slabel-txt{font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(0,71,255,.55)}
 .stitle{font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;color:#f1f5f9;margin-bottom:10px;line-height:1.2}
-.stitle span{background:linear-gradient(90deg,#2F6FFF,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.input-field{background:rgba(255,255,255,.04);border:1px solid rgba(47,111,255,.2);border-radius:4px;padding:7px 11px;font-size:.67rem;color:#94a3b8;font-family:'DM Mono',monospace;margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.input-field::before{content:'>';color:rgba(47,111,255,.4);font-size:.55rem}
-.cursor{display:inline-block;width:1.5px;height:10px;background:#2F6FFF;margin-left:2px;vertical-align:middle;animation:blink .9s step-end infinite}
+.stitle span{background:linear-gradient(90deg,#0047FF,#FFFFFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.input-field{background:rgba(255,255,255,.04);border:1px solid rgba(0,71,255,.2);border-radius:8px;padding:7px 11px;font-size:.67rem;color:#b3b3b3;font-family:'DM Mono',monospace;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.input-field::before{content:'>';color:rgba(0,71,255,.4);font-size:.55rem}
+.cursor{display:inline-block;width:1.5px;height:10px;background:#0047FF;margin-left:2px;vertical-align:middle;animation:blink .9s step-end infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 .career-cards{display:flex;flex-direction:column;gap:6px}
-.ccard{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:4px;padding:8px 10px;display:flex;align-items:center;gap:10px;opacity:0;transform:translateX(-10px)}
+.ccard{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:8px 10px;display:flex;align-items:center;gap:10px;opacity:0;transform:translateX(-10px)}
 .ccard.show{animation:cardIn .4s ease forwards}
 @keyframes cardIn{to{opacity:1;transform:translateX(0)}}
 .ccard-role{flex:1}
-.ccard-name{font-size:.7rem;font-weight:600;color:#e2e8f0;font-family:'Syne',sans-serif;margin-bottom:3px}
+.ccard-name{font-size:.7rem;font-weight:600;color:#FAFAF7;font-family:'Syne',sans-serif;margin-bottom:3px}
 .ccard-sal{font-size:.58rem;color:rgba(255,255,255,.35);font-family:'DM Mono',monospace}
 .ccard-score{text-align:right;flex-shrink:0}
 .ccard-pct{font-family:'DM Mono',monospace;font-size:.75rem;font-weight:500}
 .ccard-bar{width:60px;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;margin-top:3px}
-.ccard-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#2F6FFF,#a855f7);width:0%;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
-.resume-mock{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:10px 12px;flex:1;display:flex;flex-direction:column;gap:5px;overflow:hidden}
-.rm-head{height:8px;width:55%;border-radius:4px;background:rgba(47,111,255,.35);transform:scaleX(0);transform-origin:left;margin-bottom:3px}
+.ccard-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#0047FF,#FFFFFF);width:0%;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.resume-mock{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px 12px;flex:1;display:flex;flex-direction:column;gap:5px;overflow:hidden}
+.rm-head{height:8px;width:55%;border-radius:4px;background:rgba(0,71,255,.35);transform:scaleX(0);transform-origin:left;margin-bottom:3px}
 .rm-line{height:4px;border-radius:2px;background:rgba(255,255,255,.1);transform:scaleX(0);transform-origin:left}
 .rm-line.go{animation:lineIn .4s ease forwards}
 .rm-head.go{animation:lineIn .4s ease forwards}
 @keyframes lineIn{to{transform:scaleX(1)}}
-.ats-badge{display:inline-flex;align-items:center;gap:6px;margin-top:8px;background:linear-gradient(135deg,rgba(47,111,255,.12),rgba(47,111,255,.06));border:1px solid rgba(47,111,255,.3);border-radius:4px;padding:5px 12px;opacity:0;transition:opacity .5s ease;align-self:flex-start}
+.ats-badge{display:inline-flex;align-items:center;gap:6px;margin-top:8px;background:linear-gradient(135deg,rgba(0,71,255,.12),rgba(0,71,255,.06));border:1px solid rgba(0,71,255,.3);border-radius:8px;padding:5px 12px;opacity:0;transition:opacity .5s ease;align-self:flex-start}
 .ats-badge.show{opacity:1}
-.ats-check{color:#2F6FFF;font-size:.8rem}
-.ats-label{font-family:'DM Mono',monospace;font-size:.62rem;font-weight:500;color:#2F6FFF}
-.ats-score{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:#2F6FFF;line-height:1}
-.ats-max{font-size:.55rem;color:rgba(47,111,255,.5);font-family:'DM Mono',monospace}
+.ats-check{color:#0047FF;font-size:.8rem}
+.ats-label{font-family:'DM Mono',monospace;font-size:.62rem;font-weight:500;color:#0047FF}
+.ats-score{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:#0047FF;line-height:1}
+.ats-max{font-size:.55rem;color:rgba(0,71,255,.5);font-family:'DM Mono',monospace}
 .chat{display:flex;flex-direction:column;gap:8px;flex:1}
-.bubble{max-width:90%;border-radius:4px;padding:8px 11px;font-size:.63rem;line-height:1.55;font-family:'DM Sans',sans-serif;opacity:0;transform:translateY(8px)}
+.bubble{max-width:90%;border-radius:12px;padding:8px 11px;font-size:.63rem;line-height:1.55;font-family:'DM Sans',sans-serif;opacity:0;transform:translateY(8px)}
 .bubble.show{animation:bubbleIn .4s ease forwards}
 @keyframes bubbleIn{to{opacity:1;transform:translateY(0)}}
-.bubble.ai{background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.25);border-radius:4px 12px 12px 3px;color:#d8b4fe;align-self:flex-start}
-.bubble.user{background:rgba(47,111,255,.08);border:1px solid rgba(47,111,255,.2);border-radius:4px 12px 3px 12px;color:#7dd3fc;align-self:flex-end;margin-left:10%}
-.typing{display:flex;align-items:center;gap:3px;padding:8px 12px;background:rgba(168,85,247,.07);border:1px solid rgba(168,85,247,.15);border-radius:4px 12px 12px 3px;width:fit-content;opacity:0}
+.bubble.ai{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:12px 12px 12px 3px;color:#d8b4fe;align-self:flex-start}
+.bubble.user{background:rgba(0,71,255,.08);border:1px solid rgba(0,71,255,.2);border-radius:12px 12px 3px 12px;color:#7dd3fc;align-self:flex-end;margin-left:10%}
+.typing{display:flex;align-items:center;gap:3px;padding:8px 12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:12px 12px 12px 3px;width:fit-content;opacity:0}
 .typing.show{animation:bubbleIn .3s ease forwards}
-.tdot{width:4px;height:4px;border-radius:50%;background:#A78BFA;animation:td 1.2s ease-in-out infinite}
+.tdot{width:4px;height:4px;border-radius:50%;background:#FFFFFF;animation:td 1.2s ease-in-out infinite}
 .tdot:nth-child(2){animation-delay:.2s}
 .tdot:nth-child(3){animation-delay:.4s}
 @keyframes td{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-4px);opacity:1}}
 .score-row{display:flex;align-items:center;gap:8px;margin-top:4px;opacity:0}
 .score-row.show{animation:bubbleIn .4s ease .2s forwards}
-.score-chip{display:flex;align-items:center;gap:4px;background:rgba(47,111,255,.08);border:1px solid rgba(47,111,255,.2);border-radius:6px;padding:3px 8px;font-family:'DM Mono',monospace;font-size:.58rem;color:#2F6FFF;font-weight:500}
-.score-val{font-size:.8rem;font-weight:700;font-family:'Syne',sans-serif;color:#2F6FFF}
+.score-chip{display:flex;align-items:center;gap:4px;background:rgba(0,71,255,.08);border:1px solid rgba(0,71,255,.2);border-radius:6px;padding:3px 8px;font-family:'DM Mono',monospace;font-size:.58rem;color:#0047FF;font-weight:500}
+.score-val{font-size:.8rem;font-weight:700;font-family:'Syne',sans-serif;color:#0047FF}
 .pyq-grid{display:flex;flex-direction:column;gap:6px;flex:1}
-.pyq-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:4px;padding:8px 11px;display:flex;align-items:center;gap:10px;opacity:0;transform:translateY(8px)}
+.pyq-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:8px 11px;display:flex;align-items:center;gap:10px;opacity:0;transform:translateY(8px)}
 .pyq-card.show{animation:cardIn .4s ease forwards}
 .pyq-co{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.75rem;flex-shrink:0;font-family:'Syne',sans-serif;font-weight:700}
 .pyq-info{flex:1}
-.pyq-name{font-size:.7rem;font-weight:600;color:#e2e8f0;font-family:'Syne',sans-serif;margin-bottom:2px}
+.pyq-name{font-size:.7rem;font-weight:600;color:#FAFAF7;font-family:'Syne',sans-serif;margin-bottom:2px}
 .pyq-meta{font-size:.57rem;color:rgba(255,255,255,.3);font-family:'DM Mono',monospace}
-.pyq-count{background:rgba(47,111,255,.1);border:1px solid rgba(47,111,255,.2);border-radius:6px;padding:2px 7px;font-family:'DM Mono',monospace;font-size:.58rem;color:#2F6FFF;flex-shrink:0}
+.pyq-count{background:rgba(0,71,255,.1);border:1px solid rgba(0,71,255,.2);border-radius:6px;padding:2px 7px;font-family:'DM Mono',monospace;font-size:.58rem;color:#0047FF;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -2128,8 +2248,8 @@ html,body{background:#050a12!important;overflow:hidden;font-family:'DM Sans',san
       <div class="stitle">Your <span>AI Career</span> Roadmap</div>
       <div class="input-field">Python &middot; ML &middot; 2 yrs @ TCS<span class="cursor"></span></div>
       <div class="career-cards">
-        <div class="ccard" id="cc0"><div class="ccard-role"><div class="ccard-name">Data Scientist</div><div class="ccard-sal">&#8377;18L &ndash; &#8377;32L / yr</div></div><div class="ccard-score"><div class="ccard-pct" style="color:#2F6FFF" id="pct0">0%</div><div class="ccard-bar"><div class="ccard-fill" id="bf0"></div></div></div></div>
-        <div class="ccard" id="cc1"><div class="ccard-role"><div class="ccard-name">ML Engineer</div><div class="ccard-sal">&#8377;22L &ndash; &#8377;40L / yr</div></div><div class="ccard-score"><div class="ccard-pct" style="color:#a855f7" id="pct1">0%</div><div class="ccard-bar"><div class="ccard-fill" id="bf1" style="background:linear-gradient(90deg,#a855f7,#ec4899)"></div></div></div></div>
+        <div class="ccard" id="cc0"><div class="ccard-role"><div class="ccard-name">Data Scientist</div><div class="ccard-sal">&#8377;18L &ndash; &#8377;32L / yr</div></div><div class="ccard-score"><div class="ccard-pct" style="color:#0047FF" id="pct0">0%</div><div class="ccard-bar"><div class="ccard-fill" id="bf0"></div></div></div></div>
+        <div class="ccard" id="cc1"><div class="ccard-role"><div class="ccard-name">ML Engineer</div><div class="ccard-sal">&#8377;22L &ndash; &#8377;40L / yr</div></div><div class="ccard-score"><div class="ccard-pct" style="color:#FFFFFF" id="pct1">0%</div><div class="ccard-bar"><div class="ccard-fill" id="bf1" style="background:linear-gradient(90deg,#FFFFFF,#ec4899)"></div></div></div></div>
         <div class="ccard" id="cc2"><div class="ccard-role"><div class="ccard-name">AI Researcher</div><div class="ccard-sal">&#8377;28L &ndash; &#8377;55L / yr</div></div><div class="ccard-score"><div class="ccard-pct" style="color:#34d399" id="pct2">0%</div><div class="ccard-bar"><div class="ccard-fill" id="bf2" style="background:linear-gradient(90deg,#34d399,#06b6d4)"></div></div></div></div>
       </div>
     </div>
@@ -2223,6 +2343,81 @@ document.addEventListener('mousemove',function(e){var rect=window.frameElement?w
 </html>""", height=360, scrolling=False)
 
 
+# ==================== GLOBAL BACKGROUND ====================
+def render_global_background():
+    """Injects a global Three.js Dotted Surface background into the parent Streamlit page via components.html parent DOM injection."""
+    components.html("""<!DOCTYPE html>
+<html><body style="margin:0;padding:0;background:transparent;">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function() {
+  var p = window.parent;
+  if (!p || p._jlBgInit) return;
+  p._jlBgInit = true;
+
+  var doc = p.document;
+
+  // ── 1. Three.js dotted background ───────────────────────────────────────
+  var old = doc.getElementById('dotted-bg-canvas');
+  if (old) old.remove();
+
+  var SEPARATION = 150, AMOUNTX = 40, AMOUNTY = 60;
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(60, p.innerWidth / p.innerHeight, 1, 10000);
+  camera.position.set(0, 355, 1220);
+
+  var renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer.setPixelRatio(p.devicePixelRatio);
+  renderer.setSize(p.innerWidth, p.innerHeight);
+  renderer.setClearColor(0x000000, 0);
+
+  var cv = renderer.domElement;
+  cv.id = 'dotted-bg-canvas';
+  cv.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none;';
+  doc.body.appendChild(cv);
+
+  var positions = [], colors = [];
+  for (var ix = 0; ix < AMOUNTX; ix++) {
+    for (var iy = 0; iy < AMOUNTY; iy++) {
+      positions.push(
+        ix * SEPARATION - (AMOUNTX * SEPARATION) / 2, 0,
+        iy * SEPARATION - (AMOUNTY * SEPARATION) / 2
+      );
+      colors.push(0.2, 0.5, 1.0);
+    }
+  }
+  var geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  var mat = new THREE.PointsMaterial({ size: 6, vertexColors: true, transparent: true, opacity: 0.5, sizeAttenuation: true });
+  scene.add(new THREE.Points(geo, mat));
+
+  var count = 0;
+  function animate() {
+    requestAnimationFrame(animate);
+    var arr = geo.attributes.position.array;
+    var i = 0;
+    for (var ix = 0; ix < AMOUNTX; ix++) {
+      for (var iy = 0; iy < AMOUNTY; iy++) {
+        arr[i * 3 + 1] = Math.sin((ix + count) * 0.3) * 50 + Math.sin((iy + count) * 0.5) * 50;
+        i++;
+      }
+    }
+    geo.attributes.position.needsUpdate = true;
+    renderer.render(scene, camera);
+    count += 0.07;
+  }
+  p.addEventListener('resize', function() {
+    camera.aspect = p.innerWidth / p.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(p.innerWidth, p.innerHeight);
+  });
+  animate();
+
+})();
+</script>
+</body></html>""", height=0)
+
 # ==================== TAB RENDER FUNCTIONS ====================
 
 def render_tab_career_analysis(ai_handler: AIHandler, pdf_handler: PDFHandler,
@@ -2232,9 +2427,9 @@ def render_tab_career_analysis(ai_handler: AIHandler, pdf_handler: PDFHandler,
     """Tab 1 — Career Analysis."""
     st.markdown("### 📋 Input Your Profile")
     st.markdown("""
-    <div style="background:rgba(47,111,255,0.06);border:1px solid rgba(47,111,255,0.18);border-radius:4px;padding:14px 20px;margin-bottom:22px;">
-      <span style="color:#2F6FFF;font-weight:700;font-size:0.95rem;">Step 1 — Provide your profile &nbsp;·&nbsp;</span>
-      <span style="color:#64748b;font-size:0.88rem;">Upload a PDF resume or type your details manually.</span>
+    <div style="background:rgba(0,71,255,0.06);border:1px solid rgba(0,71,255,0.18);border-radius:14px;padding:14px 20px;margin-bottom:22px;">
+      <span style="color:#0047FF;font-weight:700;font-size:0.95rem;">Step 1 — Provide your profile &nbsp;·&nbsp;</span>
+      <span style="color:#7a7a7a;font-size:0.88rem;">Upload a PDF resume or type your details manually.</span>
     </div>
     """, unsafe_allow_html=True)
 
@@ -2254,8 +2449,8 @@ def render_tab_career_analysis(ai_handler: AIHandler, pdf_handler: PDFHandler,
 
     st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
     st.markdown("""
-    <div style="background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.18);border-radius:4px;padding:14px 20px;margin-bottom:16px;">
-      <span style="color:#a855f7;font-weight:700;font-size:0.95rem;">Step 2 — Set your preferences</span>
+    <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.18);border-radius:14px;padding:14px 20px;margin-bottom:16px;">
+      <span style="color:#FFFFFF;font-weight:700;font-size:0.95rem;">Step 2 — Set your preferences</span>
     </div>
     """, unsafe_allow_html=True)
 
@@ -2333,7 +2528,7 @@ def _render_career_results(data: Dict):
     <div class="result-card">
         <h3>🧬 Profile Summary</h3>
         <p style="font-size:1.05rem;color:#cbd5e1;line-height:1.7;margin-bottom:14px;">{data.get('profile_summary', 'N/A')}</p>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:#2F6FFF;text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px;">DETECTED SKILLS</div>
+        <div style="font-family:'Space Mono',monospace;font-size:.65rem;color:#0047FF;text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px;">DETECTED SKILLS</div>
         <div>{skills_html}</div>
     </div>
     """, unsafe_allow_html=True)
@@ -2363,17 +2558,17 @@ def _render_career_results(data: Dict):
         yt_course_url = f"https://www.youtube.com/results?search_query={yt_query}+full+course"
         if learning_path:
             learn_html += f'''
-<div style="margin-top:10px;padding:10px 14px;background:rgba(255,50,50,0.06);border:1px solid rgba(255,80,80,0.2);border-radius:4px;display:flex;align-items:center;gap:12px;">
+<div style="margin-top:10px;padding:10px 14px;background:rgba(255,50,50,0.06);border:1px solid rgba(255,80,80,0.2);border-radius:10px;display:flex;align-items:center;gap:12px;">
   <span style="font-size:1.2rem">&#127910;</span>
   <div>
-    <div style="font-size:0.7rem;font-weight:700;color:#f87171;margin-bottom:6px;font-family:JetBrains Mono,monospace;letter-spacing:.06em;text-transform:uppercase;">YouTube Resources</div>
+    <div style="font-size:0.7rem;font-weight:700;color:#f87171;margin-bottom:6px;font-family:Space Mono,monospace;letter-spacing:.06em;text-transform:uppercase;">YouTube Resources</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
       <a href="{yt_url}" target="_blank" style="font-size:0.73rem;color:#fca5a5;text-decoration:none;background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.25);border-radius:6px;padding:3px 10px;">&#128269; Search Tutorials</a>
       <a href="{yt_course_url}" target="_blank" style="font-size:0.73rem;color:#fca5a5;text-decoration:none;background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.25);border-radius:6px;padding:3px 10px;">&#127916; Full Courses</a>
     </div>
   </div>
 </div>'''
-        steps_html = "".join(f'<li style="color:#94a3b8;font-size:.88rem;margin-bottom:5px;">{s}</li>'
+        steps_html = "".join(f'<li style="color:#b3b3b3;font-size:.88rem;margin-bottom:5px;">{s}</li>'
                              for s in job.get('next_steps', []))
 
         with st.expander(f"**{idx}. {job['title']}** — {score}% Match", expanded=(idx == 1)):
@@ -2381,13 +2576,13 @@ def _render_career_results(data: Dict):
             with col_left:
                 st.markdown(f"""
                 <div style="padding-right:16px;">
-                  <span style="font-family:'JetBrains Mono',monospace;font-size:.85rem;color:#4ade80;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);border-radius:6px;padding:4px 12px;display:inline-block;margin-bottom:12px;">💰 {job['salary_range']}</span>
-                  <p style="color:#94a3b8;font-size:.9rem;line-height:1.65;margin-bottom:14px;">{job.get('reason','')}</p>
-                  <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:#2F6FFF;text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;">▸ NEXT STEPS</div>
+                  <span style="font-family:'Space Mono',monospace;font-size:.85rem;color:#4ade80;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);border-radius:6px;padding:4px 12px;display:inline-block;margin-bottom:12px;">💰 {job['salary_range']}</span>
+                  <p style="color:#b3b3b3;font-size:.9rem;line-height:1.65;margin-bottom:14px;">{job.get('reason','')}</p>
+                  <div style="font-family:'Space Mono',monospace;font-size:.65rem;color:#0047FF;text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;">▸ NEXT STEPS</div>
                   <ul style="margin:0;padding-left:18px;">{steps_html}</ul>
-                  {"<div style='font-family:JetBrains Mono,monospace;font-size:.65rem;color:#2F6FFF;text-transform:uppercase;letter-spacing:.12em;margin:12px 0 6px;'>▸ TOP COMPANIES</div>" + comp_badges if companies else ""}
-                  {"<div style='font-family:JetBrains Mono,monospace;font-size:.65rem;color:#a855f7;text-transform:uppercase;letter-spacing:.12em;margin:12px 0 6px;'>▸ CERTIFICATIONS</div>" + cert_badges if certs else ""}
-                  <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:#2F6FFF;text-transform:uppercase;letter-spacing:.12em;margin:14px 0 4px;">▸ APPLY NOW</div>
+                  {"<div style='font-family:Space Mono,monospace;font-size:.65rem;color:#0047FF;text-transform:uppercase;letter-spacing:.12em;margin:12px 0 6px;'>▸ TOP COMPANIES</div>" + comp_badges if companies else ""}
+                  {"<div style='font-family:Space Mono,monospace;font-size:.65rem;color:#FFFFFF;text-transform:uppercase;letter-spacing:.12em;margin:12px 0 6px;'>▸ CERTIFICATIONS</div>" + cert_badges if certs else ""}
+                  <div style="font-family:'Space Mono',monospace;font-size:.65rem;color:#0047FF;text-transform:uppercase;letter-spacing:.12em;margin:14px 0 4px;">▸ APPLY NOW</div>
                   {jlinks_html}
                 </div>
                 """, unsafe_allow_html=True)
@@ -2398,23 +2593,23 @@ def _render_career_results(data: Dict):
                         {'Skill': list(gaps.keys()), 'Proficiency': list(gaps.values())})
                     c = alt.Chart(chart_data).mark_bar(cornerRadiusTopRight=4, cornerRadiusBottomRight=4).encode(
                         x=alt.X('Proficiency:Q', scale=alt.Scale(domain=[0, 100]),
-                                axis=alt.Axis(labelColor='#64748b', gridColor='rgba(255,255,255,0.05)')),
+                                axis=alt.Axis(labelColor='#7a7a7a', gridColor='rgba(255,255,255,0.05)')),
                         y=alt.Y('Skill:N', sort='-x',
-                                axis=alt.Axis(labelColor='#94a3b8')),
+                                axis=alt.Axis(labelColor='#b3b3b3')),
                         color=alt.Color('Proficiency:Q', scale=alt.Scale(
                             scheme='viridis'), legend=None)
                     ).properties(height=180, background='transparent').configure_view(strokeWidth=0, fill='transparent')
                     st.altair_chart(c, use_container_width=True)
                 if learn_html:
                     st.markdown(f"""
-                    <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:#34d399;text-transform:uppercase;letter-spacing:.12em;margin:10px 0 6px;">▸ LEARNING PATH</div>
+                    <div style="font-family:'Space Mono',monospace;font-size:.65rem;color:#34d399;text-transform:uppercase;letter-spacing:.12em;margin:10px 0 6px;">▸ LEARNING PATH</div>
                     {learn_html}""", unsafe_allow_html=True)
             with col_right:
                 st.markdown(ring_html, unsafe_allow_html=True)
             if tips_html:
                 st.markdown(f"""
                 <div style="margin-top:14px;">
-                  <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:#a855f7;text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px;">▸ INTERVIEW TIPS</div>
+                  <div style="font-family:'Space Mono',monospace;font-size:.65rem;color:#FFFFFF;text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px;">▸ INTERVIEW TIPS</div>
                   {tips_html}
                 </div>""", unsafe_allow_html=True)
 
@@ -2426,12 +2621,12 @@ def render_tab_history():
         st.markdown("""
         <div style="text-align:center;padding:60px 20px;color:#475569;">
           <div style="font-size:3rem;margin-bottom:12px;">📭</div>
-          <div style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;">No history yet</div>
+          <div style="font-family:'Inter',sans-serif;font-size:1.1rem;">No history yet</div>
           <div style="font-size:.85rem;margin-top:6px;">Run your first analysis to see it here</div>
         </div>""", unsafe_allow_html=True)
         return
 
-    st.markdown(f'<p style="color:#64748b;font-size:.85rem;">{len(st.session_state.history)} analyses saved this session</p>',
+    st.markdown(f'<p style="color:#7a7a7a;font-size:.85rem;">{len(st.session_state.history)} analyses saved this session</p>',
                 unsafe_allow_html=True)
     for idx, record in enumerate(reversed(st.session_state.history), 1):
         careers_in_record = record['analysis'].get('careers', [])
@@ -2445,8 +2640,8 @@ def render_tab_history():
             st.markdown(f"""
             <div class="hist-card" style="margin:0;">
               <div>📅 {record['timestamp']} · {stage}</div>
-              <p style="color:#e2e8f0;font-size:.95rem;font-weight:600;margin:8px 0 4px;">{record['summary']}</p>
-              <div style="color:#64748b;font-size:.85rem;">Paths: {titles}</div>
+              <p style="color:#FAFAF7;font-size:.95rem;font-weight:600;margin:8px 0 4px;">{record['summary']}</p>
+              <div style="color:#7a7a7a;font-size:.85rem;">Paths: {titles}</div>
               <div style="margin-top:10px;">{badges}</div>
             </div>""", unsafe_allow_html=True)
             if st.button("♻️ Restore This Analysis", key=f"restore_{idx}"):
@@ -2461,7 +2656,7 @@ def render_tab_compare():
         st.markdown("""
         <div style="text-align:center;padding:60px 20px;color:#475569;">
           <div style="font-size:3rem;margin-bottom:12px;">⚖️</div>
-          <div style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;">Nothing to compare yet</div>
+          <div style="font-family:'Inter',sans-serif;font-size:1.1rem;">Nothing to compare yet</div>
           <div style="font-size:.85rem;margin-top:6px;">Run a career analysis first</div>
         </div>""", unsafe_allow_html=True)
         return
@@ -2545,9 +2740,9 @@ def render_tab_resume_builder(ai_handler: AIHandler, selected_model: str):
     st.markdown("### 📝 ATS-Friendly Resume Builder")
     st.markdown("""
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px;">
-      <div style="flex:1;min-width:180px;background:rgba(47,111,255,0.07);border:1px solid rgba(47,111,255,0.2);border-radius:4px;padding:14px 16px;text-align:center;"><div style="font-size:1.5rem;">1️⃣</div><div style="color:#2F6FFF;font-weight:600;font-size:0.88rem;margin-top:4px;">Fill Your Details</div></div>
-      <div style="flex:1;min-width:180px;background:rgba(168,85,247,0.07);border:1px solid rgba(168,85,247,0.2);border-radius:4px;padding:14px 16px;text-align:center;"><div style="font-size:1.5rem;">2️⃣</div><div style="color:#a855f7;font-weight:600;font-size:0.88rem;margin-top:4px;">Paste Job Description</div></div>
-      <div style="flex:1;min-width:180px;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.2);border-radius:4px;padding:14px 16px;text-align:center;"><div style="font-size:1.5rem;">3️⃣</div><div style="color:#22c55e;font-weight:600;font-size:0.88rem;margin-top:4px;">Get ATS Resume</div></div>
+      <div style="flex:1;min-width:180px;background:rgba(0,71,255,0.07);border:1px solid rgba(0,71,255,0.2);border-radius:12px;padding:14px 16px;text-align:center;"><div style="font-size:1.5rem;">1️⃣</div><div style="color:#0047FF;font-weight:600;font-size:0.88rem;margin-top:4px;">Fill Your Details</div></div>
+      <div style="flex:1;min-width:180px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:14px 16px;text-align:center;"><div style="font-size:1.5rem;">2️⃣</div><div style="color:#FFFFFF;font-weight:600;font-size:0.88rem;margin-top:4px;">Paste Job Description</div></div>
+      <div style="flex:1;min-width:180px;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.2);border-radius:12px;padding:14px 16px;text-align:center;"><div style="font-size:1.5rem;">3️⃣</div><div style="color:#22c55e;font-weight:600;font-size:0.88rem;margin-top:4px;">Get ATS Resume</div></div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -2631,22 +2826,22 @@ def _render_resume_output(res: Dict):
     """Renders the built resume preview and download button."""
     resume = res.get("resume", {})
     ats_score = res.get("ats_score", 0)
-    score_color = "#2F6FFF" if ats_score >= 80 else (
-        "#a855f7" if ats_score >= 60 else "#f59e0b")
+    score_color = "#0047FF" if ats_score >= 80 else (
+        "#FFFFFF" if ats_score >= 60 else "#f59e0b")
     kw_found = res.get("keywords_found", [])
     kw_missing = res.get("keywords_missing", [])
 
     st.markdown(f"""
     <div style="display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap;">
-      <div style="flex:1;min-width:160px;background:rgba(0,0,0,0.3);border:1px solid {score_color}40;border-radius:4px;padding:18px;text-align:center;">
-        <div style="font-size:2.5rem;font-weight:900;color:{score_color};font-family:'Orbitron',sans-serif;">{ats_score}</div>
-        <div style="color:#94a3b8;font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;">ATS Score</div>
+      <div style="flex:1;min-width:160px;background:rgba(0,0,0,0.3);border:1px solid {score_color}40;border-radius:12px;padding:18px;text-align:center;">
+        <div style="font-size:2.5rem;font-weight:900;color:{score_color};font-family:'Inter',sans-serif;">{ats_score}</div>
+        <div style="color:#b3b3b3;font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;">ATS Score</div>
       </div>
-      <div style="flex:2;min-width:200px;background:rgba(0,0,0,0.3);border:1px solid rgba(47,111,255,0.15);border-radius:4px;padding:18px;">
-        <div style="color:#2F6FFF;font-weight:600;margin-bottom:8px;">✅ Keywords Found</div>
-        <div>{' '.join(f'<span style="background:rgba(47,111,255,0.15);color:#2F6FFF;padding:3px 10px;border-radius:20px;font-size:0.8rem;margin:2px;display:inline-block;">{k}</span>' for k in kw_found[:10])}</div>
+      <div style="flex:2;min-width:200px;background:rgba(0,0,0,0.3);border:1px solid rgba(0,71,255,0.15);border-radius:12px;padding:18px;">
+        <div style="color:#0047FF;font-weight:600;margin-bottom:8px;">✅ Keywords Found</div>
+        <div>{' '.join(f'<span style="background:rgba(0,71,255,0.15);color:#0047FF;padding:3px 10px;border-radius:20px;font-size:0.8rem;margin:2px;display:inline-block;">{k}</span>' for k in kw_found[:10])}</div>
       </div>
-      <div style="flex:2;min-width:200px;background:rgba(0,0,0,0.3);border:1px solid rgba(245,158,11,0.2);border-radius:4px;padding:18px;">
+      <div style="flex:2;min-width:200px;background:rgba(0,0,0,0.3);border:1px solid rgba(245,158,11,0.2);border-radius:12px;padding:18px;">
         <div style="color:#f59e0b;font-weight:600;margin-bottom:8px;">⚠️ Keywords to Add</div>
         <div>{' '.join(f'<span style="background:rgba(245,158,11,0.15);color:#f59e0b;padding:3px 10px;border-radius:20px;font-size:0.8rem;margin:2px;display:inline-block;">{k}</span>' for k in kw_missing[:8])}</div>
       </div>
@@ -2656,9 +2851,9 @@ def _render_resume_output(res: Dict):
     tips = res.get("ats_tips", [])
     if tips:
         st.markdown(f"""
-        <div style="background:rgba(168,85,247,0.08);border-left:3px solid #a855f7;border-radius:4px;padding:12px 16px;margin-bottom:20px;">
-          <div style="color:#a855f7;font-weight:600;margin-bottom:6px;">💡 ATS Optimization Tips</div>
-          {''.join(f'<div style="color:#94a3b8;font-size:0.9rem;margin:4px 0;">• {t}</div>' for t in tips)}
+        <div style="background:rgba(255,255,255,0.08);border-left:3px solid #FFFFFF;border-radius:8px;padding:12px 16px;margin-bottom:20px;">
+          <div style="color:#FFFFFF;font-weight:600;margin-bottom:6px;">💡 ATS Optimization Tips</div>
+          {''.join(f'<div style="color:#b3b3b3;font-size:0.9rem;margin:4px 0;">• {t}</div>' for t in tips)}
         </div>
         """, unsafe_allow_html=True)
 
@@ -2674,48 +2869,48 @@ def _render_resume_output(res: Dict):
 
     exp_html = ""
     for exp in experience:
-        bullets_html = "".join(f'<li style="color:#94a3b8;margin:4px 0;font-size:0.9rem;">{b}</li>'
+        bullets_html = "".join(f'<li style="color:#b3b3b3;margin:4px 0;font-size:0.9rem;">{b}</li>'
                                for b in exp.get("bullets", []))
         exp_html += f"""
         <div style="margin-bottom:14px;">
           <div style="display:flex;justify-content:space-between;align-items:baseline;">
-            <span style="color:#e2e8f0;font-weight:600;">{exp.get('title','')}</span>
-            <span style="color:#64748b;font-size:0.85rem;">{exp.get('duration','')}</span>
+            <span style="color:#FAFAF7;font-weight:600;">{exp.get('title','')}</span>
+            <span style="color:#7a7a7a;font-size:0.85rem;">{exp.get('duration','')}</span>
           </div>
-          <div style="color:#2F6FFF;font-size:0.85rem;margin-bottom:6px;">{exp.get('company','')}</div>
+          <div style="color:#0047FF;font-size:0.85rem;margin-bottom:6px;">{exp.get('company','')}</div>
           <ul style="margin:0;padding-left:18px;">{bullets_html}</ul>
         </div>"""
 
     edu_html = "".join(
         f'<div style="display:flex;justify-content:space-between;margin-bottom:6px;">'
-        f'<div><span style="color:#e2e8f0;font-weight:600;">{e.get("degree","")}</span> — '
-        f'<span style="color:#94a3b8;">{e.get("institution","")}</span></div>'
-        f'<div style="color:#64748b;font-size:0.85rem;">{e.get("year","")} '
+        f'<div><span style="color:#FAFAF7;font-weight:600;">{e.get("degree","")}</span> — '
+        f'<span style="color:#b3b3b3;">{e.get("institution","")}</span></div>'
+        f'<div style="color:#7a7a7a;font-size:0.85rem;">{e.get("year","")} '
         f'{"| GPA: " + e.get("gpa","") if e.get("gpa") else ""}</div></div>'
         for e in education)
 
     proj_html = "".join(
-        f'<div style="margin-bottom:10px;"><span style="color:#e2e8f0;font-weight:600;">{p.get("name","")}</span>'
-        f'<p style="color:#94a3b8;font-size:0.88rem;margin:4px 0 0 0;">{p.get("description","")}</p></div>'
+        f'<div style="margin-bottom:10px;"><span style="color:#FAFAF7;font-weight:600;">{p.get("name","")}</span>'
+        f'<p style="color:#b3b3b3;font-size:0.88rem;margin:4px 0 0 0;">{p.get("description","")}</p></div>'
         for p in projects)
 
     skills_badges = " ".join(
-        f'<span style="background:rgba(47,111,255,0.1);color:#2F6FFF;padding:3px 10px;border-radius:20px;font-size:0.8rem;margin:2px;display:inline-block;">{s}</span>'
+        f'<span style="background:rgba(0,71,255,0.1);color:#0047FF;padding:3px 10px;border-radius:20px;font-size:0.8rem;margin:2px;display:inline-block;">{s}</span>'
         for s in all_skills)
     certs_text = " • ".join(certs) if certs else "—"
 
     st.markdown(f"""
-    <div style="background:#0f172a;border:1px solid rgba(47,111,255,0.2);border-radius:16px;padding:28px 32px;font-family:'Space Grotesk',sans-serif;">
-      <div style="border-bottom:2px solid rgba(47,111,255,0.3);padding-bottom:16px;margin-bottom:20px;">
-        <h2 style="font-family:'Orbitron',sans-serif!important;font-size:1.8rem!important;color:#e2e8f0!important;margin:0 0 6px 0!important;">{contact.get('name','')}</h2>
-        <div style="color:#2F6FFF;font-size:0.88rem;">{contact.get('email','')} &nbsp;|&nbsp; {contact.get('phone','')} &nbsp;|&nbsp; {contact.get('location','')} &nbsp;|&nbsp; {contact.get('linkedin','')}</div>
+    <div style="background:#0a0a0a;border:1px solid rgba(0,71,255,0.2);border-radius:16px;padding:28px 32px;font-family:'Inter',sans-serif;">
+      <div style="border-bottom:2px solid rgba(0,71,255,0.3);padding-bottom:16px;margin-bottom:20px;">
+        <h2 style="font-family:'Inter',sans-serif!important;font-size:1.8rem!important;color:#FAFAF7!important;margin:0 0 6px 0!important;">{contact.get('name','')}</h2>
+        <div style="color:#0047FF;font-size:0.88rem;">{contact.get('email','')} &nbsp;|&nbsp; {contact.get('phone','')} &nbsp;|&nbsp; {contact.get('location','')} &nbsp;|&nbsp; {contact.get('linkedin','')}</div>
       </div>
-      <div style="margin-bottom:20px;"><div style="color:#2F6FFF;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:700;margin-bottom:8px;">Professional Summary</div><p style="color:#cbd5e1;line-height:1.7;margin:0;">{summary}</p></div>
-      {"<div style='margin-bottom:20px;'><div style='color:#2F6FFF;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:700;margin-bottom:12px;'>Work Experience</div>" + exp_html + "</div>" if exp_html else ""}
-      {"<div style='margin-bottom:20px;'><div style='color:#2F6FFF;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:700;margin-bottom:8px;'>Skills</div><div>" + skills_badges + "</div></div>" if all_skills else ""}
-      {"<div style='margin-bottom:20px;'><div style='color:#2F6FFF;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:700;margin-bottom:8px;'>Education</div>" + edu_html + "</div>" if edu_html else ""}
-      {"<div style='margin-bottom:20px;'><div style='color:#2F6FFF;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:700;margin-bottom:8px;'>Projects</div>" + proj_html + "</div>" if proj_html else ""}
-      {"<div><div style='color:#2F6FFF;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:700;margin-bottom:6px;'>Certifications</div><div style='color:#94a3b8;font-size:0.9rem;'>" + certs_text + "</div></div>" if certs else ""}
+      <div style="margin-bottom:20px;"><div style="color:#0047FF;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:700;margin-bottom:8px;">Professional Summary</div><p style="color:#cbd5e1;line-height:1.7;margin:0;">{summary}</p></div>
+      {"<div style='margin-bottom:20px;'><div style='color:#0047FF;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:700;margin-bottom:12px;'>Work Experience</div>" + exp_html + "</div>" if exp_html else ""}
+      {"<div style='margin-bottom:20px;'><div style='color:#0047FF;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:700;margin-bottom:8px;'>Skills</div><div>" + skills_badges + "</div></div>" if all_skills else ""}
+      {"<div style='margin-bottom:20px;'><div style='color:#0047FF;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:700;margin-bottom:8px;'>Education</div>" + edu_html + "</div>" if edu_html else ""}
+      {"<div style='margin-bottom:20px;'><div style='color:#0047FF;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:700;margin-bottom:8px;'>Projects</div>" + proj_html + "</div>" if proj_html else ""}
+      {"<div><div style='color:#0047FF;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:700;margin-bottom:6px;'>Certifications</div><div style='color:#b3b3b3;font-size:0.9rem;'>" + certs_text + "</div></div>" if certs else ""}
     </div>
     """, unsafe_allow_html=True)
 
@@ -2776,28 +2971,28 @@ html,body{background:#050a12;font-family:'DM Sans',sans-serif;overflow:hidden;he
   display:flex;align-items:center;gap:12px;
   padding:10px 14px;flex-shrink:0;
   background:linear-gradient(90deg,#060d1a,#0a0f1a);
-  border-bottom:1px solid rgba(47,111,255,.08);
+  border-bottom:1px solid rgba(0,71,255,.08);
   position:relative;overflow:hidden;
 }
 #topBar::before{
   content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse 120px 60px at 10% 50%,rgba(168,85,247,.10),transparent);
+  background:radial-gradient(ellipse 120px 60px at 10% 50%,rgba(255,255,255,.10),transparent);
   pointer-events:none;
 }
 canvas#face{border-radius:50%;flex-shrink:0;display:block;position:relative;z-index:2}
 #avatarInfo{flex:1;min-width:0;z-index:2}
-.ai-name{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:800;color:#e2e8f0;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ai-title{font-family:'DM Mono',monospace;font-size:.48rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(47,111,255,.5);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ai-name{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:800;color:#FAFAF7;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ai-title{font-family:'DM Mono',monospace;font-size:.48rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(0,71,255,.5);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ai-status{display:flex;align-items:center;gap:5px;margin-top:5px}
 .status-dot{width:6px;height:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 7px #22c55e;flex-shrink:0}
-.status-dot.speaking{background:#A78BFA;box-shadow:0 0 10px #a855f7;animation:sdot .6s ease-in-out infinite}
-.status-dot.listening{background:#2F6FFF;box-shadow:0 0 10px #2F6FFF;animation:sdot .8s ease-in-out infinite}
+.status-dot.speaking{background:#FFFFFF;box-shadow:0 0 10px #FFFFFF;animation:sdot .6s ease-in-out infinite}
+.status-dot.listening{background:#0047FF;box-shadow:0 0 10px #0047FF;animation:sdot .8s ease-in-out infinite}
 @keyframes sdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.4)}}
-.status-txt{font-family:'DM Mono',monospace;font-size:.52rem;color:#64748b;letter-spacing:.07em;text-transform:uppercase}
+.status-txt{font-family:'DM Mono',monospace;font-size:.52rem;color:#7a7a7a;letter-spacing:.07em;text-transform:uppercase}
 
 /* WAVE bars (right side of top bar) */
 .wv{display:inline-flex;align-items:center;gap:2px;height:16px;flex-shrink:0}
-.wv-b{width:3px;border-radius:2px;background:#A78BFA;opacity:.25;height:4px}
+.wv-b{width:3px;border-radius:2px;background:#FFFFFF;opacity:.25;height:4px}
 .wv-b.on{opacity:.9;animation:wvb .5s ease-in-out infinite}
 .wv-b:nth-child(1){animation-delay:0s}
 .wv-b:nth-child(2){animation-delay:.07s;height:10px}
@@ -2809,40 +3004,40 @@ canvas#face{border-radius:50%;flex-shrink:0;display:block;position:relative;z-in
 /* AI SPEECH */
 #aiSpeech{
   padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.05);
-  background:rgba(168,85,247,.05);flex-shrink:0;
+  background:rgba(255,255,255,.05);flex-shrink:0;
   max-height:130px;overflow-y:auto;
 }
 #aiSpeech::-webkit-scrollbar{width:2px}
-#aiSpeech::-webkit-scrollbar-thumb{background:rgba(168,85,247,.3)}
-.ai-lbl{font-family:'DM Mono',monospace;font-size:.47rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(168,85,247,.5);margin-bottom:6px}
-#aiTxt{color:#e2e8f0;font-size:.85rem;line-height:1.6;white-space:pre-wrap}
+#aiSpeech::-webkit-scrollbar-thumb{background:rgba(255,255,255,.3)}
+.ai-lbl{font-family:'DM Mono',monospace;font-size:.47rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px}
+#aiTxt{color:#FAFAF7;font-size:.85rem;line-height:1.6;white-space:pre-wrap}
 
 /* USER TRANSCRIPT */
 #userPanel{
   flex:1;display:flex;flex-direction:column;
-  padding:10px 14px 8px;background:rgba(47,111,255,.025);
+  padding:10px 14px 8px;background:rgba(0,71,255,.025);
   overflow:hidden;min-height:0;
 }
 .user-lbl{
   font-family:'DM Mono',monospace;font-size:.47rem;letter-spacing:.14em;
-  text-transform:uppercase;color:rgba(47,111,255,.5);
+  text-transform:uppercase;color:rgba(0,71,255,.5);
   margin-bottom:6px;display:flex;align-items:center;gap:7px;flex-shrink:0;
 }
 .live-dot{width:5px;height:5px;border-radius:50%;background:#ef4444;opacity:0;flex-shrink:0}
 .live-dot.on{opacity:1;animation:ldot 1s ease-in-out infinite}
 @keyframes ldot{0%,100%{opacity:1}50%{opacity:.2}}
 #transcript{
-  flex:1;font-size:.83rem;color:#64748b;line-height:1.6;
+  flex:1;font-size:.83rem;color:#7a7a7a;line-height:1.6;
   font-style:italic;overflow-y:auto;cursor:text;
-  border:1px solid rgba(255,255,255,.07);border-radius:4px;
+  border:1px solid rgba(255,255,255,.07);border-radius:10px;
   padding:9px 11px;background:rgba(255,255,255,.02);
   min-height:44px;outline:none;
   -webkit-user-select:text;user-select:text;
 }
-#transcript.has{color:#e2e8f0;font-style:normal}
+#transcript.has{color:#FAFAF7;font-style:normal}
 #transcript::-webkit-scrollbar{width:2px}
-#transcript[contenteditable="true"]:focus{border-color:rgba(47,111,255,.3);box-shadow:0 0 0 2px rgba(47,111,255,.07)}
-.no-speech-warn{font-size:.72rem;color:#f59e0b;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:4px;padding:7px 11px;text-align:center}
+#transcript[contenteditable="true"]:focus{border-color:rgba(0,71,255,.3);box-shadow:0 0 0 2px rgba(0,71,255,.07)}
+.no-speech-warn{font-size:.72rem;color:#f59e0b;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:7px 11px;text-align:center}
 
 /* BUTTONS — two rows on mobile */
 #btns{
@@ -2855,10 +3050,10 @@ canvas#face{border-radius:50%;flex-shrink:0;display:block;position:relative;z-in
 }
 .mic-btn{
   width:52px;height:52px;border-radius:50%;
-  background:linear-gradient(135deg,#2F6FFF,#0ea8d8);
+  background:linear-gradient(135deg,#0047FF,#0ea8d8);
   border:none;cursor:pointer;font-size:1.3rem;
   display:flex;align-items:center;justify-content:center;
-  transition:all .2s;box-shadow:0 0 16px rgba(47,111,255,.35);
+  transition:all .2s;box-shadow:0 0 16px rgba(0,71,255,.35);
   touch-action:manipulation;grid-row:1/3;align-self:center;
 }
 .mic-btn.listening{
@@ -2868,7 +3063,7 @@ canvas#face{border-radius:50%;flex-shrink:0;display:block;position:relative;z-in
 }
 @keyframes micpulse{0%,100%{box-shadow:0 0 18px rgba(239,68,68,.5)}50%{box-shadow:0 0 32px rgba(239,68,68,.8)}}
 .action-btn{
-  height:44px;border-radius:4px;border:1.5px solid;
+  height:44px;border-radius:11px;border:1.5px solid;
   font-family:'Syne',sans-serif;font-size:.78rem;font-weight:700;
   cursor:pointer;letter-spacing:.03em;transition:all .2s;
   touch-action:manipulation;display:flex;align-items:center;
@@ -2876,23 +3071,23 @@ canvas#face{border-radius:50%;flex-shrink:0;display:block;position:relative;z-in
 }
 .action-btn:disabled{opacity:.35;cursor:not-allowed}
 #submitBtn{
-  background:linear-gradient(135deg,rgba(168,85,247,.22),rgba(47,111,255,.12));
-  border-color:rgba(168,85,247,.45);color:#e2e8f0;
+  background:linear-gradient(135deg,rgba(255,255,255,.22),rgba(0,71,255,.12));
+  border-color:rgba(255,255,255,.45);color:#FAFAF7;
 }
 #submitBtn:active{transform:scale(.97)}
 #clearBtn{
   background:rgba(255,255,255,.04);
-  border-color:rgba(255,255,255,.12);color:#64748b;
+  border-color:rgba(255,255,255,.12);color:#7a7a7a;
   font-family:'DM Mono',monospace;font-size:.6rem;
 }
-#clearBtn:active{color:#e2e8f0}
+#clearBtn:active{color:#FAFAF7}
 
 /* DESKTOP: side-by-side layout at ≥560px */
 @media(min-width:560px){
   #root{flex-direction:row}
   #topBar{
     flex:0 0 220px;flex-direction:column;align-items:center;justify-content:center;
-    border-bottom:none;border-right:1px solid rgba(47,111,255,.08);
+    border-bottom:none;border-right:1px solid rgba(0,71,255,.08);
     padding:20px 16px;
   }
   canvas#face{margin-bottom:10px}
@@ -2985,8 +3180,8 @@ function drawAvatar(speaking) {
   // Outer glow ring
   var glow = baseR + Math.sin(breathe) * 4 * scale;
   var grad = ctx.createRadialGradient(CX,CY,glow*0.4,CX,CY,glow*1.1);
-  grad.addColorStop(0, speaking ? 'rgba(168,85,247,0.0)' : 'rgba(47,111,255,0.0)');
-  grad.addColorStop(0.6, speaking ? 'rgba(168,85,247,0.10)' : 'rgba(47,111,255,0.06)');
+  grad.addColorStop(0, speaking ? 'rgba(255,255,255,0.0)' : 'rgba(0,71,255,0.0)');
+  grad.addColorStop(0.6, speaking ? 'rgba(255,255,255,0.10)' : 'rgba(0,71,255,0.06)');
   grad.addColorStop(1, 'transparent');
   ctx.beginPath(); ctx.arc(CX,CY,glow*1.15,0,Math.PI*2);
   ctx.fillStyle=grad; ctx.fill();
@@ -3001,15 +3196,15 @@ function drawAvatar(speaking) {
 
   // Border ring
   var ringGrad = ctx.createLinearGradient(0,0,W,H);
-  ringGrad.addColorStop(0, speaking ? 'rgba(168,85,247,0.8)' : 'rgba(47,111,255,0.6)');
-  ringGrad.addColorStop(0.5, speaking ? 'rgba(47,111,255,0.4)' : 'rgba(168,85,247,0.3)');
-  ringGrad.addColorStop(1, speaking ? 'rgba(168,85,247,0.8)' : 'rgba(47,111,255,0.6)');
+  ringGrad.addColorStop(0, speaking ? 'rgba(255,255,255,0.8)' : 'rgba(0,71,255,0.6)');
+  ringGrad.addColorStop(0.5, speaking ? 'rgba(0,71,255,0.4)' : 'rgba(255,255,255,0.3)');
+  ringGrad.addColorStop(1, speaking ? 'rgba(255,255,255,0.8)' : 'rgba(0,71,255,0.6)');
   ctx.beginPath(); ctx.arc(CX,CY,glow,0,Math.PI*2);
   ctx.strokeStyle=ringGrad; ctx.lineWidth = speaking ? 2.5*scale : 1.5*scale; ctx.stroke();
 
   // Eyes
   var eyeY = CY - 10*scale, eyeOffX = 14*scale, eyeR = 7*scale;
-  var eyeColor = speaking ? 'rgba(168,85,247,0.9)' : 'rgba(47,111,255,0.85)';
+  var eyeColor = speaking ? 'rgba(255,255,255,0.9)' : 'rgba(0,71,255,0.85)';
   [CX-eyeOffX, CX+eyeOffX].forEach(function(ex){
     var eyeGrad = ctx.createRadialGradient(ex,eyeY,0,ex,eyeY,eyeR);
     eyeGrad.addColorStop(0,'rgba(255,255,255,0.9)');
@@ -3035,8 +3230,8 @@ function drawAvatar(speaking) {
   ctx.save();
   if (openH > 1) {
     var mouthGrad = ctx.createLinearGradient(CX-12*scale,mouthY-openH/2,CX+12*scale,mouthY+openH/2);
-    mouthGrad.addColorStop(0,'rgba(168,85,247,0.8)');
-    mouthGrad.addColorStop(1,'rgba(47,111,255,0.6)');
+    mouthGrad.addColorStop(0,'rgba(255,255,255,0.8)');
+    mouthGrad.addColorStop(1,'rgba(0,71,255,0.6)');
     ctx.beginPath();
     ctx.ellipse(CX, mouthY, 12*scale, openH/2+1, 0, 0, Math.PI*2);
     ctx.fillStyle = 'rgba(5,10,18,0.9)'; ctx.fill();
@@ -3047,7 +3242,7 @@ function drawAvatar(speaking) {
     ctx.beginPath();
     ctx.moveTo(CX-10*scale, mouthY);
     ctx.quadraticCurveTo(CX, mouthY+6*scale, CX+10*scale, mouthY);
-    ctx.strokeStyle = speaking ? 'rgba(168,85,247,0.7)' : 'rgba(47,111,255,0.6)';
+    ctx.strokeStyle = speaking ? 'rgba(255,255,255,0.7)' : 'rgba(0,71,255,0.6)';
     ctx.lineWidth=2*scale; ctx.lineCap='round'; ctx.stroke();
   }
   ctx.restore();
@@ -3055,7 +3250,7 @@ function drawAvatar(speaking) {
   // Subtle scan line
   var scanY = (Date.now()*0.04) % H;
   ctx.beginPath(); ctx.moveTo(CX-glow,scanY); ctx.lineTo(CX+glow,scanY);
-  ctx.strokeStyle='rgba(47,111,255,0.03)'; ctx.lineWidth=2*scale; ctx.stroke();
+  ctx.strokeStyle='rgba(0,71,255,0.03)'; ctx.lineWidth=2*scale; ctx.stroke();
 }
 
 // Animation loop
@@ -3293,8 +3488,8 @@ def _conv_interview_setup_ui():
 
     st.markdown("""
     <div style="
-        background: linear-gradient(135deg, rgba(168,85,247,0.10) 0%, rgba(47,111,255,0.08) 100%);
-        border: 1px solid rgba(168,85,247,0.30);
+        background: linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(0,71,255,0.08) 100%);
+        border: 1px solid rgba(255,255,255,0.30);
         border-radius: 18px;
         padding: 22px 26px 18px 26px;
         margin-bottom: 24px;
@@ -3302,39 +3497,39 @@ def _conv_interview_setup_ui():
         <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
             <span style="font-size:1.8rem;">🤖</span>
             <div>
-                <div style="font-family:'Space Grotesk',sans-serif; font-size:1.15rem;
-                            font-weight:700; color:#e2e8f0; letter-spacing:-0.01em;">
+                <div style="font-family:'Inter',sans-serif; font-size:1.15rem;
+                            font-weight:700; color:#FAFAF7; letter-spacing:-0.01em;">
                     AI Live Interview Mode
                 </div>
-                <div style="color:#64748b; font-size:0.82rem; margin-top:2px;">
+                <div style="color:#7a7a7a; font-size:0.82rem; margin-top:2px;">
                     A real interviewer that reacts, probes, follows up — then gives you the full Head-of-Talent debrief
                 </div>
             </div>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
-            <span style="background:rgba(47,111,255,0.10); border:1px solid rgba(47,111,255,0.25);
+            <span style="background:rgba(0,71,255,0.10); border:1px solid rgba(0,71,255,0.25);
                          border-radius:20px; padding:4px 12px; font-size:0.72rem;
-                         color:#2F6FFF; font-family:'JetBrains Mono',monospace;">🎙️ Voice-first</span>
-            <span style="background:rgba(168,85,247,0.10); border:1px solid rgba(168,85,247,0.25);
+                         color:#0047FF; font-family:'Space Mono',monospace;">🎙️ Voice-first</span>
+            <span style="background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.25);
                          border-radius:20px; padding:4px 12px; font-size:0.72rem;
-                         color:#a855f7; font-family:'JetBrains Mono',monospace;">🤖 Animated AI avatar</span>
+                         color:#FFFFFF; font-family:'Space Mono',monospace;">🤖 Animated AI avatar</span>
             <span style="background:rgba(34,197,94,0.10); border:1px solid rgba(34,197,94,0.25);
                          border-radius:20px; padding:4px 12px; font-size:0.72rem;
-                         color:#22c55e; font-family:'JetBrains Mono',monospace;">📋 Full talent review</span>
+                         color:#22c55e; font-family:'Space Mono',monospace;">📋 Full talent review</span>
             <span style="background:rgba(245,158,11,0.10); border:1px solid rgba(245,158,11,0.25);
                          border-radius:20px; padding:4px 12px; font-size:0.72rem;
-                         color:#f59e0b; font-family:'JetBrains Mono',monospace;">⭐ Honest score</span>
+                         color:#f59e0b; font-family:'Space Mono',monospace;">⭐ Honest score</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
     c1, c2 = st.columns([3, 2])
     with c1:
-        st.markdown('<div style="color:rgba(47,111,255,0.8);font-family:\'JetBrains Mono\',monospace;font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;">🎯 Target Role</div>', unsafe_allow_html=True)
+        st.markdown('<div style="color:rgba(0,71,255,0.8);font-family:\'Space Mono\',monospace;font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;">🎯 Target Role</div>', unsafe_allow_html=True)
         raw_role = st.selectbox("Role", ALL_ROLES_CONV, index=1,
                                 key="conv_role_sel", label_visibility="collapsed")
     with c2:
-        st.markdown('<div style="color:rgba(47,111,255,0.8);font-family:\'JetBrains Mono\',monospace;font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;">🪜 Experience Level</div>', unsafe_allow_html=True)
+        st.markdown('<div style="color:rgba(0,71,255,0.8);font-family:\'Space Mono\',monospace;font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;">🪜 Experience Level</div>', unsafe_allow_html=True)
         level = st.selectbox("Level", ["Fresher", "Junior (1–3 yrs)", "Mid-level (3–6 yrs)",
                              "Senior (6+ yrs)", "Staff / Lead (8+ yrs)"], key="conv_level_sel", label_visibility="collapsed")
 
@@ -3350,18 +3545,18 @@ def _conv_interview_setup_ui():
     else:
         role = raw_role
         st.markdown(
-            f'<div style="background:rgba(47,111,255,0.06);border:1px solid rgba(47,111,255,0.20);border-radius:4px;padding:10px 16px;margin-top:4px;color:#2F6FFF;font-size:0.88rem;">✅ <strong style="color:#e2e8f0;">{role}</strong> · <span style="color:#64748b;">{level}</span></div>', unsafe_allow_html=True)
+            f'<div style="background:rgba(0,71,255,0.06);border:1px solid rgba(0,71,255,0.20);border-radius:8px;padding:10px 16px;margin-top:4px;color:#0047FF;font-size:0.88rem;">✅ <strong style="color:#FAFAF7;">{role}</strong> · <span style="color:#7a7a7a;">{level}</span></div>', unsafe_allow_html=True)
 
     st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
     st.markdown("""
-    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:4px;padding:14px 18px;margin-bottom:16px;">
-        <div style="color:#94a3b8;font-size:0.78rem;font-family:'JetBrains Mono',monospace;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">▸ HOW IT WORKS</div>
-        <div style="color:#64748b;font-size:0.83rem;line-height:1.75;">
-            1. An <strong style="color:#e2e8f0;">animated AI avatar</strong> appears and introduces itself — and speaks to you<br>
-            2. <strong style="color:#e2e8f0;">Click the mic 🎤</strong> and speak your answer naturally<br>
+    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px 18px;margin-bottom:16px;">
+        <div style="color:#b3b3b3;font-size:0.78rem;font-family:'Space Mono',monospace;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">▸ HOW IT WORKS</div>
+        <div style="color:#7a7a7a;font-size:0.83rem;line-height:1.75;">
+            1. An <strong style="color:#FAFAF7;">animated AI avatar</strong> appears and introduces itself — and speaks to you<br>
+            2. <strong style="color:#FAFAF7;">Click the mic 🎤</strong> and speak your answer naturally<br>
             3. The AI reacts, follows up, asks deeper questions — just like a real interview<br>
-            4. When ready, click <strong style="color:#e2e8f0;">"Wrap up"</strong> to end<br>
-            5. Get the full <strong style="color:#a855f7;">Head of Talent review</strong> — score, strengths, red flags, verdict
+            4. When ready, click <strong style="color:#FAFAF7;">"Wrap up"</strong> to end<br>
+            5. Get the full <strong style="color:#FFFFFF;">Head of Talent review</strong> — score, strengths, red flags, verdict
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -3374,23 +3569,23 @@ def _render_message_bubble(role_: str, content: str, is_review: bool = False):
     if role_ == "assistant":
         if is_review:
             st.markdown(f"""
-            <div style="background:linear-gradient(135deg,rgba(168,85,247,0.10) 0%,rgba(47,111,255,0.07) 100%);border:1.5px solid rgba(168,85,247,0.35);border-radius:16px;padding:20px 22px;margin:12px 0;">
-                <div style="font-family:'JetBrains Mono',monospace;font-size:0.58rem;letter-spacing:0.16em;text-transform:uppercase;color:rgba(168,85,247,0.7);margin-bottom:12px;">▸ HEAD OF TALENT REVIEW</div>
-                <div style="color:#e2e8f0;font-size:0.88rem;line-height:1.85;white-space:pre-wrap;">{content}</div>
+            <div style="background:linear-gradient(135deg,rgba(255,255,255,0.10) 0%,rgba(0,71,255,0.07) 100%);border:1.5px solid rgba(255,255,255,0.35);border-radius:16px;padding:20px 22px;margin:12px 0;">
+                <div style="font-family:'Space Mono',monospace;font-size:0.58rem;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:12px;">▸ HEAD OF TALENT REVIEW</div>
+                <div style="color:#FAFAF7;font-size:0.88rem;line-height:1.85;white-space:pre-wrap;">{content}</div>
             </div>
             """, unsafe_allow_html=True)
         else:
             st.markdown(f"""
             <div style="display:flex;gap:10px;margin:8px 0;align-items:flex-start;">
-                <div style="width:34px;height:34px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,rgba(168,85,247,0.4),rgba(47,111,255,0.25));border:1.5px solid rgba(168,85,247,0.45);display:flex;align-items:center;justify-content:center;font-size:1rem;">🤖</div>
-                <div style="background:rgba(168,85,247,0.07);border:1px solid rgba(168,85,247,0.20);border-radius:4px 14px 14px 14px;padding:10px 14px;max-width:82%;color:#e2e8f0;font-size:0.87rem;line-height:1.65;">{content}</div>
+                <div style="width:34px;height:34px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,rgba(255,255,255,0.4),rgba(0,71,255,0.25));border:1.5px solid rgba(255,255,255,0.45);display:flex;align-items:center;justify-content:center;font-size:1rem;">🤖</div>
+                <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.20);border-radius:4px 14px 14px 14px;padding:10px 14px;max-width:82%;color:#FAFAF7;font-size:0.87rem;line-height:1.65;">{content}</div>
             </div>
             """, unsafe_allow_html=True)
     else:
         st.markdown(f"""
         <div style="display:flex;gap:10px;margin:8px 0;align-items:flex-start;justify-content:flex-end;">
-            <div style="background:rgba(47,111,255,0.09);border:1px solid rgba(47,111,255,0.22);border-radius:4px 4px 14px 14px;padding:10px 14px;max-width:82%;color:#e2e8f0;font-size:0.87rem;line-height:1.65;">{content}</div>
-            <div style="width:34px;height:34px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,rgba(47,111,255,0.35),rgba(0,180,200,0.2));border:1.5px solid rgba(47,111,255,0.4);display:flex;align-items:center;justify-content:center;font-size:1rem;">🧑</div>
+            <div style="background:rgba(0,71,255,0.09);border:1px solid rgba(0,71,255,0.22);border-radius:14px 4px 14px 14px;padding:10px 14px;max-width:82%;color:#FAFAF7;font-size:0.87rem;line-height:1.65;">{content}</div>
+            <div style="width:34px;height:34px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,rgba(0,71,255,0.35),rgba(0,180,200,0.2));border:1.5px solid rgba(0,71,255,0.4);display:flex;align-items:center;justify-content:center;font-size:1rem;">🧑</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -3400,23 +3595,23 @@ def _render_message_bubble(role_: str, content: str, is_review: bool = False):
     if role_ == "assistant":
         if is_review:
             st.markdown(f"""
-            <div style="background:linear-gradient(135deg,rgba(168,85,247,0.10) 0%,rgba(47,111,255,0.07) 100%);border:1.5px solid rgba(168,85,247,0.35);border-radius:16px;padding:20px 22px;margin:12px 0;">
-                <div style="font-family:'JetBrains Mono',monospace;font-size:0.58rem;letter-spacing:0.16em;text-transform:uppercase;color:rgba(168,85,247,0.7);margin-bottom:12px;">▸ HEAD OF TALENT REVIEW</div>
-                <div style="color:#e2e8f0;font-size:0.88rem;line-height:1.85;white-space:pre-wrap;">{content}</div>
+            <div style="background:linear-gradient(135deg,rgba(255,255,255,0.10) 0%,rgba(0,71,255,0.07) 100%);border:1.5px solid rgba(255,255,255,0.35);border-radius:16px;padding:20px 22px;margin:12px 0;">
+                <div style="font-family:'Space Mono',monospace;font-size:0.58rem;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:12px;">▸ HEAD OF TALENT REVIEW</div>
+                <div style="color:#FAFAF7;font-size:0.88rem;line-height:1.85;white-space:pre-wrap;">{content}</div>
             </div>
             """, unsafe_allow_html=True)
         else:
             st.markdown(f"""
             <div style="display:flex;gap:10px;margin:6px 0;align-items:flex-start;">
-                <div style="width:32px;height:32px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,rgba(168,85,247,0.4),rgba(47,111,255,0.25));border:1.5px solid rgba(168,85,247,0.45);display:flex;align-items:center;justify-content:center;font-size:.9rem;">🤖</div>
-                <div style="background:rgba(168,85,247,0.07);border:1px solid rgba(168,85,247,0.20);border-radius:4px 14px 14px 14px;padding:9px 13px;max-width:85%;color:#e2e8f0;font-size:0.85rem;line-height:1.65;">{content}</div>
+                <div style="width:32px;height:32px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,rgba(255,255,255,0.4),rgba(0,71,255,0.25));border:1.5px solid rgba(255,255,255,0.45);display:flex;align-items:center;justify-content:center;font-size:.9rem;">🤖</div>
+                <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.20);border-radius:4px 14px 14px 14px;padding:9px 13px;max-width:85%;color:#FAFAF7;font-size:0.85rem;line-height:1.65;">{content}</div>
             </div>
             """, unsafe_allow_html=True)
     else:
         st.markdown(f"""
         <div style="display:flex;gap:10px;margin:6px 0;align-items:flex-start;justify-content:flex-end;">
-            <div style="background:rgba(47,111,255,0.09);border:1px solid rgba(47,111,255,0.22);border-radius:4px 4px 14px 14px;padding:9px 13px;max-width:85%;color:#e2e8f0;font-size:0.85rem;line-height:1.65;">{content}</div>
-            <div style="width:32px;height:32px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,rgba(47,111,255,0.35),rgba(0,180,200,0.2));border:1.5px solid rgba(47,111,255,0.4);display:flex;align-items:center;justify-content:center;font-size:.9rem;">🧑</div>
+            <div style="background:rgba(0,71,255,0.09);border:1px solid rgba(0,71,255,0.22);border-radius:14px 4px 14px 14px;padding:9px 13px;max-width:85%;color:#FAFAF7;font-size:0.85rem;line-height:1.65;">{content}</div>
+            <div style="width:32px;height:32px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,rgba(0,71,255,0.35),rgba(0,180,200,0.2));border:1.5px solid rgba(0,71,255,0.4);display:flex;align-items:center;justify-content:center;font-size:.9rem;">🧑</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -3444,10 +3639,10 @@ def _render_conversational_interview(ai_handler, selected_model: str):
         label = "🎓 REVIEW MODE" if is_done else "🔴 LIVE"
         st.markdown(f"""
         <div style="display:flex;align-items:center;gap:10px;padding:6px 0;">
-          <div style="background:rgba(47,111,255,.12);border:1px solid rgba(47,111,255,.3);
+          <div style="background:rgba(0,71,255,.12);border:1px solid rgba(0,71,255,.3);
                       border-radius:20px;padding:3px 12px;font-family:'DM Mono',monospace;
-                      font-size:.62rem;color:#2F6FFF;letter-spacing:.1em;">{label}</div>
-          <span style="color:#94a3b8;font-size:.82rem;font-weight:600;">{role}</span>
+                      font-size:.62rem;color:#0047FF;letter-spacing:.1em;">{label}</div>
+          <span style="color:#b3b3b3;font-size:.82rem;font-weight:600;">{role}</span>
           <span style="color:#475569;font-size:.82rem;">· {level}</span>
           <span style="color:#334155;font-size:.75rem;">{exchanges} exchanges</span>
         </div>
@@ -3494,12 +3689,12 @@ def _render_conversational_interview(ai_handler, selected_model: str):
                 msg["role"], msg["content"], is_review=is_review_msg)
         st.markdown("""
         <div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);
-                    border-radius:4px;padding:14px 18px;margin-top:12px;text-align:center;">
+                    border-radius:12px;padding:14px 18px;margin-top:12px;text-align:center;">
           <div style="color:#22c55e;font-weight:700;font-size:.95rem;margin-bottom:4px;">
             🎓 Interview Complete
           </div>
-          <div style="color:#64748b;font-size:.82rem;">
-            Your full review is above. Click <strong style="color:#94a3b8;">New</strong> to practice again.
+          <div style="color:#7a7a7a;font-size:.82rem;">
+            Your full review is above. Click <strong style="color:#b3b3b3;">New</strong> to practice again.
           </div>
         </div>
         """, unsafe_allow_html=True)
@@ -3699,9 +3894,9 @@ def render_tab_mock_interview(ai_handler: AIHandler, selected_model: str):
     # ── TEXT MODE (original — unchanged) ─────────────────────────
     st.markdown("""
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px;">
-      <div style="flex:1;min-width:160px;background:rgba(168,85,247,0.07);border:1px solid rgba(168,85,247,0.2);border-radius:4px;padding:12px 16px;text-align:center;"><div style="font-size:1.4rem;">🎯</div><div style="color:#a855f7;font-weight:600;font-size:0.85rem;margin-top:4px;">Pick Role + Level</div></div>
-      <div style="flex:1;min-width:160px;background:rgba(47,111,255,0.07);border:1px solid rgba(47,111,255,0.2);border-radius:4px;padding:12px 16px;text-align:center;"><div style="font-size:1.4rem;">💬</div><div style="color:#2F6FFF;font-weight:600;font-size:0.85rem;margin-top:4px;">Answer 8 Questions</div></div>
-      <div style="flex:1;min-width:160px;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.2);border-radius:4px;padding:12px 16px;text-align:center;"><div style="font-size:1.4rem;">🤖</div><div style="color:#22c55e;font-weight:600;font-size:0.85rem;margin-top:4px;">Get AI Feedback + Score</div></div>
+      <div style="flex:1;min-width:160px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:12px 16px;text-align:center;"><div style="font-size:1.4rem;">🎯</div><div style="color:#FFFFFF;font-weight:600;font-size:0.85rem;margin-top:4px;">Pick Role + Level</div></div>
+      <div style="flex:1;min-width:160px;background:rgba(0,71,255,0.07);border:1px solid rgba(0,71,255,0.2);border-radius:12px;padding:12px 16px;text-align:center;"><div style="font-size:1.4rem;">💬</div><div style="color:#0047FF;font-weight:600;font-size:0.85rem;margin-top:4px;">Answer 8 Questions</div></div>
+      <div style="flex:1;min-width:160px;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.2);border-radius:12px;padding:12px 16px;text-align:center;"><div style="font-size:1.4rem;">🤖</div><div style="color:#22c55e;font-weight:600;font-size:0.85rem;margin-top:4px;">Get AI Feedback + Score</div></div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -3795,11 +3990,11 @@ def _render_interview_setup(ai_handler: AIHandler, selected_model: str):
 
     sel_col1, sel_col2 = st.columns([3, 2])
     with sel_col1:
-        st.markdown('<div style="color:rgba(47,111,255,0.75);font-family:\'JetBrains Mono\',monospace;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;">🎯 Job Role</div>', unsafe_allow_html=True)
+        st.markdown('<div style="color:rgba(0,71,255,0.75);font-family:\'Space Mono\',monospace;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;">🎯 Job Role</div>', unsafe_allow_html=True)
         selected_role_raw = st.selectbox("Job Role", options=ALL_ROLES, index=1,
                                          key="mi_role_select", label_visibility="collapsed")
     with sel_col2:
-        st.markdown('<div style="color:rgba(47,111,255,0.75);font-family:\'JetBrains Mono\',monospace;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;">🪜 Experience Level</div>', unsafe_allow_html=True)
+        st.markdown('<div style="color:rgba(0,71,255,0.75);font-family:\'Space Mono\',monospace;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;">🪜 Experience Level</div>', unsafe_allow_html=True)
         mi_level = st.selectbox("Experience Level",
                                 ["Fresher", "Junior (1-3 yrs)",
                                  "Mid-level (3-6 yrs)", "Senior (6+ yrs)"],
@@ -3818,11 +4013,11 @@ def _render_interview_setup(ai_handler: AIHandler, selected_model: str):
                                 key="mi_custom_role", label_visibility="collapsed")
         if mi_role:
             st.markdown(
-                f'<div style="color:#a855f7;font-size:0.85rem;margin-bottom:8px;">✅ Role set to: <strong style="color:#e2e8f0;">{mi_role}</strong></div>', unsafe_allow_html=True)
+                f'<div style="color:#FFFFFF;font-size:0.85rem;margin-bottom:8px;">✅ Role set to: <strong style="color:#FAFAF7;">{mi_role}</strong></div>', unsafe_allow_html=True)
     else:
         mi_role = selected_role_raw
         st.markdown(
-            f'<div style="background:rgba(47,111,255,0.06);border:1px solid rgba(47,111,255,0.2);border-radius:4px;padding:10px 16px;margin-bottom:16px;color:#2F6FFF;font-size:0.88rem;">✅ Ready: <strong style="color:#e2e8f0;">{mi_role}</strong> · <span style="color:#64748b;">{mi_level}</span></div>', unsafe_allow_html=True)
+            f'<div style="background:rgba(0,71,255,0.06);border:1px solid rgba(0,71,255,0.2);border-radius:8px;padding:10px 16px;margin-bottom:16px;color:#0047FF;font-size:0.88rem;">✅ Ready: <strong style="color:#FAFAF7;">{mi_role}</strong> · <span style="color:#7a7a7a;">{mi_level}</span></div>', unsafe_allow_html=True)
 
     if st.button("🚀 Start Mock Interview", use_container_width=True, type="primary", key="start_interview"):
         if not selected_model:
@@ -3862,11 +4057,11 @@ def _render_interview_session(ai_handler: AIHandler, selected_model: str):
 
     # Progress bar
     progress_pct = answered / total_q if total_q > 0 else 0
-    prog_color = "#2F6FFF" if progress_pct < 0.5 else (
-        "#a855f7" if progress_pct < 1 else "#22c55e")
+    prog_color = "#0047FF" if progress_pct < 0.5 else (
+        "#FFFFFF" if progress_pct < 1 else "#22c55e")
     st.markdown(f"""
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-      <span style="color:#94a3b8;font-size:0.85rem;min-width:80px;">Progress</span>
+      <span style="color:#b3b3b3;font-size:0.85rem;min-width:80px;">Progress</span>
       <div style="flex:1;background:rgba(255,255,255,0.08);border-radius:20px;height:8px;">
         <div style="width:{progress_pct*100:.0f}%;height:100%;background:{prog_color};border-radius:20px;transition:width 0.5s;"></div>
       </div>
@@ -3875,7 +4070,7 @@ def _render_interview_session(ai_handler: AIHandler, selected_model: str):
     """, unsafe_allow_html=True)
 
     cat_colors = {
-        "Behavioral": "#2F6FFF", "Technical": "#a855f7", "Problem Solving": "#f59e0b",
+        "Behavioral": "#0047FF", "Technical": "#FFFFFF", "Problem Solving": "#f59e0b",
         "Situational": "#22c55e", "Culture Fit": "#ec4899", "Role-specific Scenario": "#f97316",
     }
 
@@ -3895,7 +4090,7 @@ def _render_interview_session(ai_handler: AIHandler, selected_model: str):
         all_answered = answered == total_q
 
         if all_answered and unevaluated:
-            st.markdown("""<div style="background:linear-gradient(135deg,rgba(168,85,247,0.15),rgba(47,111,255,0.1));border:2px solid rgba(168,85,247,0.5);border-radius:4px;padding:4px 8px;text-align:center;margin-bottom:4px;"><div style="color:#e2e8f0;font-size:0.78rem;font-weight:600;">🎉 All answers saved! Ready to evaluate.</div></div>""", unsafe_allow_html=True)
+            st.markdown("""<div style="background:linear-gradient(135deg,rgba(255,255,255,0.15),rgba(0,71,255,0.1));border:2px solid rgba(255,255,255,0.5);border-radius:12px;padding:4px 8px;text-align:center;margin-bottom:4px;"><div style="color:#FAFAF7;font-size:0.78rem;font-weight:600;">🎉 All answers saved! Ready to evaluate.</div></div>""", unsafe_allow_html=True)
             if st.button("📊 Get My Full Report ✨", key="batch_eval", use_container_width=True, type="primary"):
                 progress_placeholder = st.empty()
                 for eval_idx, q in enumerate(questions):
@@ -3912,11 +4107,11 @@ def _render_interview_session(ai_handler: AIHandler, selected_model: str):
                 progress_placeholder.empty()
                 st.rerun()
         elif all_answered and not unevaluated:
-            st.markdown("""<div style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.3);border-radius:4px;padding:8px 14px;text-align:center;"><span style="color:#22c55e;font-weight:700;font-size:0.88rem;">✅ Full report complete — scroll down for your final verdict!</span></div>""", unsafe_allow_html=True)
+            st.markdown("""<div style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.3);border-radius:12px;padding:8px 14px;text-align:center;"><span style="color:#22c55e;font-weight:700;font-size:0.88rem;">✅ Full report complete — scroll down for your final verdict!</span></div>""", unsafe_allow_html=True)
         else:
             remaining = total_q - answered
             st.markdown(
-                f"""<div style="background:rgba(47,111,255,0.05);border:1px solid rgba(47,111,255,0.15);border-radius:4px;padding:8px 14px;text-align:center;"><span style="color:#64748b;font-size:0.85rem;">Answer <strong style="color:#2F6FFF;">{remaining} more</strong> to unlock the full report</span></div>""", unsafe_allow_html=True)
+                f"""<div style="background:rgba(0,71,255,0.05);border:1px solid rgba(0,71,255,0.15);border-radius:12px;padding:8px 14px;text-align:center;"><span style="color:#7a7a7a;font-size:0.85rem;">Answer <strong style="color:#0047FF;">{remaining} more</strong> to unlock the full report</span></div>""", unsafe_allow_html=True)
 
     st.markdown(f"**Role:** `{role}` &nbsp;|&nbsp; **Questions:** {total_q}")
     st.markdown("---")
@@ -3925,7 +4120,7 @@ def _render_interview_session(ai_handler: AIHandler, selected_model: str):
         q_id = q.get("id", idx + 1)
         cat = q.get("category", "General")
         diff = q.get("difficulty", "Medium")
-        cat_col = cat_colors.get(cat, "#2F6FFF")
+        cat_col = cat_colors.get(cat, "#0047FF")
         diff_badge = {"Easy": "🟢", "Medium": "🟡", "Hard": "🔴"}.get(diff, "🟡")
         q_text = q.get("question", "")
         hint = q.get("hint", "")
@@ -3944,10 +4139,10 @@ def _render_interview_session(ai_handler: AIHandler, selected_model: str):
             st.markdown(f"""
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center;">
               <span style="background:{cat_col}20;color:{cat_col};padding:3px 10px;border-radius:20px;font-size:0.78rem;">{cat}</span>
-              <span style="background:rgba(255,255,255,0.05);color:#94a3b8;padding:3px 10px;border-radius:20px;font-size:0.78rem;">{diff_badge} {diff}</span>
-              {"<span style='color:#64748b;font-size:0.75rem;'>asked at:</span> " + companies_html if companies_html else ""}
+              <span style="background:rgba(255,255,255,0.05);color:#b3b3b3;padding:3px 10px;border-radius:20px;font-size:0.78rem;">{diff_badge} {diff}</span>
+              {"<span style='color:#7a7a7a;font-size:0.75rem;'>asked at:</span> " + companies_html if companies_html else ""}
             </div>
-            <div style="color:#e2e8f0;font-size:1.05rem;font-weight:500;margin-bottom:10px;">{q_text}</div>
+            <div style="color:#FAFAF7;font-size:1.05rem;font-weight:500;margin-bottom:10px;">{q_text}</div>
             """, unsafe_allow_html=True)
 
             if hint:
@@ -3993,11 +4188,11 @@ def _render_question_feedback(fb: Dict):
     score = fb.get("score", 0)
     verdict = fb.get("verdict", "")
     fb_color = "#22c55e" if score >= 90 else (
-        "#2F6FFF" if score >= 75 else ("#f59e0b" if score >= 60 else "#ef4444"))
+        "#0047FF" if score >= 75 else ("#f59e0b" if score >= 60 else "#ef4444"))
     verdict_emoji = {"Excellent": "🌟", "Good": "✅",
                      "Average": "⚠️", "Needs Work": "❌"}.get(verdict, "📝")
     crack = fb.get("crack_this_question", "Borderline")
-    crack_color = {"Very Likely": "#22c55e", "Likely": "#2F6FFF",
+    crack_color = {"Very Likely": "#22c55e", "Likely": "#0047FF",
                    "Borderline": "#f59e0b", "Unlikely": "#ef4444"}.get(crack, "#f59e0b")
     crack_emoji = {"Very Likely": "🟢", "Likely": "🔵",
                    "Borderline": "🟡", "Unlikely": "🔴"}.get(crack, "🟡")
@@ -4013,21 +4208,21 @@ def _render_question_feedback(fb: Dict):
     st.markdown(f"""
     <div style="background:linear-gradient(135deg,rgba(0,0,0,0.4),rgba(15,23,42,0.6));border:1px solid {fb_color}35;border-radius:16px;padding:20px;margin-top:14px;">
       <div style="display:flex;align-items:center;gap:20px;margin-bottom:16px;flex-wrap:wrap;">
-        <div style="text-align:center;background:{fb_color}12;border:2px solid {fb_color}40;border-radius:4px;padding:12px 20px;min-width:80px;">
-          <div style="font-size:2.2rem;font-weight:900;color:{fb_color};font-family:'Orbitron',sans-serif;line-height:1;">{score}</div>
-          <div style="color:#64748b;font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;margin-top:2px;">/ 100</div>
+        <div style="text-align:center;background:{fb_color}12;border:2px solid {fb_color}40;border-radius:12px;padding:12px 20px;min-width:80px;">
+          <div style="font-size:2.2rem;font-weight:900;color:{fb_color};font-family:'Inter',sans-serif;line-height:1;">{score}</div>
+          <div style="color:#7a7a7a;font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;margin-top:2px;">/ 100</div>
         </div>
         <div style="flex:1;min-width:180px;">
           <div style="color:{fb_color};font-size:1.05rem;font-weight:700;margin-bottom:4px;">{verdict_emoji} {verdict}</div>
-          <div style="color:#94a3b8;font-size:0.88rem;line-height:1.5;">"{one_liner}"</div>
+          <div style="color:#b3b3b3;font-size:0.88rem;line-height:1.5;">"{one_liner}"</div>
         </div>
-        <div style="background:{crack_color}12;border:1px solid {crack_color}40;border-radius:4px;padding:10px 14px;text-align:center;">
+        <div style="background:{crack_color}12;border:1px solid {crack_color}40;border-radius:10px;padding:10px 14px;text-align:center;">
           <div style="font-size:1rem;">{crack_emoji}</div>
           <div style="color:{crack_color};font-size:0.75rem;font-weight:700;white-space:nowrap;">{crack}</div>
-          <div style="color:#64748b;font-size:0.65rem;">crack chance</div>
+          <div style="color:#7a7a7a;font-size:0.65rem;">crack chance</div>
         </div>
       </div>
-      {"" if not crack_msg else f'<div style="background:{crack_color}08;border-left:3px solid {crack_color};border-radius:4px;padding:10px 14px;margin-bottom:14px;color:#cbd5e1;font-size:0.88rem;line-height:1.6;">{crack_msg}</div>'}
+      {"" if not crack_msg else f'<div style="background:{crack_color}08;border-left:3px solid {crack_color};border-radius:8px;padding:10px 14px;margin-bottom:14px;color:#cbd5e1;font-size:0.88rem;line-height:1.6;">{crack_msg}</div>'}
     </div>
     """, unsafe_allow_html=True)
 
@@ -4037,27 +4232,27 @@ def _render_question_feedback(fb: Dict):
             st.markdown('<div style="color:#22c55e;font-weight:700;font-size:0.85rem;letter-spacing:0.05em;margin:16px 0 8px 0;">✅ WHAT YOU DID WELL</div>', unsafe_allow_html=True)
             for s in well:
                 st.markdown(
-                    f'<div style="background:rgba(34,197,94,0.07);border-left:2px solid #22c55e;border-radius:6px;padding:8px 12px;margin-bottom:6px;color:#94a3b8;font-size:0.87rem;">{s}</div>', unsafe_allow_html=True)
+                    f'<div style="background:rgba(34,197,94,0.07);border-left:2px solid #22c55e;border-radius:6px;padding:8px 12px;margin-bottom:6px;color:#b3b3b3;font-size:0.87rem;">{s}</div>', unsafe_allow_html=True)
     with fc2:
         if wrong:
             st.markdown('<div style="color:#f59e0b;font-weight:700;font-size:0.85rem;letter-spacing:0.05em;margin:16px 0 8px 0;">⚠️ WHAT WENT WRONG</div>', unsafe_allow_html=True)
             for w in wrong:
                 st.markdown(
-                    f'<div style="background:rgba(245,158,11,0.07);border-left:2px solid #f59e0b;border-radius:6px;padding:8px 12px;margin-bottom:6px;color:#94a3b8;font-size:0.87rem;">{w}</div>', unsafe_allow_html=True)
+                    f'<div style="background:rgba(245,158,11,0.07);border-left:2px solid #f59e0b;border-radius:6px;padding:8px 12px;margin-bottom:6px;color:#b3b3b3;font-size:0.87rem;">{w}</div>', unsafe_allow_html=True)
 
     if how_fix:
-        st.markdown('<div style="color:#2F6FFF;font-weight:700;font-size:0.85rem;letter-spacing:0.05em;margin:12px 0 6px 0;">🔧 HOW TO IMPROVE</div>', unsafe_allow_html=True)
+        st.markdown('<div style="color:#0047FF;font-weight:700;font-size:0.85rem;letter-spacing:0.05em;margin:12px 0 6px 0;">🔧 HOW TO IMPROVE</div>', unsafe_allow_html=True)
         for fix in how_fix:
             st.markdown(
-                f'<div style="background:rgba(47,111,255,0.06);border-left:2px solid #2F6FFF;border-radius:6px;padding:8px 12px;margin-bottom:6px;color:#94a3b8;font-size:0.87rem;">{fix}</div>', unsafe_allow_html=True)
+                f'<div style="background:rgba(0,71,255,0.06);border-left:2px solid #0047FF;border-radius:6px;padding:8px 12px;margin-bottom:6px;color:#b3b3b3;font-size:0.87rem;">{fix}</div>', unsafe_allow_html=True)
 
     kw_html = ""
     if kw_used:
-        kw_html += "<span style='color:#64748b;font-size:0.8rem;margin-right:6px;'>Used:</span>" + " ".join(
+        kw_html += "<span style='color:#7a7a7a;font-size:0.8rem;margin-right:6px;'>Used:</span>" + " ".join(
             f'<span style="background:rgba(34,197,94,0.12);color:#22c55e;padding:2px 9px;border-radius:20px;font-size:0.77rem;margin:2px;display:inline-block;">{k}</span>'
             for k in kw_used)
     if kw_missed:
-        kw_html += "  <span style='color:#64748b;font-size:0.8rem;margin-left:10px;margin-right:6px;'>Missed:</span>" + " ".join(
+        kw_html += "  <span style='color:#7a7a7a;font-size:0.8rem;margin-left:10px;margin-right:6px;'>Missed:</span>" + " ".join(
             f'<span style="background:rgba(239,68,68,0.12);color:#ef4444;padding:2px 9px;border-radius:20px;font-size:0.77rem;margin:2px;display:inline-block;">{k}</span>'
             for k in kw_missed)
     if kw_html:
@@ -4066,8 +4261,8 @@ def _render_question_feedback(fb: Dict):
 
     if sample:
         st.markdown(f"""
-        <div style="background:rgba(168,85,247,0.07);border:1px solid rgba(168,85,247,0.25);border-radius:4px;padding:14px 16px;margin-top:10px;">
-          <div style="color:#a855f7;font-size:0.8rem;font-weight:700;letter-spacing:0.08em;margin-bottom:8px;">💎 MODEL ANSWER</div>
+        <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.25);border-radius:10px;padding:14px 16px;margin-top:10px;">
+          <div style="color:#FFFFFF;font-size:0.8rem;font-weight:700;letter-spacing:0.08em;margin-bottom:8px;">💎 MODEL ANSWER</div>
           <div style="color:#cbd5e1;font-size:0.9rem;line-height:1.7;font-style:italic;">"{sample}"</div>
         </div>
         """, unsafe_allow_html=True)
@@ -4094,8 +4289,8 @@ def _render_final_verdict(ai_handler: AIHandler, selected_model: str,
     if not st.session_state.final_verdict:
         # Fallback: just show average score
         grade_color = "#22c55e" if avg_score >= 90 else (
-            "#2F6FFF" if avg_score >= 75 else ("#f59e0b" if avg_score >= 60 else "#ef4444"))
-        st.markdown(f'<div style="text-align:center;padding:24px;"><div style="font-size:3rem;font-weight:900;color:{grade_color};">{avg_score:.0f}</div><div style="color:#94a3b8;">Overall Score</div></div>',
+            "#0047FF" if avg_score >= 75 else ("#f59e0b" if avg_score >= 60 else "#ef4444"))
+        st.markdown(f'<div style="text-align:center;padding:24px;"><div style="font-size:3rem;font-weight:900;color:{grade_color};">{avg_score:.0f}</div><div style="color:#b3b3b3;">Overall Score</div></div>',
                     unsafe_allow_html=True)
         return
 
@@ -4111,10 +4306,10 @@ def _render_final_verdict(ai_handler: AIHandler, selected_model: str,
     weeks = vd.get("estimated_weeks_to_ready", 4)
     motive = vd.get("motivational_close", "")
 
-    grade_color = {"A+": "#22c55e", "A": "#22c55e", "B+": "#2F6FFF", "B": "#2F6FFF",
-                   "C+": "#f59e0b", "C": "#f59e0b", "D": "#ef4444"}.get(grade, "#2F6FFF")
+    grade_color = {"A+": "#22c55e", "A": "#22c55e", "B+": "#0047FF", "B": "#0047FF",
+                   "C+": "#f59e0b", "C": "#f59e0b", "D": "#ef4444"}.get(grade, "#0047FF")
     crack_band = {
-        "Yes, apply now!": ("#22c55e", "🚀"), "Almost there": ("#2F6FFF", "💪"),
+        "Yes, apply now!": ("#22c55e", "🚀"), "Almost there": ("#0047FF", "💪"),
         "Borderline": ("#f59e0b", "⚡"), "Not yet — keep practising": ("#ef4444", "🔥"),
     }
     cc, ce = crack_band.get(can_crack, ("#f59e0b", "⚡"))
@@ -4122,25 +4317,25 @@ def _render_final_verdict(ai_handler: AIHandler, selected_model: str,
     st.markdown(f"""
     <div style="background:linear-gradient(135deg,rgba(5,10,20,0.95),rgba(15,23,42,0.9));border:2px solid {grade_color}30;border-radius:20px;padding:28px 32px;margin-top:24px;">
       <div style="display:flex;gap:20px;align-items:stretch;flex-wrap:wrap;margin-bottom:24px;">
-        <div style="text-align:center;background:{grade_color}10;border:2px solid {grade_color}30;border-radius:4px;padding:18px 22px;">
-          <div style="font-size:3rem;font-weight:900;color:{grade_color};font-family:'Orbitron',sans-serif;line-height:1;">{grade}</div>
-          <div style="color:#64748b;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;margin-top:4px;">Grade</div>
+        <div style="text-align:center;background:{grade_color}10;border:2px solid {grade_color}30;border-radius:14px;padding:18px 22px;">
+          <div style="font-size:3rem;font-weight:900;color:{grade_color};font-family:'Inter',sans-serif;line-height:1;">{grade}</div>
+          <div style="color:#7a7a7a;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;margin-top:4px;">Grade</div>
         </div>
-        <div style="text-align:center;background:rgba(0,0,0,0.3);border:2px solid rgba(255,255,255,0.06);border-radius:4px;padding:18px 22px;">
-          <div style="font-size:3rem;font-weight:900;color:{grade_color};font-family:'Orbitron',sans-serif;line-height:1;">{avg_score:.0f}</div>
-          <div style="color:#64748b;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;margin-top:4px;">Avg Score</div>
+        <div style="text-align:center;background:rgba(0,0,0,0.3);border:2px solid rgba(255,255,255,0.06);border-radius:14px;padding:18px 22px;">
+          <div style="font-size:3rem;font-weight:900;color:{grade_color};font-family:'Inter',sans-serif;line-height:1;">{avg_score:.0f}</div>
+          <div style="color:#7a7a7a;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;margin-top:4px;">Avg Score</div>
         </div>
-        <div style="flex:1;min-width:220px;background:{cc}10;border:2px solid {cc}30;border-radius:4px;padding:18px 22px;">
+        <div style="flex:1;min-width:220px;background:{cc}10;border:2px solid {cc}30;border-radius:14px;padding:18px 22px;">
           <div style="color:{cc};font-size:1.6rem;margin-bottom:4px;">{ce}</div>
           <div style="color:{cc};font-size:1rem;font-weight:800;line-height:1.2;">{can_crack}</div>
-          <div style="color:#64748b;font-size:0.72rem;margin-top:2px;">Company Crack Verdict</div>
+          <div style="color:#7a7a7a;font-size:0.72rem;margin-top:2px;">Company Crack Verdict</div>
           {"" if ready else f'<div style="color:#f59e0b;font-size:0.75rem;margin-top:6px;">~{weeks} weeks prep needed</div>'}
         </div>
-        <div style="flex:2;min-width:200px;background:rgba(0,0,0,0.3);border:2px solid rgba(255,255,255,0.06);border-radius:4px;padding:18px 22px;display:flex;align-items:center;">
-          <div><div style="color:#e2e8f0;font-size:0.95rem;font-weight:600;line-height:1.5;margin-bottom:6px;">"{headline}"</div><div style="color:#64748b;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;">Overall Assessment</div></div>
+        <div style="flex:2;min-width:200px;background:rgba(0,0,0,0.3);border:2px solid rgba(255,255,255,0.06);border-radius:14px;padding:18px 22px;display:flex;align-items:center;">
+          <div><div style="color:#FAFAF7;font-size:0.95rem;font-weight:600;line-height:1.5;margin-bottom:6px;">"{headline}"</div><div style="color:#7a7a7a;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;">Overall Assessment</div></div>
         </div>
       </div>
-      <div style="background:{cc}08;border-left:4px solid {cc};border-radius:4px;padding:14px 18px;margin-bottom:22px;">
+      <div style="background:{cc}08;border-left:4px solid {cc};border-radius:10px;padding:14px 18px;margin-bottom:22px;">
         <div style="color:{cc};font-size:0.78rem;font-weight:700;letter-spacing:0.1em;margin-bottom:6px;">🏢 COMPANY VERDICT</div>
         <div style="color:#cbd5e1;font-size:0.92rem;line-height:1.7;">{crack_msg}</div>
       </div>
@@ -4152,22 +4347,22 @@ def _render_final_verdict(ai_handler: AIHandler, selected_model: str,
         st.markdown('<div style="color:#22c55e;font-weight:700;font-size:0.85rem;letter-spacing:0.05em;margin:16px 0 8px 0;">🌟 TOP STRENGTHS</div>', unsafe_allow_html=True)
         for s in strengths:
             st.markdown(
-                f'<div style="background:rgba(34,197,94,0.07);border-left:3px solid #22c55e;border-radius:4px;padding:10px 14px;margin-bottom:8px;color:#94a3b8;font-size:0.88rem;line-height:1.5;">{s}</div>', unsafe_allow_html=True)
+                f'<div style="background:rgba(34,197,94,0.07);border-left:3px solid #22c55e;border-radius:8px;padding:10px 14px;margin-bottom:8px;color:#b3b3b3;font-size:0.88rem;line-height:1.5;">{s}</div>', unsafe_allow_html=True)
     with wv_col:
         st.markdown('<div style="color:#ef4444;font-weight:700;font-size:0.85rem;letter-spacing:0.05em;margin:16px 0 8px 0;">⚠️ TOP WEAKNESSES</div>', unsafe_allow_html=True)
         for w in weaknesses:
             st.markdown(
-                f'<div style="background:rgba(239,68,68,0.07);border-left:3px solid #ef4444;border-radius:4px;padding:10px 14px;margin-bottom:8px;color:#94a3b8;font-size:0.88rem;line-height:1.5;">{w}</div>', unsafe_allow_html=True)
+                f'<div style="background:rgba(239,68,68,0.07);border-left:3px solid #ef4444;border-radius:8px;padding:10px 14px;margin-bottom:8px;color:#b3b3b3;font-size:0.88rem;line-height:1.5;">{w}</div>', unsafe_allow_html=True)
 
     if action_plan:
-        st.markdown('<div style="color:#2F6FFF;font-weight:700;font-size:0.85rem;letter-spacing:0.05em;margin:16px 0 8px 0;">🎯 YOUR PRIORITY ACTION PLAN</div>', unsafe_allow_html=True)
+        st.markdown('<div style="color:#0047FF;font-weight:700;font-size:0.85rem;letter-spacing:0.05em;margin:16px 0 8px 0;">🎯 YOUR PRIORITY ACTION PLAN</div>', unsafe_allow_html=True)
         for i, step in enumerate(action_plan, 1):
             st.markdown(
-                f'<div style="display:flex;gap:12px;align-items:flex-start;background:rgba(47,111,255,0.05);border:1px solid rgba(47,111,255,0.12);border-radius:4px;padding:12px 16px;margin-bottom:8px;"><div style="background:rgba(47,111,255,0.15);color:#2F6FFF;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:900;flex-shrink:0;">{i}</div><div style="color:#cbd5e1;font-size:0.9rem;line-height:1.5;">{step}</div></div>', unsafe_allow_html=True)
+                f'<div style="display:flex;gap:12px;align-items:flex-start;background:rgba(0,71,255,0.05);border:1px solid rgba(0,71,255,0.12);border-radius:10px;padding:12px 16px;margin-bottom:8px;"><div style="background:rgba(0,71,255,0.15);color:#0047FF;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:900;flex-shrink:0;">{i}</div><div style="color:#cbd5e1;font-size:0.9rem;line-height:1.5;">{step}</div></div>', unsafe_allow_html=True)
 
     if motive:
         st.markdown(
-            f'<div style="background:linear-gradient(135deg,rgba(168,85,247,0.08),rgba(47,111,255,0.06));border:1px solid rgba(168,85,247,0.2);border-radius:4px;padding:18px 22px;margin-top:16px;text-align:center;"><div style="font-size:1.6rem;margin-bottom:8px;">💬</div><div style="color:#e2e8f0;font-size:0.95rem;line-height:1.7;font-style:italic;">"{motive}"</div></div>', unsafe_allow_html=True)
+            f'<div style="background:linear-gradient(135deg,rgba(255,255,255,0.08),rgba(0,71,255,0.06));border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:18px 22px;margin-top:16px;text-align:center;"><div style="font-size:1.6rem;margin-bottom:8px;">💬</div><div style="color:#FAFAF7;font-size:0.95rem;line-height:1.7;font-style:italic;">"{motive}"</div></div>', unsafe_allow_html=True)
 
 
 # ==================== SIDEBAR ====================
@@ -4190,13 +4385,13 @@ def render_sidebar(config: Config) -> tuple[str, str, str, bool, bool]:
             st.markdown("""
         <div style="padding: 24px 16px 8px 16px;">
             <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-                <div style="width:38px;height:38px;background:linear-gradient(135deg,#2F6FFF,#3a7bd5);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:0 0 16px rgba(47,111,255,0.35);">⚡</div>
-                <span style="font-family:'Space Grotesk',sans-serif;font-size:1.05rem;font-weight:700;color:#ffffff;letter-spacing:0.04em;">JOBLESS AI</span>
+                <div style="width:38px;height:38px;background:linear-gradient(135deg,#0047FF,#3a7bd5);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:0 0 16px rgba(0,71,255,0.35);">⚡</div>
+                <span style="font-family:'Inter',sans-serif;font-size:1.05rem;font-weight:700;color:#ffffff;letter-spacing:0.04em;">JOBLESS AI</span>
             </div>
         </div>
         """, unsafe_allow_html=True)
-            st.markdown('<div style="height:1px;background:linear-gradient(90deg,transparent,rgba(47,111,255,0.2),transparent);margin:0 0 16px 0;"></div>', unsafe_allow_html=True)
-            st.markdown('<div style="font-family:JetBrains Mono,monospace;font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(47,111,255,0.4);margin-bottom:10px;">Settings</div>', unsafe_allow_html=True)
+            st.markdown('<div style="height:1px;background:linear-gradient(90deg,transparent,rgba(0,71,255,0.2),transparent);margin:0 0 16px 0;"></div>', unsafe_allow_html=True)
+            st.markdown('<div style="font-family:Space Mono,monospace;font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(0,71,255,0.4);margin-bottom:10px;">Settings</div>', unsafe_allow_html=True)
         else:
             lottie_brain = load_lottieurl(
                 "https://lottie.host/880ffc06-b30a-406d-a60d-7734e5659837/92k6e3z3tK.json")
@@ -4205,7 +4400,7 @@ def render_sidebar(config: Config) -> tuple[str, str, str, bool, bool]:
             st.markdown("### ⚙️ Settings")
 
         # Provider selector
-        st.markdown("""<div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(47,111,255,0.75);margin-bottom:6px;">🤖 AI Provider</div>""", unsafe_allow_html=True)
+        st.markdown("""<div style="font-family:'Space Mono',monospace;font-size:0.68rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(0,71,255,0.75);margin-bottom:6px;">🤖 AI Provider</div>""", unsafe_allow_html=True)
         provider_icons = {
             "Google Gemini  🆓": "🔵 Google Gemini  🆓",
             "Groq  🆓⚡":        "⚡ Groq  🆓  (Ultra-fast)",
@@ -4223,7 +4418,7 @@ def render_sidebar(config: Config) -> tuple[str, str, str, bool, bool]:
             st.rerun()
 
         # Model selector
-        st.markdown("""<div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(47,111,255,0.75);margin:10px 0 6px 0;">🧠 Model</div>""", unsafe_allow_html=True)
+        st.markdown("""<div style="font-family:'Space Mono',monospace;font-size:0.68rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(0,71,255,0.75);margin:10px 0 6px 0;">🧠 Model</div>""", unsafe_allow_html=True)
         model_list = PROVIDER_MODELS[selected_provider]
         saved_model = st.session_state.get("selected_model", model_list[0])
         default_idx = model_list.index(
@@ -4240,7 +4435,7 @@ def render_sidebar(config: Config) -> tuple[str, str, str, bool, bool]:
         key_url = PROVIDER_KEY_URLS[selected_provider]
         free_txt = PROVIDER_FREE_TIER[selected_provider]
         st.markdown(
-            f"""<div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(47,111,255,0.75);margin-bottom:6px;">🔑 {selected_provider} API Key</div>""", unsafe_allow_html=True)
+            f"""<div style="font-family:'Space Mono',monospace;font-size:0.68rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(0,71,255,0.75);margin-bottom:6px;">🔑 {selected_provider} API Key</div>""", unsafe_allow_html=True)
 
         current_key = config.get_api_key(selected_provider)
         api_key_input = st.text_input(
@@ -4256,11 +4451,11 @@ def render_sidebar(config: Config) -> tuple[str, str, str, bool, bool]:
 
         st.markdown(f"""
         <a href="{key_url}" target="_blank" style="text-decoration:none;">
-            <div style="background:linear-gradient(90deg,#fbbf24,#f59e0b);color:#1f2937;padding:9px 14px;border-radius:4px;font-weight:700;font-size:0.8rem;text-align:center;cursor:pointer;margin-top:6px;">
+            <div style="background:linear-gradient(90deg,#fbbf24,#f59e0b);color:#1f2937;padding:9px 14px;border-radius:8px;font-weight:700;font-size:0.8rem;text-align:center;cursor:pointer;margin-top:6px;">
                 🔑 Get {selected_provider} Key →
             </div>
         </a>
-        <div style="color:#64748b;font-size:0.72rem;margin-top:6px;text-align:center;">{free_txt}</div>
+        <div style="color:#7a7a7a;font-size:0.72rem;margin-top:6px;text-align:center;">{free_txt}</div>
         """, unsafe_allow_html=True)
 
         st.divider()
@@ -4275,8 +4470,8 @@ def render_sidebar(config: Config) -> tuple[str, str, str, bool, bool]:
 
         with st.expander("🔒 Privacy & Data Notice", expanded=False):
             st.markdown("""
-            <div style="font-family:'Space Grotesk',sans-serif;font-size:0.82rem;line-height:1.7;color:#94a3b8;">
-            <div style="color:#2F6FFF;font-weight:700;margin-bottom:8px;">What happens to your data</div>
+            <div style="font-family:'Inter',sans-serif;font-size:0.82rem;line-height:1.7;color:#b3b3b3;">
+            <div style="color:#0047FF;font-weight:700;margin-bottom:8px;">What happens to your data</div>
             Resume/profile text is sent to the AI provider you selected. It is <b>not stored by JobLess AI</b>.
             API keys are held only in your browser session and cleared on tab close.
             Session history is lost on page refresh.
@@ -4352,7 +4547,7 @@ def init_session_state():
 # ==================== PYQ HUB ====================
 
 _C_WHITE = _rl_colors.HexColor("#f1f5f9")
-_C_LIGHT = _rl_colors.HexColor("#94a3b8")
+_C_LIGHT = _rl_colors.HexColor("#b3b3b3")
 _C_DARK = _rl_colors.HexColor("#1e293b")
 _C_MID = _rl_colors.HexColor("#334155")
 _C_GREEN = _rl_colors.HexColor("#22c55e")
@@ -5011,7 +5206,7 @@ def build_pyq_pdf(exam_name: str) -> bytes:
         author="JobLess AI"
     )
 
-    accent_hex = exam.get("accent", "#2F6FFF")
+    accent_hex = exam.get("accent", "#0047FF")
     accent_color = _rl_colors.HexColor(accent_hex)
     W, H = _A4
 
@@ -5025,7 +5220,7 @@ def build_pyq_pdf(exam_name: str) -> bytes:
                        fontSize=28, leading=34, textColor=_rl_colors.HexColor("#f1f5f9"),
                        fontName="Helvetica-Bold", alignment=_TAC, spaceAfter=6)
     s_cover_sub = mk("CoverSub",
-                     fontSize=12, leading=16, textColor=_rl_colors.HexColor("#94a3b8"),
+                     fontSize=12, leading=16, textColor=_rl_colors.HexColor("#b3b3b3"),
                      fontName="Helvetica", alignment=_TAC, spaceAfter=4)
     s_cover_tag = mk("CoverTag",
                      fontSize=9, leading=12, textColor=accent_color,
@@ -5208,15 +5403,15 @@ def render_tab_pyq_hub(ai_handler, selected_model: str):
 
     st.markdown("""
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px;">
-      <div style="flex:1;min-width:150px;background:rgba(99,102,241,0.07);border:1px solid rgba(99,102,241,0.25);border-radius:4px;padding:12px 16px;text-align:center;">
+      <div style="flex:1;min-width:150px;background:rgba(99,102,241,0.07);border:1px solid rgba(99,102,241,0.25);border-radius:12px;padding:12px 16px;text-align:center;">
         <div style="font-size:1.4rem;">📄</div>
         <div style="color:#818cf8;font-weight:600;font-size:0.85rem;margin-top:4px;">Download PDF Instantly</div>
       </div>
-      <div style="flex:1;min-width:150px;background:rgba(168,85,247,0.07);border:1px solid rgba(168,85,247,0.25);border-radius:4px;padding:12px 16px;text-align:center;">
+      <div style="flex:1;min-width:150px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.25);border-radius:12px;padding:12px 16px;text-align:center;">
         <div style="font-size:1.4rem;">🤖</div>
-        <div style="color:#a855f7;font-weight:600;font-size:0.85rem;margin-top:4px;">AI-Generated for Any Exam</div>
+        <div style="color:#FFFFFF;font-weight:600;font-size:0.85rem;margin-top:4px;">AI-Generated for Any Exam</div>
       </div>
-      <div style="flex:1;min-width:150px;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.25);border-radius:4px;padding:12px 16px;text-align:center;">
+      <div style="flex:1;min-width:150px;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.25);border-radius:12px;padding:12px 16px;text-align:center;">
         <div style="font-size:1.4rem;">✅</div>
         <div style="color:#22c55e;font-weight:600;font-size:0.85rem;margin-top:4px;">Answers + Explanations</div>
       </div>
@@ -5230,7 +5425,7 @@ def render_tab_pyq_hub(ai_handler, selected_model: str):
     with pyq_t1:
         st.markdown("""
         <div style="background:rgba(99,102,241,0.07);border:1px solid rgba(99,102,241,0.2);
-        border-radius:4px;padding:12px 18px;margin-bottom:20px;color:#a5b4fc;font-size:0.85rem;">
+        border-radius:10px;padding:12px 18px;margin-bottom:20px;color:#a5b4fc;font-size:0.85rem;">
         📄 Select an exam to instantly download a professionally formatted PDF with PYQs,
         coding questions, and full answer explanations — no login, no links, no waiting.
         </div>""", unsafe_allow_html=True)
@@ -5250,12 +5445,12 @@ def render_tab_pyq_hub(ai_handler, selected_model: str):
                 color = meta["color"]
                 st.markdown(f"""
                 <div style="background:rgba(0,0,0,0.25);border:1px solid {color}40;
-                border-radius:4px;padding:18px 20px;margin-bottom:4px;">
+                border-radius:14px;padding:18px 20px;margin-bottom:4px;">
                   <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
                     <span style="font-size:1.6rem;">{meta['icon']}</span>
                     <div>
-                      <div style="color:#e2e8f0;font-weight:700;font-size:0.95rem;">{exam_key}</div>
-                      <div style="color:#64748b;font-size:0.78rem;">{meta['desc']}</div>
+                      <div style="color:#FAFAF7;font-weight:700;font-size:0.95rem;">{exam_key}</div>
+                      <div style="color:#7a7a7a;font-size:0.78rem;">{meta['desc']}</div>
                     </div>
                     <span style="margin-left:auto;background:{color}22;color:{color};
                     font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:20px;
@@ -5304,8 +5499,8 @@ def render_tab_pyq_hub(ai_handler, selected_model: str):
     # ── Sub-tab 2: AI custom PDF generator ────────────────────────────────
     with pyq_t2:
         st.markdown("""
-        <div style="background:rgba(168,85,247,0.07);border:1px solid rgba(168,85,247,0.2);
-        border-radius:4px;padding:12px 18px;margin-bottom:20px;color:#c4b5fd;font-size:0.85rem;">
+        <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.2);
+        border-radius:10px;padding:12px 18px;margin-bottom:20px;color:#c4b5fd;font-size:0.85rem;">
         🤖 Don't see your exam above? Type any company + role and the AI will generate a full
         PYQ-style question paper — with coding questions, MCQs, and answer explanations — then
         package it as a downloadable PDF.
@@ -5313,11 +5508,11 @@ def render_tab_pyq_hub(ai_handler, selected_model: str):
 
         ai_c1, ai_c2 = st.columns([3, 2])
         with ai_c1:
-            st.markdown('<div style="color:rgba(168,85,247,0.9);font-family:\'JetBrains Mono\',monospace;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;">🏢 Company Name</div>', unsafe_allow_html=True)
+            st.markdown('<div style="color:rgba(255,255,255,0.9);font-family:\'Space Mono\',monospace;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;">🏢 Company Name</div>', unsafe_allow_html=True)
             pyq_co = st.text_input("Company", placeholder="e.g. L&T, Reliance, Accenture, Cognizant...",
                                    key="pyq_ai_company", label_visibility="collapsed")
         with ai_c2:
-            st.markdown('<div style="color:rgba(168,85,247,0.9);font-family:\'JetBrains Mono\',monospace;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;">🎯 Role / Exam Type</div>', unsafe_allow_html=True)
+            st.markdown('<div style="color:rgba(255,255,255,0.9);font-family:\'Space Mono\',monospace;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;">🎯 Role / Exam Type</div>', unsafe_allow_html=True)
             pyq_role = st.text_input("Role", placeholder="e.g. Graduate Engineer, SDE, Data Analyst...",
                                      key="pyq_ai_role", label_visibility="collapsed")
 
@@ -5373,7 +5568,7 @@ def render_tab_pyq_hub(ai_handler, selected_model: str):
 def _build_ai_pyq_pdf(company: str, role: str, sections: list) -> bytes:
     """Build a PDF from AI-generated question sections."""
     buf = _io.BytesIO()
-    accent = _rl_colors.HexColor("#a855f7")
+    accent = _rl_colors.HexColor("#FFFFFF")
     W, H = _A4
 
     doc = _SDT(buf, pagesize=_A4,
@@ -5387,7 +5582,7 @@ def _build_ai_pyq_pdf(company: str, role: str, sections: list) -> bytes:
 
     s_cover = mk("AITitle", fontSize=22, leading=28, textColor=_rl_colors.HexColor("#f1f5f9"),
                  fontName="Helvetica-Bold", alignment=_TAC, spaceAfter=6)
-    s_sub = mk("AISub", fontSize=11, leading=15, textColor=_rl_colors.HexColor("#94a3b8"),
+    s_sub = mk("AISub", fontSize=11, leading=15, textColor=_rl_colors.HexColor("#b3b3b3"),
                fontName="Helvetica", alignment=_TAC, spaceAfter=4)
     s_sec = mk("AISec", fontSize=13, leading=17, textColor=_PDF_TEXT,
                fontName="Helvetica-Bold", spaceBefore=14, spaceAfter=6)
@@ -5510,6 +5705,7 @@ def main():
     )
 
     init_session_state()
+    render_global_background()
 
     config = Config()
     ui = UIComponents()
@@ -5578,7 +5774,7 @@ def main():
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-html, body { background: #060c18 !important; background-color: #060c18 !important; overflow: hidden; }
+html, body { background: #060606 !important; background-color: #060606 !important; overflow: hidden; }
 
 /* ── Grid ── */
 .grid {
@@ -5658,9 +5854,9 @@ html, body { background: #060c18 !important; background-color: #060c18 !importan
 }
 
 .card:hover {
-  border-color: rgba(47,111,255,0.25);
+  border-color: rgba(0,71,255,0.25);
   transform: translateY(-5px);
-  box-shadow: 0 20px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(47,111,255,0.08);
+  box-shadow: 0 20px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,71,255,0.08);
 }
 
 .card-icon {
@@ -5671,16 +5867,16 @@ html, body { background: #060c18 !important; background-color: #060c18 !importan
 }
 
 .card-title {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.88rem;
   font-weight: 700;
-  color: #e2e8f0;
+  color: #FAFAF7;
   margin-bottom: 4px;
   letter-spacing: 0.01em;
 }
 
 .card-desc {
-  font-family: 'Epilogue', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.72rem;
   color: #4a5a72;
   line-height: 1.4;
@@ -5691,12 +5887,12 @@ html, body { background: #060c18 !important; background-color: #060c18 !importan
   bottom: 10px;
   right: 12px;
   font-size: 0.7rem;
-  color: rgba(47,111,255,0.3);
+  color: rgba(0,71,255,0.3);
   font-family: 'Space Mono', monospace;
   transition: color 0.2s ease, transform 0.2s ease;
 }
 .card:hover .card-arrow {
-  color: rgba(47,111,255,0.7);
+  color: rgba(0,71,255,0.7);
   transform: translate(2px, -2px);
 }
 
@@ -5709,9 +5905,9 @@ html, body { background: #060c18 !important; background-color: #060c18 !importan
   align-items: center;
   gap: 7px;
   padding: 9px 22px;
-  background: linear-gradient(135deg, #2F6FFF 0%, #0ea8d8 100%);
+  background: linear-gradient(135deg, #0047FF 0%, #0ea8d8 100%);
   color: #020b14;
-  font-family: 'Syne', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -5719,7 +5915,7 @@ html, body { background: #060c18 !important; background-color: #060c18 !importan
   border-radius: 50px;
   border: none;
   cursor: pointer;
-  box-shadow: 0 0 28px rgba(47,111,255,0.35), 0 4px 16px rgba(0,0,0,0.35);
+  box-shadow: 0 0 28px rgba(0,71,255,0.35), 0 4px 16px rgba(0,0,0,0.35);
   transition: all 0.22s ease;
   position: relative;
   overflow: hidden;
@@ -5736,7 +5932,7 @@ html, body { background: #060c18 !important; background-color: #060c18 !importan
   transition: opacity 0.2s;
   opacity: 0;
 }
-.gs-btn:hover { transform: translateY(-2px); box-shadow: 0 0 44px rgba(47,111,255,0.55), 0 6px 22px rgba(0,0,0,0.4); }
+.gs-btn:hover { transform: translateY(-2px); box-shadow: 0 0 44px rgba(0,71,255,0.55), 0 6px 22px rgba(0,0,0,0.4); }
 .gs-btn:hover::before { opacity: 1; }
 .gs-btn:active { transform: translateY(0px); }
 </style>
@@ -5839,7 +6035,7 @@ document.addEventListener('mousemove', function(e) {
 
     # Footer
     st.markdown(f"""
-        <div style="text-align:center;padding:20px;color:#94a3b8;">
+        <div style="text-align:center;padding:20px;color:#b3b3b3;">
             © {datetime.date.today().year} JobLess AI | Created by Anubhab Mondal
             <br>
             <span style="font-size:0.77rem;color:#475569;">
