@@ -3307,23 +3307,29 @@ function initSTT(){
     return;
   }
   recognition = new SR();
-  recognition.continuous=true; recognition.interimResults=true; recognition.lang='en-US';
+  // FIX: continuous=false prevents Android Chrome from infinitely duplicating speech
+  // It stops after every utterance, and we manually restart it in onend.
+  recognition.continuous=false; 
+  recognition.interimResults=true; 
+  recognition.lang='en-US';
   
-  // FIX: Android Chrome often duplicates words because of how it handles interim results + final string building.
   recognition.onresult=function(e){
-    var interimT = '';
-    // Instead of appending manually to finalT, we reconstruct the latest final from results
-    var latestFinal = ''; 
+    var interimText = '';
+    var finalChunk = ''; 
     for(var i=0; i<e.results.length; i++){
       if(e.results[i].isFinal) {
-        latestFinal += e.results[i][0].transcript + ' ';
+        finalChunk += e.results[i][0].transcript;
       } else {
-        interimT += e.results[i][0].transcript;
+        interimText += e.results[i][0].transcript;
       }
     }
-    // Only update if we aren't manually typing over it
+    
+    if (finalChunk) {
+      finalT += finalChunk + ' ';
+    }
+    
     var el=document.getElementById('transcript');
-    var full = (latestFinal + interimT).trim();
+    var full = (finalT + interimText).trim();
     if (full) {
       el.textContent = full;
       el.classList.add('has');
@@ -3331,7 +3337,7 @@ function initSTT(){
     }
     
     // Send live preview to parent
-    try{window.parent.postMessage({type:'jl-voice-transcript',text:latestFinal.trim()},'*');}catch(e){}
+    try{window.parent.postMessage({type:'jl-voice-transcript',text:finalT.trim()},'*');}catch(e){}
   };
   recognition.onerror=function(e){if(e.error!=='no-speech') console.log(e.error);};
   recognition.onend=function(){if(isListening){try{recognition.start();}catch(e){}}};
@@ -3359,10 +3365,11 @@ function stopListening(){
 }
 
 function showTranscript() {
-  // Now handled inside onresult to prevent the finalT concatenation bug
+  // Handled inside onresult
 }
 
 function clearTranscript(){
+  finalT = '';
   var el=document.getElementById('transcript');
   el.textContent='Speak or type your answer...';
   el.classList.remove('has');
@@ -3383,7 +3390,7 @@ function submitAnswer(mode){
   if(mode!=='wrapup' && !t){ alert('Please speak or type your answer first.'); return; }
   // Disable both buttons
   document.getElementById('submitBtn').disabled=true;
-  document.getElementById('wrapBtn').disabled=true;
+  if(document.getElementById('wrapBtn')) document.getElementById('wrapBtn').disabled=true;
   document.getElementById('submitBtn').textContent='Sending...';
   // Fill hidden input in parent and trigger form submit
   try{
@@ -3409,6 +3416,7 @@ function submitAnswer(mode){
 document.getElementById('transcript').addEventListener('input',function(){
   var t = this.textContent.trim();
   if(t&&t!=='Speak or type your answer...') this.classList.add('has');
+  finalT = t + ' ';
 });
 
 // ── INIT ──────────────────────────────────────────────────────────────
