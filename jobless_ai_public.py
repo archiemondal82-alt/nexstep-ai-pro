@@ -340,318 +340,372 @@ _V5_LANDING_HTML = """<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JobLess AI — Career Intelligence Platform</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Epilogue:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root {
-  --white:#FFFFFF; --off:#F8F9FD; --surface:#F2F4FB;
-  --border:rgba(0,0,0,0.07); --border2:rgba(0,0,0,0.11);
-  --ink:#08091A; --body:#2A2D45; --muted:#6B7280; --dim:#9CA3AF;
-  --blue:#1C54F0; --blue2:#4F7DFF; --indigo:#6366F1; --violet:#8B5CF6;
-  --sans:'Plus Jakarta Sans',sans-serif; --mono:'DM Mono',monospace;
-}
+:root{--paper:#F5F2EC;--ink:#0C0C0C;--blue:#0047FF;--gray:#7A7A7A;--rule:#D4D0C8;--soft:#E8E4DC;--white:#FAFAF7;}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 html{font-size:16px;scroll-behavior:smooth;}
-body{font-family:var(--sans);background:var(--white);color:var(--ink);overflow-x:hidden;cursor:none;}
-
-/* GRAIN */
-body::after{content:'';position:fixed;inset:0;z-index:9997;pointer-events:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-  opacity:0.025;}
-
-/* CURSOR */
-#cursor-dot{position:fixed;width:8px;height:8px;background:var(--blue);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width .15s,height .15s,background .2s;}
-#cursor-ring{position:fixed;width:40px;height:40px;border:1.5px solid rgba(28,84,240,0.4);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:width .22s cubic-bezier(.16,1,.3,1),height .22s,border-color .2s;}
-body.cursor-hover #cursor-dot{width:12px;height:12px;background:var(--blue2);}
-body.cursor-hover #cursor-ring{width:52px;height:52px;border-color:rgba(28,84,240,0.6);}
-*,a,button{cursor:none!important;}
-
-/* ANIMATED BLOBS */
-.blobs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
-.blob{position:absolute;border-radius:50%;filter:blur(100px);animation:blob-float linear infinite;}
-.blob-1{width:700px;height:700px;background:radial-gradient(circle,rgba(28,84,240,0.08) 0%,transparent 65%);top:-200px;right:-150px;animation:b1 20s linear infinite;}
-.blob-2{width:550px;height:550px;background:radial-gradient(circle,rgba(99,102,241,0.07) 0%,transparent 65%);bottom:-100px;left:-100px;animation:b2 26s linear infinite;}
-.blob-3{width:400px;height:400px;background:radial-gradient(circle,rgba(139,92,246,0.06) 0%,transparent 65%);top:40%;left:35%;animation:b3 32s linear infinite;}
-@keyframes b1{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-80px,60px) scale(1.12)}66%{transform:translate(40px,-70px) scale(0.9)}}
-@keyframes b2{0%,100%{transform:translate(0,0)}40%{transform:translate(90px,-50px) scale(1.15)}70%{transform:translate(-40px,80px) scale(0.88)}}
-@keyframes b3{0%,100%{transform:translate(0,0)}50%{transform:translate(-100px,60px)}}
-
-/* FLOATING NAV */
-nav{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:9000;display:flex;align-items:center;gap:2px;background:rgba(255,255,255,0.85);backdrop-filter:blur(24px) saturate(200%);border:1px solid rgba(255,255,255,0.9);border-radius:100px;padding:6px 6px 6px 18px;box-shadow:0 4px 24px rgba(0,0,0,0.09);}
-.nav-brand{display:flex;align-items:center;gap:8px;font-size:0.9rem;font-weight:800;letter-spacing:-0.04em;color:var(--ink);margin-right:12px;}
-.nav-icon{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--indigo));display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:800;color:#fff;box-shadow:0 2px 8px rgba(28,84,240,0.4);}
-.nav-link{padding:7px 14px;border-radius:100px;font-size:0.78rem;font-weight:500;color:var(--muted);background:transparent;border:none;transition:color .15s,background .15s;}
-.nav-link:hover{color:var(--ink);background:rgba(0,0,0,0.04);}
-.nav-btn{padding:9px 22px;border-radius:100px;border:none;background:linear-gradient(135deg,var(--blue),var(--indigo));color:#fff;font-size:0.8rem;font-weight:700;margin-left:8px;box-shadow:0 3px 14px rgba(28,84,240,0.38);transition:transform .12s,filter .15s;}
-.nav-btn:hover{transform:translateY(-1px);filter:brightness(1.06);}
-
+body{background:var(--paper);color:var(--ink);font-family:'Epilogue',sans-serif;overflow-x:hidden;}
+/* NAV */
+nav{position:sticky;top:0;z-index:200;height:60px;background:var(--paper);border-bottom:1px solid var(--rule);display:flex;align-items:center;padding:0 48px;gap:36px;}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:.98rem;letter-spacing:-.03em;color:var(--ink);display:flex;align-items:center;gap:9px;margin-right:auto;text-decoration:none;}
+.logo-sq{width:20px;height:20px;background:var(--ink);border-radius:3px;display:flex;align-items:center;justify-content:center;}
+.logo-sq svg{width:10px;height:10px;fill:var(--paper);}
+.nav-l{display:flex;gap:28px;list-style:none;}
+.nav-l a{font-family:'Epilogue',sans-serif;font-size:.78rem;font-weight:400;letter-spacing:.02em;color:var(--gray);text-decoration:none;}
+.nb{font-family:'Syne',sans-serif;font-size:.75rem;font-weight:700;padding:8px 20px;border-radius:3px;border:none;cursor:pointer;transition:all .2s;}
+.nb-g{background:none;color:var(--gray);border:1px solid var(--rule);}
+.nb-s{background:var(--ink);color:var(--paper);}
+.nb-s:hover{background:var(--blue);}
+/* API KEY BANNER */
+.api-banner{background:var(--ink);padding:12px 48px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;}
+.api-text{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.1em;color:rgba(255,255,255,.45);}
+.api-pill{display:flex;align-items:center;gap:7px;font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.1em;color:#fff;background:var(--blue);padding:7px 16px;border-radius:2px;}
 /* HERO */
-.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:110px 40px 80px;position:relative;overflow:hidden;text-align:center;}
-.hero-grid{position:absolute;inset:0;pointer-events:none;z-index:1;background-image:radial-gradient(circle,rgba(28,84,240,0.13) 1px,transparent 1px);background-size:30px 30px;mask-image:radial-gradient(ellipse 70% 55% at 50% 50%,black 20%,transparent 100%);}
-.hero-content{position:relative;z-index:2;}
-.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:5px 16px 5px 5px;background:rgba(28,84,240,0.06);border:1px solid rgba(28,84,240,0.16);border-radius:100px;margin-bottom:32px;animation:badge-in .7s cubic-bezier(.16,1,.3,1) both;}
-@keyframes badge-in{from{opacity:0;transform:translateY(10px) scale(0.95)}to{opacity:1;transform:none}}
-.badge-pulse{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--indigo));display:flex;align-items:center;justify-content:center;font-size:0.65rem;color:#fff;animation:pulse-ring 2.5s ease infinite;}
-@keyframes pulse-ring{0%{box-shadow:0 0 0 0 rgba(28,84,240,0.5)}60%{box-shadow:0 0 0 10px rgba(28,84,240,0)}100%{box-shadow:0 0 0 0 rgba(28,84,240,0)}}
-.badge-text{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;background:linear-gradient(90deg,var(--blue),var(--indigo));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.hero-h1{font-size:clamp(3.4rem,7vw,7.5rem);font-weight:800;line-height:0.93;letter-spacing:-0.04em;color:var(--ink);margin-bottom:28px;animation:hero-txt .8s .08s cubic-bezier(.16,1,.3,1) both;}
-@keyframes hero-txt{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
-.word-gradient{background:linear-gradient(135deg,var(--blue) 0%,var(--indigo) 45%,var(--violet) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:inline;}
-.hero-sub{font-size:1.1rem;font-weight:400;line-height:1.72;color:var(--muted);max-width:520px;margin:0 auto 48px;animation:hero-txt .8s .16s cubic-bezier(.16,1,.3,1) both;}
-.hero-sub strong{color:var(--body);font-weight:600;}
-.hero-btns{display:flex;gap:12px;justify-content:center;margin-bottom:60px;animation:hero-txt .8s .22s cubic-bezier(.16,1,.3,1) both;}
-.cta-primary{padding:15px 34px;border:none;border-radius:100px;background:linear-gradient(135deg,var(--blue),var(--indigo));color:#fff;font-size:0.95rem;font-weight:700;box-shadow:0 6px 24px rgba(28,84,240,0.42);transition:transform .15s,filter .15s;position:relative;overflow:hidden;}
-.cta-primary:hover{transform:translateY(-2px);filter:brightness(1.06);}
-.cta-ghost{padding:15px 30px;border-radius:100px;background:rgba(255,255,255,0.85);border:1px solid var(--border2);color:var(--body);font-size:0.95rem;font-weight:500;backdrop-filter:blur(12px);transition:transform .15s,box-shadow .15s;}
-.cta-ghost:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.1);}
-.hero-stats{display:flex;gap:0;background:rgba(255,255,255,0.8);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.95);border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,0.09);overflow:hidden;max-width:640px;margin:0 auto;animation:hero-txt .8s .3s cubic-bezier(.16,1,.3,1) both;}
-.hstat{flex:1;padding:22px 16px;text-align:center;border-right:1px solid var(--border);}
-.hstat:last-child{border-right:none;}
-.hstat-n{font-size:2.2rem;font-weight:800;letter-spacing:-0.06em;background:linear-gradient(135deg,var(--blue),var(--indigo));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:4px;}
-.hstat-l{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--dim);}
-
-/* MARQUEE */
-.marquee{overflow:hidden;padding:16px 0;background:linear-gradient(90deg,var(--off),rgba(240,243,255,0.8));border-top:1px solid var(--border);border-bottom:1px solid var(--border);position:relative;}
-.marquee::before,.marquee::after{content:'';position:absolute;top:0;bottom:0;width:100px;z-index:2;pointer-events:none;}
-.marquee::before{left:0;background:linear-gradient(90deg,var(--off),transparent);}
-.marquee::after{right:0;background:linear-gradient(-90deg,var(--off),transparent);}
-.mq-track{display:flex;width:max-content;animation:scroll-mq 30s linear infinite;}
-@keyframes scroll-mq{to{transform:translateX(-50%);}}
-.mq-item{display:flex;align-items:center;gap:10px;padding:0 28px;font-family:var(--mono);font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--dim);}
-.mq-star{color:var(--blue);font-size:0.55rem;}
-
-/* FEATURES SECTION */
-.section{padding:80px 80px 60px;max-width:1300px;margin:0 auto;}
-.eyebrow{font-family:var(--mono);font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--dim);margin-bottom:14px;}
-.section-h{font-size:clamp(2.2rem,4vw,3.4rem);font-weight:800;letter-spacing:-0.05em;line-height:0.95;color:var(--ink);margin-bottom:12px;}
-.light{font-weight:300;color:var(--muted);}
-.section-sub{font-size:0.92rem;color:var(--muted);line-height:1.7;max-width:520px;margin-bottom:44px;}
-.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
-.feat-card{background:rgba(255,255,255,0.85);border:1px solid var(--border);border-radius:18px;padding:26px;backdrop-filter:blur(10px);box-shadow:0 2px 14px rgba(0,0,0,0.05);transition:transform .25s,box-shadow .25s,border-color .25s;position:relative;overflow:hidden;}
-.feat-card:hover{transform:translateY(-5px);box-shadow:0 16px 40px rgba(0,0,0,0.1);border-color:rgba(28,84,240,0.2);}
-.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--indigo));transform:scaleX(0);transform-origin:left;transition:transform .3s;}
-.feat-card:hover::before{transform:scaleX(1);}
-.fc-num{font-family:var(--mono);font-size:0.52rem;letter-spacing:0.14em;color:var(--dim);margin-bottom:12px;}
-.fc-ico{font-size:1.5rem;display:block;margin-bottom:10px;}
-.fc-t{font-size:1rem;font-weight:700;letter-spacing:-0.025em;color:var(--ink);margin-bottom:7px;}
-.fc-d{font-size:0.78rem;color:var(--muted);line-height:1.6;margin-bottom:14px;}
-.fc-link{font-family:var(--mono);font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;background:linear-gradient(90deg,var(--blue),var(--indigo));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-
-/* SETUP BAND */
-.setup-band{background:linear-gradient(135deg,#0a0f1a 0%,#0d1533 50%,#0f0a1a 100%);padding:80px;}
-.setup-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
-.setup-copy h2{font-size:clamp(2rem,3vw,2.8rem);font-weight:800;letter-spacing:-0.04em;line-height:1;color:#fff;margin-bottom:16px;}
-.setup-copy h2 em{font-style:italic;font-weight:300;color:rgba(255,255,255,0.5);}
-.setup-copy p{font-size:0.9rem;color:rgba(255,255,255,0.45);line-height:1.7;max-width:360px;}
-.eyebrow-light{font-family:var(--mono);font-size:0.56rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(28,84,240,0.7);margin-bottom:16px;}
-.setup-box{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:18px;overflow:hidden;backdrop-filter:blur(20px);}
-.setup-box-top{padding:24px 24px 16px;}
-.provider-tabs{display:flex;gap:4px;background:rgba(255,255,255,0.06);border-radius:10px;padding:4px;margin-bottom:18px;}
-.ptab{flex:1;padding:8px;border-radius:8px;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.4);background:transparent;border:none;transition:all .15s;}
-.ptab.on{background:rgba(255,255,255,0.1);color:#fff;}
-.fl{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.35);display:block;margin-bottom:6px;}
-.fi{width:100%;padding:10px 13px;margin-bottom:12px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:9px;color:#fff;font-family:var(--sans);font-size:0.84rem;outline:none;transition:border-color .15s;}
-.fi:focus{border-color:rgba(28,84,240,0.6);box-shadow:0 0 0 3px rgba(28,84,240,0.12);}
-.fi option{background:#0d1533;}
-.kl{font-family:var(--mono);font-size:0.57rem;color:rgba(28,84,240,0.7);text-decoration:none;display:block;margin-bottom:16px;transition:color .15s;}
-.kl:hover{color:var(--blue2);}
-.setup-box-bot{padding:18px 24px;border-top:1px solid rgba(255,255,255,0.08);}
-.launch-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--blue),var(--indigo));color:#fff;font-size:0.88rem;font-weight:700;border:none;border-radius:10px;box-shadow:0 4px 18px rgba(28,84,240,0.38);transition:filter .15s,transform .12s;}
-.launch-btn:hover{filter:brightness(1.08);transform:translateY(-1px);}
-.sidebar-note{margin-top:14px;background:rgba(28,84,240,0.1);border:1px solid rgba(28,84,240,0.25);border-radius:9px;padding:12px 14px;font-family:var(--mono);font-size:0.62rem;letter-spacing:0.06em;color:rgba(255,255,255,0.6);}
-.sidebar-note span{color:var(--blue2);}
-
+.hero{display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 100px);border-bottom:1px solid var(--rule);}
+.hero-l{padding:72px 56px 64px;border-right:1px solid var(--rule);display:flex;flex-direction:column;justify-content:space-between;}
+.h-tag{display:inline-flex;align-items:center;gap:7px;font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gray);margin-bottom:44px;}
+.h-tag span{width:6px;height:6px;background:var(--blue);border-radius:50%;animation:blink 2s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+.h1{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(3.4rem,5.5vw,6.4rem);line-height:.9;letter-spacing:-.05em;color:var(--ink);animation:riseUp .9s cubic-bezier(.16,1,.3,1) both;}
+.h1 .em{font-family:'Epilogue',sans-serif;font-style:italic;font-weight:300;display:block;}
+.h1 .bl{color:var(--blue);}
+@keyframes riseUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.hero-desc{margin-top:32px;font-size:.95rem;font-weight:300;line-height:1.8;color:var(--gray);max-width:360px;animation:riseUp .9s .1s cubic-bezier(.16,1,.3,1) both;}
+.hero-btns{margin-top:36px;display:flex;gap:10px;animation:riseUp .9s .2s cubic-bezier(.16,1,.3,1) both;}
+.btn-p{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;letter-spacing:.03em;background:var(--ink);color:var(--paper);border:none;padding:13px 30px;border-radius:3px;cursor:pointer;display:inline-flex;align-items:center;gap:9px;transition:background .2s,transform .15s;}
+.btn-p:hover{background:var(--blue);transform:translateY(-2px);}
+.btn-g{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.03em;background:none;color:var(--ink);border:1px solid var(--rule);padding:13px 24px;border-radius:3px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;}
+.hero-stats{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--rule);margin-top:auto;}
+.hs{padding:20px 0;border-right:1px solid var(--rule);}
+.hs:last-child{border-right:none;}
+.hs-n{font-family:'Syne',sans-serif;font-weight:800;font-size:1.7rem;letter-spacing:-.04em;color:var(--ink);display:block;}
+.hs-n .b{color:var(--blue);}
+.hs-l{font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);display:block;margin-top:3px;}
+/* HERO RIGHT — WebGL canvas */
+.hero-r{position:relative;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center;}
+#hero-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;}
+/* Resume float card */
+.resume-float{position:relative;z-index:10;width:min(320px,70%);background:rgba(250,250,247,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;backdrop-filter:blur(20px);overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.5);animation:riseUp 1s .3s cubic-bezier(.16,1,.3,1) both;}
+.rf-bar{background:rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.08);padding:10px 14px;display:flex;align-items:center;gap:6px;}
+.rf-d{width:8px;height:8px;border-radius:50%;}.rf-r{background:#FF5F57;}.rf-y{background:#FEBC2E;}.rf-g{background:#28C840;}
+.rf-body{padding:18px 20px;}
+.rf-label{font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:10px;}
+.rf-name{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:#fff;margin-bottom:4px;}
+.rf-role{font-size:.75rem;color:rgba(255,255,255,.45);margin-bottom:16px;}
+.rf-scan{position:relative;height:2px;background:rgba(255,255,255,.05);border-radius:50px;overflow:hidden;margin-bottom:14px;}
+.rf-scan-fill{position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,#0047FF,transparent);animation:scan 2s ease-in-out infinite;}
+@keyframes scan{0%{left:-100%}100%{left:200%}}
+.rf-pills{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:16px;}
+.rf-pill{font-family:'Space Mono',monospace;font-size:.58rem;padding:3px 10px;border-radius:2px;}
+.rf-pill.on{background:rgba(0,71,255,.25);color:#7AABFF;border:1px solid rgba(0,71,255,.4);}
+.rf-pill.off{background:rgba(255,255,255,.05);color:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.08);}
+.rf-score-row{display:flex;align-items:center;gap:14px;}
+.rf-ring{width:54px;height:54px;flex-shrink:0;}
+.rf-score-big{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:#fff;display:block;line-height:1;}
+.rf-score-sub{font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.1em;color:rgba(255,255,255,.35);text-transform:uppercase;display:block;margin-top:3px;}
+.rf-bars{margin-top:14px;display:flex;flex-direction:column;gap:7px;}
+.rf-bar-row{display:flex;align-items:center;gap:8px;}
+.rf-bar-l{font-family:'Space Mono',monospace;font-size:.55rem;color:rgba(255,255,255,.3);width:56px;flex-shrink:0;}
+.rf-bar-track{flex:1;height:3px;background:rgba(255,255,255,.07);border-radius:50px;overflow:hidden;}
+.rf-bar-fill{height:100%;border-radius:50px;animation:growBar 1.5s cubic-bezier(.16,1,.3,1) both;}
+.rf-bar-fill.b1{background:#0047FF;width:87%;animation-delay:.8s;}
+.rf-bar-fill.b2{background:#4ADE80;width:94%;animation-delay:1s;}
+.rf-bar-fill.b3{background:#F59E0B;width:72%;animation-delay:1.2s;}
+@keyframes growBar{from{width:0}to{}}
+.rf-bar-v{font-family:'Space Mono',monospace;font-size:.55rem;color:rgba(255,255,255,.5);width:28px;text-align:right;flex-shrink:0;}
+/* Ticker */
+.hero-ticker{grid-column:1/-1;background:var(--ink);border-top:1px solid rgba(255,255,255,.06);height:40px;overflow:hidden;display:flex;align-items:center;}
+.ht-tag{flex-shrink:0;height:100%;padding:0 18px;display:flex;align-items:center;font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--paper);border-right:1px solid rgba(255,255,255,.08);}
+.ht-inner{overflow:hidden;flex:1;}
+.ht-t{display:flex;white-space:nowrap;animation:ticK 32s linear infinite;}
+@keyframes ticK{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.ti{font-family:'Space Mono',monospace;font-size:.62rem;color:rgba(255,255,255,.4);padding:0 22px;display:inline-flex;align-items:center;gap:6px;}
+.ti .u{color:#4ADE80;}.ti .d{color:#F87171;}
+/* TOOLS */
+.tools{border-bottom:1px solid var(--rule);}
+.tools-head{padding:80px 56px 60px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:end;border-bottom:1px solid var(--rule);}
+.sec-eye{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gray);margin-bottom:14px;}
+.sec-h2{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(2rem,3vw,3.2rem);letter-spacing:-.04em;line-height:1;}
+.sec-h2 em{font-family:'Epilogue',sans-serif;font-style:italic;font-weight:300;}
+.sec-h2 .bl{color:var(--blue);}
+.sec-sub{font-size:.9rem;font-weight:300;line-height:1.8;color:var(--gray);}
+.tools-grid{display:grid;grid-template-columns:repeat(3,1fr);}
+.tc{border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:0;overflow:hidden;position:relative;cursor:pointer;transition:background .3s;}
+.tc:hover{background:var(--ink);}
+.tc:nth-child(3n){border-right:none;}
+.tc:nth-child(n+4){border-bottom:none;}
+.tc-art{height:140px;border-bottom:1px solid var(--rule);overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--soft);transition:background .3s,border-color .3s;}
+.tc:hover .tc-art{border-color:rgba(255,255,255,.06);background:#111;}
+.tc-art svg{width:100%;height:100%;overflow:visible;}
+.tc-body{padding:24px 24px 28px;}
+.tc-n{font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.12em;color:var(--rule);margin-bottom:12px;transition:color .3s;}
+.tc:hover .tc-n{color:rgba(255,255,255,.2);}
+.tc-t{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;letter-spacing:-.02em;color:var(--ink);margin-bottom:6px;transition:color .3s;}
+.tc:hover .tc-t{color:#fff;}
+.tc-d{font-size:.8rem;font-weight:300;line-height:1.6;color:var(--gray);transition:color .3s;}
+.tc:hover .tc-d{color:rgba(255,255,255,.4);}
+.tc-arrow{position:absolute;bottom:20px;right:20px;font-size:1rem;color:var(--rule);transition:color .25s,transform .25s;}
+.tc:hover .tc-arrow{color:var(--blue);transform:translate(3px,-3px);}
+/* PROCESS */
+.process{padding:80px 56px;border-bottom:1px solid var(--rule);}
+.proc-head{display:grid;grid-template-columns:1fr 2fr;gap:80px;margin-bottom:48px;align-items:end;}
+.proc-steps{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--rule);}
+.ps{padding:32px 24px;border-right:1px solid var(--rule);}
+.ps:last-child{border-right:none;}
+.ps-n{font-family:'Syne',sans-serif;font-size:3rem;font-weight:800;letter-spacing:-.05em;color:var(--rule);line-height:1;margin-bottom:18px;}
+.ps-t{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;color:var(--ink);margin-bottom:7px;}
+.ps-d{font-size:.78rem;font-weight:300;line-height:1.65;color:var(--gray);}
+/* EDITORIAL */
+.editorial{padding:80px 56px;background:var(--soft);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);}
+.ed-grid{display:grid;grid-template-columns:1fr 2fr;gap:80px;align-items:start;}
+.ed-lbl{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gray);margin-bottom:18px;padding-top:8px;border-top:1px solid var(--rule);}
+.ed-meta{font-size:.78rem;color:var(--gray);line-height:1.7;}
+.ed-q{font-family:'Epilogue',sans-serif;font-style:italic;font-weight:300;font-size:clamp(1.5rem,2.4vw,2.6rem);line-height:1.35;letter-spacing:-.02em;color:var(--ink);padding-top:8px;border-top:2px solid var(--ink);}
+/* TESTIMONIALS */
+.testis{padding:80px 56px;border-bottom:1px solid var(--rule);}
+.trow{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--rule);}
+.tcard{padding:32px 24px;border-right:1px solid var(--rule);}
+.tcard:last-child{border-right:none;}
+.tc-stars{font-size:.7rem;letter-spacing:3px;color:var(--blue);margin-bottom:14px;}
+.tc-q{font-family:'Epilogue',sans-serif;font-size:.88rem;font-style:italic;font-weight:300;color:var(--ink);line-height:1.7;margin-bottom:20px;}
+.tc-auth{display:flex;align-items:center;gap:10px;}
+.tc-av{width:30px;height:30px;border-radius:50%;background:var(--soft);border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0;}
+.tc-name{font-size:.78rem;font-weight:700;color:var(--ink);}
+.tc-role{font-family:'Space Mono',monospace;font-size:.54rem;color:var(--gray);letter-spacing:.04em;margin-top:2px;}
+/* CTA */
+.cta{padding:100px 56px;border-bottom:1px solid var(--rule);display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;}
+.cta-h2{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(2.2rem,3.8vw,4.5rem);letter-spacing:-.05em;line-height:.92;color:var(--ink);}
+.cta-h2 em{font-family:'Epilogue',sans-serif;font-style:italic;font-weight:300;}
+.cta-h2 .bl{color:var(--blue);}
+.cta-r{display:flex;flex-direction:column;gap:16px;}
+.cta-r p{font-size:.88rem;font-weight:300;line-height:1.8;color:var(--gray);}
+.cta-btns{display:flex;gap:10px;flex-wrap:wrap;}
+.cta-note{font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.08em;color:var(--gray);}
+.cta-note span{color:var(--blue);}
 /* FOOTER */
-footer{border-top:1px solid var(--border);padding:52px 80px 32px;max-width:1300px;margin:0 auto;}
-.ft-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px;}
-.ft-brand{font-size:1rem;font-weight:800;letter-spacing:-0.04em;color:var(--ink);margin-bottom:8px;}
-.ft-tagline{font-size:0.8rem;color:var(--dim);line-height:1.65;max-width:240px;}
-.ft-h{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--dim);margin-bottom:12px;}
-.ft-list{list-style:none;display:flex;flex-direction:column;gap:9px;}
-.ft-list a{font-size:0.81rem;color:var(--muted);text-decoration:none;transition:color .15s;}
-.ft-list a:hover{color:var(--blue);}
-.ft-bottom{display:flex;justify-content:space-between;padding-top:20px;border-top:1px solid var(--border);}
-.ft-copy{font-family:var(--mono);font-size:0.57rem;letter-spacing:0.06em;color:var(--dim);}
-
-/* REVEAL ANIMATIONS */
-.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1);}
-.reveal.visible{opacity:1;transform:none;}
-.d1{transition-delay:.05s}.d2{transition-delay:.1s}.d3{transition-delay:.15s}.d4{transition-delay:.2s}.d5{transition-delay:.25s}.d6{transition-delay:.3s}
+footer{padding:48px 56px 28px;border-top:1px solid var(--rule);}
+.ft-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;padding-bottom:40px;border-bottom:1px solid var(--rule);margin-bottom:20px;}
+.ft-bn{font-family:'Syne',sans-serif;font-weight:800;font-size:.9rem;display:flex;align-items:center;gap:8px;margin-bottom:10px;color:var(--ink);}
+.ft-bp{font-size:.8rem;font-weight:300;color:var(--gray);line-height:1.7;max-width:220px;}
+.ft-ch{font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gray);margin-bottom:12px;}
+.ft-links{list-style:none;}
+.ft-links li{margin-bottom:7px;}
+.ft-links a{font-size:.8rem;font-weight:300;color:var(--gray);text-decoration:none;}
+.ft-btm{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+.ft-copy{font-family:'Space Mono',monospace;font-size:.54rem;letter-spacing:.06em;color:var(--gray);}
+.ft-copy strong{color:var(--blue);}
+@media(max-width:1000px){
+  nav{padding:0 24px;}
+  .hero{grid-template-columns:1fr;min-height:auto;}
+  .hero-l{padding:48px 24px 36px;}
+  .hero-r{height:360px;}
+  .tools-head,.proc-head,.cta,.ed-grid{grid-template-columns:1fr;gap:20px;padding:48px 24px 36px;}
+  .tools-grid{grid-template-columns:1fr 1fr;}
+  .proc-steps,.trow{grid-template-columns:1fr 1fr;}
+  .editorial,.testis,.process{padding:56px 24px;}
+  .ft-row{grid-template-columns:1fr 1fr;gap:28px;}
+}
+@media(max-width:600px){
+  .tools-grid,.proc-steps,.trow,.ft-row{grid-template-columns:1fr;}
+  .hero-stats{grid-template-columns:1fr 1fr;}
+  .h1{font-size:3rem;}
+  .hero-l{padding:36px 18px 28px;}
+  .hero-r{height:280px;}
+  .cta{padding:64px 18px;}
+}
 </style>
 </head>
 <body>
-<div id="cursor-dot"></div>
-<div id="cursor-ring"></div>
-<div class="blobs"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
 
-<!-- NAV -->
 <nav>
-  <div class="nav-brand"><div class="nav-icon">JL</div>JobLess AI</div>
-  <button class="nav-link">Features</button>
-  <button class="nav-link">Pricing</button>
-  <button class="nav-link">About</button>
-  <button class="nav-btn">Launch App →</button>
+  <a class="logo" href="#">
+    <div class="logo-sq"><svg viewBox="0 0 10 10"><circle cx="5" cy="5" r="3"/></svg></div>
+    JobLess AI
+  </a>
+  <ul class="nav-l">
+    <li><a href="#tools">Features</a></li>
+    <li><a href="#process">How It Works</a></li>
+    <li><a href="#cta">Get Started</a></li>
+  </ul>
+  <button class="nb nb-g">Sign In</button>
+  <button class="nb nb-s" onclick="document.querySelector('.api-banner').scrollIntoView({behavior:'smooth'})">Get Started</button>
 </nav>
 
-<!-- HERO -->
+<div class="api-banner">
+  <span class="api-text">// Enter your Anthropic / OpenAI / Gemini API key in the sidebar (←) to unlock the full dashboard</span>
+  <div class="api-pill">← Add API Key in Sidebar to Begin</div>
+</div>
+
 <section class="hero">
-  <canvas id="hero-canvas" style="position:absolute;inset:0;pointer-events:none;z-index:0;opacity:0.4;"></canvas>
-  <div class="hero-grid"></div>
-  <div class="hero-content">
-    <div class="hero-badge">
-      <div class="badge-pulse">✦</div>
-      <span class="badge-text">Free · Bring your own AI key · Zero data storage</span>
-    </div>
-    <h1 class="hero-h1">The smartest way<br>to <span class="word-gradient">land the job.</span></h1>
-    <p class="hero-sub">AI-powered career co-pilot. <strong>ATS resumes</strong>, live mock interviews, and curated question banks for 50+ domains — on free AI providers you control.</p>
-    <div class="hero-btns">
-      <button class="cta-primary" onclick="scrollToSetup()">Get Started — It's Free</button>
-      <button class="cta-ghost" onclick="document.getElementById('features-anchor').scrollIntoView({behavior:'smooth'})">Explore Features ↓</button>
+  <div class="hero-l">
+    <div>
+      <div class="h-tag"><span></span>AI Career Intelligence · Powered by Claude</div>
+      <h1 class="h1">Land your<br><span class="bl">dream</span><br><span class="em">role.</span></h1>
+      <p class="hero-desc">Upload your resume. Get a deep career analysis, ATS-optimised documents, mock interviews, and a clear roadmap to the offers you deserve.</p>
+      <div class="hero-btns">
+        <button class="btn-p">Analyse My Resume →</button>
+        <button class="btn-g">▶ See Features</button>
+      </div>
     </div>
     <div class="hero-stats">
-      <div class="hstat"><div class="hstat-n" id="c1">0</div><div class="hstat-l">Interview Lift</div></div>
-      <div class="hstat"><div class="hstat-n" id="c2">0</div><div class="hstat-l">Faster Placement</div></div>
-      <div class="hstat"><div class="hstat-n" id="c3">0</div><div class="hstat-l">Career Domains</div></div>
-      <div class="hstat"><div class="hstat-n" id="c4">0</div><div class="hstat-l">User Rating</div></div>
+      <div class="hs"><span class="hs-n"><span class="b" id="c1">0</span>%</span><span class="hs-l">ATS Pass Rate</span></div>
+      <div class="hs"><span class="hs-n"><span class="b" id="c2">0</span>×</span><span class="hs-l">More Interviews</span></div>
+      <div class="hs"><span class="hs-n"><span class="b" id="c3">0</span>k+</span><span class="hs-l">Resumes Built</span></div>
+      <div class="hs"><span class="hs-n"><span class="b" id="c4">0</span>★</span><span class="hs-l">User Rating</span></div>
     </div>
+  </div>
+  <div class="hero-r">
+    <canvas id="hero-canvas"></canvas>
+    <div class="resume-float">
+      <div class="rf-bar"><div class="rf-d rf-r"></div><div class="rf-d rf-y"></div><div class="rf-d rf-g"></div></div>
+      <div class="rf-body">
+        <div class="rf-label">Resume Analysis · Live</div>
+        <div class="rf-name">Your Name Here</div>
+        <div class="rf-role">→ Target Role · Target Company</div>
+        <div class="rf-scan"><div class="rf-scan-fill"></div></div>
+        <div class="rf-pills">
+          <span class="rf-pill on">Python</span><span class="rf-pill on">React</span><span class="rf-pill on">ML</span>
+          <span class="rf-pill off">Go</span><span class="rf-pill on">AWS</span><span class="rf-pill off">K8s</span>
+        </div>
+        <div class="rf-score-row">
+          <svg class="rf-ring" viewBox="0 0 54 54">
+            <circle cx="27" cy="27" r="22" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="4"/>
+            <circle cx="27" cy="27" r="22" fill="none" stroke="#0047FF" stroke-width="4"
+              stroke-dasharray="138.23" stroke-dashoffset="17.97" stroke-linecap="round" transform="rotate(-90 27 27)">
+              <animate attributeName="stroke-dashoffset" from="138.23" to="17.97" dur="1.5s" begin="0.5s" fill="freeze" calcMode="spline" keySplines="0.16 1 0.3 1"/>
+            </circle>
+          </svg>
+          <div><span class="rf-score-big">87%</span><span class="rf-score-sub">ATS Score</span></div>
+        </div>
+        <div class="rf-bars">
+          <div class="rf-bar-row"><span class="rf-bar-l">ATS</span><div class="rf-bar-track"><div class="rf-bar-fill b1"></div></div><span class="rf-bar-v">87%</span></div>
+          <div class="rf-bar-row"><span class="rf-bar-l">Read</span><div class="rf-bar-track"><div class="rf-bar-fill b2"></div></div><span class="rf-bar-v">94%</span></div>
+          <div class="rf-bar-row"><span class="rf-bar-l">Impact</span><div class="rf-bar-track"><div class="rf-bar-fill b3"></div></div><span class="rf-bar-v">72%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-ticker">
+    <div class="ht-tag">Market Pulse</div>
+    <div class="ht-inner"><div class="ht-t">
+      <span class="ti">SWE <span class="u">↑12%</span><span style="color:rgba(255,255,255,.1);margin:0 8px">·</span></span>
+      <span class="ti">AI/ML <span class="u">↑31%</span><span style="color:rgba(255,255,255,.1);margin:0 8px">·</span></span>
+      <span class="ti">Data Sci <span class="u">↑8%</span><span style="color:rgba(255,255,255,.1);margin:0 8px">·</span></span>
+      <span class="ti">Product Mgr <span class="d">↓3%</span><span style="color:rgba(255,255,255,.1);margin:0 8px">·</span></span>
+      <span class="ti">DevOps <span class="u">↑19%</span><span style="color:rgba(255,255,255,.1);margin:0 8px">·</span></span>
+      <span class="ti">Avg CTC ₹18.4L <span class="u">↑7%</span><span style="color:rgba(255,255,255,.1);margin:0 8px">·</span></span>
+      <span class="ti">Cloud <span class="u">↑22%</span><span style="color:rgba(255,255,255,.1);margin:0 8px">·</span></span>
+      <span class="ti">Full Stack <span class="u">↑14%</span><span style="color:rgba(255,255,255,.1);margin:0 8px">·</span></span>
+      <span class="ti">SWE <span class="u">↑12%</span><span style="color:rgba(255,255,255,.1);margin:0 8px">·</span></span>
+      <span class="ti">AI/ML <span class="u">↑31%</span><span style="color:rgba(255,255,255,.1);margin:0 8px">·</span></span>
+      <span class="ti">Data Sci <span class="u">↑8%</span><span style="color:rgba(255,255,255,.1);margin:0 8px">·</span></span>
+      <span class="ti">Cloud <span class="u">↑22%</span><span style="color:rgba(255,255,255,.1);margin:0 8px">·</span></span>
+    </div></div>
   </div>
 </section>
 
-<!-- MARQUEE -->
-<div class="marquee"><div class="mq-track">
-  <div class="mq-item"><span class="mq-star">✦</span>Career Analysis</div>
-  <div class="mq-item"><span class="mq-star">✦</span>ATS Resume Builder</div>
-  <div class="mq-item"><span class="mq-star">✦</span>Live Mock Interview</div>
-  <div class="mq-item"><span class="mq-star">✦</span>PYQ Hub</div>
-  <div class="mq-item"><span class="mq-star">✦</span>Career Compare</div>
-  <div class="mq-item"><span class="mq-star">✦</span>Learning Resources</div>
-  <div class="mq-item"><span class="mq-star">✦</span>50+ Domains</div>
-  <div class="mq-item"><span class="mq-star">✦</span>Zero Data Storage</div>
-  <div class="mq-item"><span class="mq-star">✦</span>Free AI Providers</div>
-  <div class="mq-item"><span class="mq-star">✦</span>Career Analysis</div>
-  <div class="mq-item"><span class="mq-star">✦</span>ATS Resume Builder</div>
-  <div class="mq-item"><span class="mq-star">✦</span>Live Mock Interview</div>
-  <div class="mq-item"><span class="mq-star">✦</span>PYQ Hub</div>
-  <div class="mq-item"><span class="mq-star">✦</span>Career Compare</div>
-  <div class="mq-item"><span class="mq-star">✦</span>Learning Resources</div>
-  <div class="mq-item"><span class="mq-star">✦</span>50+ Domains</div>
-  <div class="mq-item"><span class="mq-star">✦</span>Zero Data Storage</div>
-  <div class="mq-item"><span class="mq-star">✦</span>Free AI Providers</div>
-</div></div>
-
-<!-- FEATURES -->
-<div class="section" id="features-anchor">
-  <div class="eyebrow reveal">What's inside</div>
-  <h2 class="section-h reveal d1">Six tools. <span class="light">One mission.</span></h2>
-  <p class="section-sub reveal d2">Everything you need from first resume draft to final interview round — powered by AI you own.</p>
-  <div class="feat-grid">
-    <div class="feat-card reveal d1"><div class="fc-num">01 / 06</div><div class="fc-ico">📊</div><div class="fc-t">Career Analysis</div><div class="fc-d">Upload your resume and get AI career paths with match scores, salary benchmarks, and step-by-step learning roadmaps.</div><div class="fc-link">↗ Open</div></div>
-    <div class="feat-card reveal d2"><div class="fc-num">02 / 06</div><div class="fc-ico">📝</div><div class="fc-t">Resume Builder</div><div class="fc-d">ATS-optimized resumes that score 90+ with real keyword analysis. Formatted. Exportable. Ready to send today.</div><div class="fc-link">↗ Open</div></div>
-    <div class="feat-card reveal d3"><div class="fc-num">03 / 06</div><div class="fc-ico">🎤</div><div class="fc-t">Mock Interview</div><div class="fc-d">Live AI interviewer that reacts honestly, challenges weak answers, and delivers a real Head-of-Talent review.</div><div class="fc-link">↗ Open</div></div>
-    <div class="feat-card reveal d4"><div class="fc-num">04 / 06</div><div class="fc-ico">📂</div><div class="fc-t">PYQ Hub</div><div class="fc-d">Previous year questions from Google, Microsoft, Amazon, ISRO, TCS, and 200+ more — verified by role.</div><div class="fc-link">↗ Open</div></div>
-    <div class="feat-card reveal d5"><div class="fc-num">05 / 06</div><div class="fc-ico">📚</div><div class="fc-t">Resources</div><div class="fc-d">Curated free courses, certs, and roadmaps for data science, engineering, finance, consulting, and more.</div><div class="fc-link">↗ Open</div></div>
-    <div class="feat-card reveal d6"><div class="fc-num">06 / 06</div><div class="fc-ico">⚖️</div><div class="fc-t">Career Compare</div><div class="fc-d">Side-by-side comparison of any two careers — salary, growth, remote flex, and a clear AI verdict.</div><div class="fc-link">↗ Open</div></div>
+<section class="tools" id="tools">
+  <div class="tools-head">
+    <div><div class="sec-eye">// Six tools. One platform.</div><h2 class="sec-h2">Everything to<br><em>get <span class="bl">hired.</span></em></h2></div>
+    <p class="sec-sub">Every feature is built on frontier AI — analysing your real-world profile against live market data so every career move is a calculated one.</p>
   </div>
-</div>
-
-<!-- SETUP BAND -->
-<div class="setup-band" id="setup-band">
-  <div class="setup-inner">
-    <div class="setup-copy reveal">
-      <div class="eyebrow-light">Quick setup · 60 seconds</div>
-      <h2>Connect your<br>AI key. <em>Start free.</em></h2>
-      <p>All three providers below are completely free. No credit card, no trial limits. Paste your key in the sidebar on the left and you're in immediately.</p>
-    </div>
-    <div class="setup-box reveal d2">
-      <div class="setup-box-top">
-        <div class="provider-tabs">
-          <button class="ptab on" id="pt-gem">Gemini 🆓</button>
-          <button class="ptab" id="pt-groq">Groq ⚡</button>
-          <button class="ptab" id="pt-coh">Cohere 🆓</button>
-        </div>
-        <div class="free-chip" id="fchip" style="display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:100px;background:rgba(28,84,240,0.12);border:1px solid rgba(28,84,240,0.25);font-family:var(--mono);font-size:0.56rem;letter-spacing:0.09em;color:rgba(28,84,240,0.85);margin-bottom:16px;">✓ Free forever · 15 req/min · No card needed</div>
-        <label class="fl">API Key (enter in sidebar ←)</label>
-        <input type="password" class="fi" placeholder="Paste your API key here..." id="fake-key">
-        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="kl" id="klink">↗ Get your free key at aistudio.google.com/app/apikey</a>
-        <label class="fl">Model</label>
-        <select class="fi" id="model-sel"><option>gemini-2.0-flash (recommended)</option><option>gemini-2.0-flash-lite</option><option>gemini-1.5-pro</option></select>
-      </div>
-      <div class="setup-box-bot">
-        <button class="launch-btn" onclick="scrollToTop()">Launch JobLess AI →</button>
-        <div class="sidebar-note">👆 Enter your API key in the <span>sidebar on the left</span> to start immediately.</div>
-      </div>
-    </div>
+  <div class="tools-grid">
+    <div class="tc"><div class="tc-art"><svg viewBox="0 0 280 140" preserveAspectRatio="xMidYMid meet"><defs><radialGradient id="ng1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#0047FF" stop-opacity=".15"/><stop offset="100%" stop-color="#0047FF" stop-opacity="0"/></radialGradient></defs><ellipse cx="140" cy="70" rx="90" ry="50" fill="url(#ng1)"/><g stroke="#0047FF" stroke-opacity=".18" stroke-width="1"><line x1="140" y1="70" x2="60" y2="30"/><line x1="140" y1="70" x2="220" y2="35"/><line x1="140" y1="70" x2="75" y2="115"/><line x1="140" y1="70" x2="210" y2="110"/><line x1="60" y1="30" x2="30" y2="80"/><line x1="220" y1="35" x2="250" y2="90"/></g><circle r="3" fill="#0047FF" opacity=".8"><animateMotion dur="3s" repeatCount="indefinite" path="M140,70 L60,30 L30,80 L75,115 L140,70"/></circle><circle cx="140" cy="70" r="10" fill="none" stroke="#0047FF" stroke-width="2"/><circle cx="140" cy="70" r="5" fill="#0047FF"/><circle cx="60" cy="30" r="6" fill="none" stroke="#0047FF" stroke-width="1.5" opacity=".7"/><circle cx="60" cy="30" r="3" fill="#0047FF" opacity=".7"/><circle cx="220" cy="35" r="6" fill="none" stroke="#0047FF" stroke-width="1.5" opacity=".7"/><circle cx="75" cy="115" r="5" fill="none" stroke="#4ADE80" stroke-width="1.5" opacity=".7"/><circle cx="210" cy="110" r="5" fill="none" stroke="#4ADE80" stroke-width="1.5" opacity=".7"/></svg></div><div class="tc-body"><div class="tc-n">01 ─</div><div class="tc-t">Career Analysis</div><div class="tc-d">Deep scan against 10k+ JD patterns. Skill gaps, salary benchmarks, and a prioritised action plan.</div><span class="tc-arrow">↗</span></div></div>
+    <div class="tc"><div class="tc-art"><svg viewBox="0 0 280 140" preserveAspectRatio="xMidYMid meet"><rect x="30" y="20" width="80" height="100" rx="4" fill="none" stroke="#D4D0C8" stroke-width="1.5"/><line x1="42" y1="40" x2="98" y2="40" stroke="#D4D0C8" stroke-width="1.5"/><line x1="42" y1="52" x2="88" y2="52" stroke="#D4D0C8" stroke-width="1"/><line x1="42" y1="62" x2="92" y2="62" stroke="#D4D0C8" stroke-width="1"/><line x1="42" y1="72" x2="80" y2="72" stroke="#D4D0C8" stroke-width="1"/><g><line x1="125" y1="70" x2="155" y2="70" stroke="#0047FF" stroke-width="2" stroke-linecap="round"/><polygon points="155,65 165,70 155,75" fill="#0047FF"/></g><rect x="170" y="20" width="80" height="100" rx="4" fill="rgba(0,71,255,0.04)" stroke="#0047FF" stroke-width="1.5" stroke-opacity=".6"/><line x1="182" y1="38" x2="238" y2="38" stroke="#0047FF" stroke-width="2.5" stroke-opacity=".8"/><line x1="182" y1="50" x2="238" y2="50" stroke="#0047FF" stroke-width="1" stroke-opacity=".4"/><line x1="182" y1="60" x2="230" y2="60" stroke="#0047FF" stroke-width="1" stroke-opacity=".4"/><rect x="188" y="108" width="36" height="10" rx="5" fill="#0047FF"/><text x="206" y="116" text-anchor="middle" font-family="Space Mono" font-size="5" fill="white">ATS 87%</text></svg></div><div class="tc-body"><div class="tc-n">02 ─</div><div class="tc-t">Resume Builder</div><div class="tc-d">ATS-crushing resumes tailored to the exact JD. Claude rewrites, scores, and exports as polished PDF.</div><span class="tc-arrow">↗</span></div></div>
+    <div class="tc"><div class="tc-art"><svg viewBox="0 0 280 140" preserveAspectRatio="xMidYMid meet"><rect x="127" y="14" width="26" height="38" rx="13" fill="none" stroke="#0047FF" stroke-width="2"/><path d="M140,52 Q140,70 140,76" stroke="#0047FF" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M118,64 Q118,80 140,80 Q162,80 162,64" stroke="#0047FF" stroke-width="2" fill="none"/><g fill="#0047FF"><rect x="58" y="75" width="7" height="40" rx="3.5" opacity=".7"><animate attributeName="height" values="40;20;50;25;40" dur="1.6s" repeatCount="indefinite"/></rect><rect x="72" y="80" width="7" height="30" rx="3.5" opacity=".9"><animate attributeName="height" values="30;50;18;42;30" dur="1.2s" repeatCount="indefinite"/></rect><rect x="86" y="72" width="7" height="46" rx="3.5"><animate attributeName="height" values="46;20;55;28;46" dur="1.5s" repeatCount="indefinite"/></rect></g><g fill="#4ADE80"><rect x="180" y="75" width="7" height="42" rx="3.5"><animate attributeName="height" values="42;22;54;30;42" dur="1.3s" repeatCount="indefinite"/></rect><rect x="194" y="80" width="7" height="32" rx="3.5" opacity=".9"><animate attributeName="height" values="32;52;20;44;32" dur="1.6s" repeatCount="indefinite"/></rect><rect x="208" y="84" width="7" height="24" rx="3.5" opacity=".7"><animate attributeName="height" values="24;44;14;36;24" dur="1.4s" repeatCount="indefinite"/></rect></g></svg></div><div class="tc-body"><div class="tc-n">03 ─</div><div class="tc-t">Mock Interview</div><div class="tc-d">Role-specific technical and behavioural questions. AI evaluates answers and coaches you in real time.</div><span class="tc-arrow">↗</span></div></div>
+    <div class="tc"><div class="tc-art"><svg viewBox="0 0 280 140" preserveAspectRatio="xMidYMid meet"><rect x="82" y="38" width="116" height="82" rx="5" fill="none" stroke="#D4D0C8" stroke-width="1.5" transform="rotate(-4 140 79)"/><rect x="82" y="32" width="116" height="82" rx="5" fill="white" stroke="#D4D0C8" stroke-width="1.5"/><text x="140" y="54" text-anchor="middle" font-family="Syne,sans-serif" font-size="11" font-weight="800" fill="#0047FF" opacity=".7">GOOGLE</text><line x1="98" y1="64" x2="182" y2="64" stroke="#D4D0C8" stroke-width="1"/><rect x="98" y="72" width="10" height="10" rx="2" fill="none" stroke="#D4D0C8" stroke-width="1"/><line x1="116" y1="77" x2="174" y2="77" stroke="#0C0C0C" stroke-width="1.2" opacity=".5"/><rect x="98" y="90" width="10" height="10" rx="2" fill="#0047FF"/><polyline points="100,95 102.5,98 107,92" stroke="white" stroke-width="1.5" fill="none"/><rect x="155" y="46" width="36" height="12" rx="6" fill="#0047FF"/><text x="173" y="55" text-anchor="middle" font-family="Space Mono" font-size="5" fill="white">10k+ Q&amp;A</text></svg></div><div class="tc-body"><div class="tc-n">04 ─</div><div class="tc-t">PYQ Hub</div><div class="tc-d">10,000+ previous year interview Q&amp;As sorted by company, domain, and seniority level.</div><span class="tc-arrow">↗</span></div></div>
+    <div class="tc"><div class="tc-art"><svg viewBox="0 0 280 140" preserveAspectRatio="xMidYMid meet"><path d="M30,120 C60,120 60,70 100,70 C140,70 140,30 180,30 C220,30 220,80 250,70" fill="none" stroke="#D4D0C8" stroke-width="2" stroke-dasharray="5,4"/><circle cx="30" cy="120" r="7" fill="white" stroke="#D4D0C8" stroke-width="2"/><circle cx="100" cy="70" r="8" fill="white" stroke="#0047FF" stroke-width="2"/><circle cx="180" cy="30" r="8" fill="#0047FF"/><circle cx="250" cy="70" r="7" fill="white" stroke="#4ADE80" stroke-width="2"/><circle r="4" fill="#0047FF" opacity=".9"><animateMotion dur="4s" repeatCount="indefinite" path="M30,120 C60,120 60,70 100,70 C140,70 140,30 180,30 C220,30 220,80 250,70" calcMode="spline" keySplines="0.4 0 0.6 1"/></circle></svg></div><div class="tc-body"><div class="tc-n">05 ─</div><div class="tc-t">Resources</div><div class="tc-d">Curated roadmaps, courses, and tools organised by career path and experience. Updated daily.</div><span class="tc-arrow">↗</span></div></div>
+    <div class="tc"><div class="tc-art"><svg viewBox="0 0 280 140" preserveAspectRatio="xMidYMid meet"><line x1="50" y1="15" x2="50" y2="120" stroke="#D4D0C8" stroke-width="1.5"/><line x1="50" y1="120" x2="250" y2="120" stroke="#D4D0C8" stroke-width="1.5"/><rect x="68" y="40" width="22" height="80" rx="3" fill="#0047FF" opacity=".85"><animate attributeName="height" from="0" to="80" dur="1.2s" begin="0.5s" fill="freeze" calcMode="spline" keySplines="0.16 1 0.3 1"/><animate attributeName="y" from="120" to="40" dur="1.2s" begin="0.5s" fill="freeze" calcMode="spline" keySplines="0.16 1 0.3 1"/></rect><rect x="92" y="62" width="22" height="58" rx="3" fill="#D4D0C8"><animate attributeName="height" from="0" to="58" dur="1.2s" begin="0.6s" fill="freeze" calcMode="spline" keySplines="0.16 1 0.3 1"/><animate attributeName="y" from="120" to="62" dur="1.2s" begin="0.6s" fill="freeze" calcMode="spline" keySplines="0.16 1 0.3 1"/></rect><rect x="200" y="25" width="22" height="95" rx="3" fill="#4ADE80" opacity=".7"><animate attributeName="height" from="0" to="95" dur="1.2s" begin="0.9s" fill="freeze" calcMode="spline" keySplines="0.16 1 0.3 1"/><animate attributeName="y" from="120" to="25" dur="1.2s" begin="0.9s" fill="freeze" calcMode="spline" keySplines="0.16 1 0.3 1"/></rect><rect x="224" y="45" width="22" height="75" rx="3" fill="#D4D0C8" opacity=".6"><animate attributeName="height" from="0" to="75" dur="1.2s" begin="1.0s" fill="freeze" calcMode="spline" keySplines="0.16 1 0.3 1"/><animate attributeName="y" from="120" to="45" dur="1.2s" begin="1.0s" fill="freeze" calcMode="spline" keySplines="0.16 1 0.3 1"/></rect></svg></div><div class="tc-body"><div class="tc-n">06 ─</div><div class="tc-t">Career Compare</div><div class="tc-d">Side-by-side analysis of career paths. Growth curves, CTC ranges, required skills, and difficulty.</div><span class="tc-arrow">↗</span></div></div>
   </div>
-</div>
+</section>
 
-<!-- FOOTER -->
+<section class="process" id="process">
+  <div class="proc-head">
+    <div><div class="sec-eye">// How it works</div><h2 class="sec-h2">Upload.<br>Analyse.<br><em>Get hired.</em></h2></div>
+    <p class="sec-sub">From raw resume to curated, market-ready career strategy — in minutes, not months.</p>
+  </div>
+  <div class="proc-steps">
+    <div class="ps"><div class="ps-n">01</div><div class="ps-t">Upload Your Resume</div><div class="ps-d">PDF, DOCX, or LinkedIn export. Parser handles formatting, keywords, and structure automatically.</div></div>
+    <div class="ps"><div class="ps-n">02</div><div class="ps-t">AI Deep Scan</div><div class="ps-d">Claude analyses your profile against thousands of active job descriptions. Full gap analysis and market positioning report.</div></div>
+    <div class="ps"><div class="ps-n">03</div><div class="ps-t">Build &amp; Optimise</div><div class="ps-d">Generate tailored resumes, practice answers, explore career pivots — guided by live market intelligence.</div></div>
+    <div class="ps"><div class="ps-n">04</div><div class="ps-t">Apply with Confidence</div><div class="ps-d">Export polished documents, iterate as offers come in, and watch your interview-to-offer ratio climb.</div></div>
+  </div>
+</section>
+
+<section class="editorial">
+  <div class="ed-grid">
+    <div><div class="ed-lbl">Featured Story</div><p class="ed-meta">Priya Sharma<br>Product Manager · Flipkart<br><br>ATS score: 52 → 91<br>Week 1: 3 callbacks</p></div>
+    <div class="ed-q">"I went from zero callbacks to three in one week. The ATS score jumped from 52 to 91 in a single session. Genuinely the most useful career tool I've ever used — and I've tried them all."</div>
+  </div>
+</section>
+
+<section class="testis">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:40px;">
+    <div class="sec-eye" style="margin-bottom:0">// 50,000+ users · ★★★★★ 4.9</div>
+    <span style="font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.08em;color:var(--blue)">2,400+ reviews</span>
+  </div>
+  <div class="trow">
+    <div class="tcard"><div class="tc-stars">★★★★★</div><div class="tc-q">"The mock interview tool asked me the exact questions that appeared in my Google loop. Three rounds, zero filters."</div><div class="tc-auth"><div class="tc-av">👨‍💻</div><div><div class="tc-name">Rohan Mehta</div><div class="tc-role">SWE · Google Bangalore</div></div></div></div>
+    <div class="tcard"><div class="tc-stars">★★★★★</div><div class="tc-q">"Convinced me to pivot to ML engineering. Switched, upskilled, landed a ₹28L offer in four months."</div><div class="tc-auth"><div class="tc-av">🧑‍🔬</div><div><div class="tc-name">Arjun Das</div><div class="tc-role">ML Engineer · Swiggy</div></div></div></div>
+    <div class="tcard"><div class="tc-stars">★★★★★</div><div class="tc-q">"Set up in five minutes. Had my career analysis before the next lecture. The gap list alone was worth it."</div><div class="tc-auth"><div class="tc-av">🧑‍🎓</div><div><div class="tc-name">Kavya Iyer</div><div class="tc-role">Final Year · IIT Madras</div></div></div></div>
+  </div>
+</section>
+
+<section class="cta" id="cta">
+  <h2 class="cta-h2">Your next<br>job starts<br><em>right <span class="bl">here.</span></em></h2>
+  <div class="cta-r">
+    <p>Enter your API key in the sidebar to unlock the full dashboard — career analysis, resume builder, mock interviews, and more. No credit card. No data stored.</p>
+    <div class="cta-btns"><button class="btn-p">Add API Key → Get Started</button></div>
+    <div class="cta-note"><span>✓</span> No credit card &nbsp;·&nbsp; <span>✓</span> Data never stored &nbsp;·&nbsp; <span>✓</span> Use your own API key</div>
+  </div>
+</section>
+
 <footer>
   <div class="ft-row">
-    <div><div class="ft-brand">JobLess AI</div><p class="ft-tagline">AI-powered career intelligence. Your data is processed in your session and never stored.</p></div>
-    <div><div class="ft-h">Product</div><ul class="ft-list"><li><a href="#">Career Analysis</a></li><li><a href="#">Resume Builder</a></li><li><a href="#">Mock Interview</a></li><li><a href="#">PYQ Hub</a></li></ul></div>
-    <div><div class="ft-h">Company</div><ul class="ft-list"><li><a href="#">About</a></li><li><a href="#">Blog</a></li><li><a href="#">Contact</a></li></ul></div>
-    <div><div class="ft-h">Legal</div><ul class="ft-list"><li><a href="#">Privacy</a></li><li><a href="#">Terms</a></li><li><a href="#">Security</a></li></ul></div>
+    <div><div class="ft-bn"><div style="width:18px;height:18px;border-radius:3px;background:#0C0C0C;display:inline-flex;align-items:center;justify-content:center;margin-right:8px"><svg width="9" height="9" viewBox="0 0 10 10" fill="#F5F2EC"><circle cx="5" cy="5" r="3"/></svg></div>JobLess AI</div><p class="ft-bp">AI-powered career intelligence for professionals who refuse to leave their future to chance.</p></div>
+    <div><div class="ft-ch">Product</div><ul class="ft-links"><li><a href="#">Career Analysis</a></li><li><a href="#">Resume Builder</a></li><li><a href="#">Mock Interview</a></li><li><a href="#">PYQ Hub</a></li></ul></div>
+    <div><div class="ft-ch">Company</div><ul class="ft-links"><li><a href="#">About</a></li><li><a href="#">Blog</a></li><li><a href="#">Changelog</a></li><li><a href="#">Contact</a></li></ul></div>
+    <div><div class="ft-ch">Legal</div><ul class="ft-links"><li><a href="#">Privacy</a></li><li><a href="#">Terms</a></li><li><a href="#">Security</a></li></ul></div>
   </div>
-  <div class="ft-bottom">
-    <div class="ft-copy">© 2025 JobLess AI · Built by Anubhab Mondal</div>
-    <div class="ft-copy">Made in India 🇮🇳 · Your data is never stored.</div>
+  <div class="ft-btm">
+    <div class="ft-copy">© 2025 JobLess AI · Built by <strong>Anubhab Mondal</strong> · Your data is never stored.</div>
+    <div class="ft-copy">Made in India 🇮🇳</div>
   </div>
 </footer>
 
 <script>
-/* Cursor */
-const dot=document.getElementById('cursor-dot'),ring=document.getElementById('cursor-ring');
-let mx=0,my=0,rx=0,ry=0;
-document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;dot.style.left=mx+'px';dot.style.top=my+'px';});
-(function raf(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(raf);})();
-document.querySelectorAll('button,a,.feat-card').forEach(el=>{
-  el.addEventListener('mouseenter',()=>document.body.classList.add('cursor-hover'));
-  el.addEventListener('mouseleave',()=>document.body.classList.remove('cursor-hover'));
-});
-
-/* Scroll reveal */
-const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.12});
-document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
-
-/* Stat counters */
-function cnt(id,end,suffix){const el=document.getElementById(id);if(!el)return;let s=null;(function step(ts){if(!s)s=ts;const p=Math.min((ts-s)/1500,1),e=1-Math.pow(1-p,3);el.textContent=(typeof end==='number'&&!Number.isInteger(end))?(e*end).toFixed(1)+suffix:Math.floor(e*end)+suffix;if(p<1)requestAnimationFrame(step);})(performance.now());}
-setTimeout(()=>{cnt('c1',87,'%');cnt('c2',2.4,'×');cnt('c3',50,'+');cnt('c4',4.9,'★');},400);
-
-/* Provider tabs */
-const providers={
-  'pt-gem':{'chip':'✓ Free forever · 15 req/min · No card','link':'https://aistudio.google.com/app/apikey','link_txt':'aistudio.google.com/app/apikey','models':['gemini-2.0-flash (recommended)','gemini-2.0-flash-lite','gemini-1.5-pro']},
-  'pt-groq':{'chip':'✓ Free forever · Ultra-fast · No card','link':'https://console.groq.com/keys','link_txt':'console.groq.com/keys','models':['llama-3.3-70b-versatile','llama3-70b-8192','mixtral-8x7b-32768']},
-  'pt-coh':{'chip':'✓ Free trial · No card needed','link':'https://dashboard.cohere.com/api-keys','link_txt':'dashboard.cohere.com/api-keys','models':['command-r-plus','command-r','command']}
-};
-document.querySelectorAll('.ptab').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('on'));
-    btn.classList.add('on');
-    const p=providers[btn.id];
-    document.getElementById('fchip').textContent=p.chip;
-    const kl=document.getElementById('klink');
-    kl.href=p.link;kl.textContent='↗ Get your free key at '+p.link_txt;
-    const ms=document.getElementById('model-sel');
-    ms.innerHTML=p.models.map(m=>'<option>'+m+'</option>').join('');
-  });
-});
-
-/* Scroll helpers */
-function scrollToSetup(){document.getElementById('setup-band').scrollIntoView({behavior:'smooth'});}
-function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
-
-/* Particle canvas */
+/* WebGL2 Hero Shader — blue nebula */
 (function(){
   const canvas=document.getElementById('hero-canvas');
   if(!canvas)return;
-  const ctx=canvas.getContext('2d');
-  let W,H,pts=[];
-  function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight;pts=Array.from({length:60},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4,r:Math.random()*1.5+.5}));}
+  const gl=canvas.getContext('webgl2');
+  if(!gl)return;
+  const VERT=`#version 300 es\nprecision highp float;\nin vec4 position;\nvoid main(){gl_Position=position;}`;
+  const FRAG=`#version 300 es\nprecision highp float;\nout vec4 O;\nuniform vec2 resolution;\nuniform float time;\n#define FC gl_FragCoord.xy\n#define T time\n#define R resolution\n#define MN min(R.x,R.y)\nfloat rnd(vec2 p){p=fract(p*vec2(12.9898,78.233));p+=dot(p,p+34.56);return fract(p.x*p.y);}\nfloat noise(in vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.-2.*f);float a=rnd(i),b=rnd(i+vec2(1,0)),c=rnd(i+vec2(0,1)),d=rnd(i+1.);return mix(mix(a,b,u.x),mix(c,d,u.x),u.y);}\nfloat fbm(vec2 p){float t=.0,a=1.;mat2 m=mat2(1.,-.5,.2,1.2);for(int i=0;i<5;i++){t+=a*noise(p);p*=2.*m;a*=.5;}return t;}\nfloat clouds(vec2 p){float d=1.,t=.0;for(float i=.0;i<3.;i++){float a=d*fbm(i*10.+p.x*.2+.2*(1.+i)*p.y+d+i*i+p);t=mix(t,d,a);d=a;p*=2./(i+1.);}return t;}\nvoid main(void){vec2 uv=(FC-.5*R)/MN,st=uv*vec2(2.,1.);vec3 col=vec3(0);float bg=clouds(vec2(st.x+T*.3,-st.y));uv*=1.-.3*(sin(T*.15)*.5+.5);for(float i=1.;i<12.;i++){uv+=.1*cos(i*vec2(.1+.01*i,.8)+i*i+T*.35+.1*uv.x);vec2 p=uv;float d=length(p);col+=.00125/d*(cos(sin(i)*vec3(6.,3.,1.))+1.);float b=noise(i+p+bg*1.731);col+=.002*b/length(max(p,vec2(b*p.x*.02,p.y)));col=mix(col,vec3(bg*.03,bg*.06,bg*.28),d);}float vign=1.0-smoothstep(0.4,1.4,length((FC-.5*R)/MN));col*=vign*1.15;col=mix(vec3(0.0,0.01,0.06),col,smoothstep(0.,0.12,length(col)));O=vec4(col,1.);}`;
+  function mkShader(t,s){const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh;}
+  const prog=gl.createProgram();
+  gl.attachShader(prog,mkShader(gl.VERTEX_SHADER,VERT));
+  gl.attachShader(prog,mkShader(gl.FRAGMENT_SHADER,FRAG));
+  gl.linkProgram(prog);
+  const buf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,1,-1,-1,1,1,1,-1]),gl.STATIC_DRAW);
+  const pos=gl.getAttribLocation(prog,'position');
+  gl.enableVertexAttribArray(pos);
+  gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
+  const uRes=gl.getUniformLocation(prog,'resolution'),uTime=gl.getUniformLocation(prog,'time');
+  function resize(){const dpr=Math.max(1,0.5*(window.devicePixelRatio||1));canvas.width=canvas.offsetWidth*dpr;canvas.height=canvas.offsetHeight*dpr;gl.viewport(0,0,canvas.width,canvas.height);}
   window.addEventListener('resize',resize);resize();
-  function loop(){ctx.clearRect(0,0,W,H);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(28,84,240,0.5)';ctx.fill();});pts.forEach((a,i)=>pts.slice(i+1).forEach(b=>{const d=Math.hypot(a.x-b.x,a.y-b.y);if(d<120){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=`rgba(28,84,240,${0.12*(1-d/120)})`;ctx.lineWidth=.8;ctx.stroke();}}));requestAnimationFrame(loop);}
-  loop();
+  let raf;
+  function loop(now){gl.useProgram(prog);gl.uniform2f(uRes,canvas.width,canvas.height);gl.uniform1f(uTime,now*1e-3);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);raf=requestAnimationFrame(loop);}
+  raf=requestAnimationFrame(loop);
+  document.addEventListener('visibilitychange',()=>{ if(document.hidden)cancelAnimationFrame(raf); else raf=requestAnimationFrame(loop); });
 })();
+/* Stat counters */
+function cnt(id,end,dec){const el=document.getElementById(id);if(!el)return;let s=null;(function step(ts){if(!s)s=ts;const p=Math.min((ts-s)/1600,1);const e=1-Math.pow(1-p,3);el.textContent=dec?(e*end).toFixed(dec):Math.floor(e*end);if(p<1)requestAnimationFrame(step);})(performance.now());}
+setTimeout(()=>{cnt('c1',87,0);cnt('c2',2.4,1);cnt('c3',50,0);cnt('c4',4.9,1);},400);
 </script>
 </body>
 </html>"""
@@ -1812,8 +1866,8 @@ def render_match_ring(score: int) -> str:
     r = 36
     circ = 2 * 3.14159 * r
     fill = circ - (circ * score / 100)
-    color = "#1C54F0" if score >= 80 else (
-        "#6366F1" if score >= 60 else "#f59e0b")
+    color = "#00d2ff" if score >= 80 else (
+        "#a855f7" if score >= 60 else "#f59e0b")
     return f"""
     <div class="match-ring-wrap">
       <div class="match-ring">
@@ -1856,178 +1910,419 @@ class UIComponents:
     def apply_custom_css():
         css = """
         <style>
-            @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&family=DM+Mono:wght@300;400;500&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Epilogue:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap');
 
-            /* ── APP BACKGROUND — light theme ── */
-            html, body { background: #FFFFFF !important; background-color: #FFFFFF !important; }
+            @keyframes gradientShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+            @keyframes glowPulse { 0%,100%{box-shadow:0 0 20px rgba(0,210,255,0.3),0 0 40px rgba(58,123,213,0.15)} 50%{box-shadow:0 0 50px rgba(0,210,255,0.8),0 0 100px rgba(58,123,213,0.5)} }
+            @keyframes shimmer { 0%{background-position:-300% center} 100%{background-position:300% center} }
+            @keyframes borderRotate { 0%{background-position:0% 0%} 100%{background-position:300% 300%} }
+            @keyframes slideInLeft { from{transform:perspective(800px) rotateY(-12deg) translateX(-50px);opacity:0} to{transform:perspective(800px) rotateY(0deg) translateX(0);opacity:1} }
+            @keyframes scaleIn { from{transform:perspective(600px) scale(0.88) rotateX(8deg);opacity:0} to{transform:perspective(600px) scale(1) rotateX(0deg);opacity:1} }
+            @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+            /* ── APP BACKGROUND — aggressive cloud-safe rules ── */
+            html, body { background: #060c18 !important; background-color: #060c18 !important; }
             .stApp, .stApp > div, [data-testid="stAppViewContainer"],
             [data-testid="stAppViewBlockContainer"],
             [data-testid="stMain"], [data-testid="stMainBlockContainer"],
             .main, .block-container, section.main > div {
-                background: #FFFFFF !important;
-                background-color: #FFFFFF !important;
-                color: #08091A !important;
+                background: #060c18 !important;
+                background-color: #060c18 !important;
+                color: white !important;
             }
-            .stApp { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+            .stApp { font-family: 'Space Grotesk', sans-serif !important; cursor: none !important; }
             .main .block-container { padding-top: 0 !important; padding-left: 2rem !important; padding-right: 2rem !important; max-width: 100% !important; margin-top: -30px !important; }
+            /* Kill Streamlit's default top header gap */
             [data-testid="stAppViewContainer"] > section > div:first-child { padding-top: 0 !important; }
-            header[data-testid="stHeader"] { height: 0 !important; min-height: 0 !important; background: #FFFFFF !important; overflow: visible !important; }
+            header[data-testid="stHeader"] { height: 0 !important; min-height: 0 !important; background: #060c18 !important; overflow: visible !important; }
             #root > div:first-child { padding-top: 0 !important; }
             .stApp > header { height: 0 !important; overflow: visible !important; }
             div[data-testid="stToolbar"] { display: none !important; }
             div[data-testid="stDecoration"] { display: none !important; }
             div[data-testid="stStatusWidget"] { display: none !important; }
+            /* Keep Streamlit sidebar toggle fully clickable */
             [data-testid="stSidebarCollapsedControl"],
             [data-testid="stSidebarNavToggleButton"],
             button[kind="header"] { visibility: visible !important; display: flex !important; z-index: 9999 !important; opacity: 1 !important; }
 
             /* ── TYPOGRAPHY ── */
-            h1, h2, h3 { font-family: 'Plus Jakarta Sans', sans-serif !important; font-weight: 800 !important; letter-spacing: -0.04em !important; color: #08091A !important; }
+            h1, h2, h3 { font-family: 'Space Grotesk', sans-serif !important; font-weight: 700 !important; letter-spacing: -0.02em !important; color: #e2e8f0 !important; }
             h2 { font-size: 1.7rem !important; }
-            h3 { font-size: 1rem !important; color: #1C54F0 !important; text-transform: uppercase !important; letter-spacing: 0.14em !important; font-weight: 700 !important; }
-            label, .stRadio label, .stCheckbox label, .stSelectbox label, .stTextInput label, .stTextArea label {
-                font-family: 'DM Mono', monospace !important; font-size: 0.72rem !important;
-                letter-spacing: 0.12em !important; text-transform: uppercase !important; color: #6B7280 !important; }
-            p, li { font-family: 'Plus Jakarta Sans', sans-serif !important; font-size: 0.95rem !important; line-height: 1.7 !important; color: #2A2D45 !important; }
+            h3 { font-size: 1.2rem !important; color: #00d2ff !important; text-transform: uppercase !important; letter-spacing: 0.1em !important; font-weight: 600 !important; }
+            label, .stRadio label, .stCheckbox label, .stSelectbox label, .stTextInput label, .stTextArea label { font-family: 'JetBrains Mono', monospace !important; font-size: 0.72rem !important; letter-spacing: 0.12em !important; text-transform: uppercase !important; color: rgba(0,210,255,0.75) !important; }
+            p, li { font-family: 'Space Grotesk', sans-serif !important; font-size: 0.97rem !important; line-height: 1.7 !important; color: #94a3b8 !important; }
 
-            /* ── SIDEBAR ── */
+            /* ── SIDEBAR CONTAINER ── */
             [data-testid="stSidebar"] {
-                background: #F2F4FB !important;
-                border-right: 1px solid rgba(0,0,0,0.07) !important;
-                box-shadow: 4px 0 24px rgba(0,0,0,0.06) !important;
+                background: #08101e !important;
+                border-right: 1px solid rgba(0, 210, 255, 0.1) !important;
+                box-shadow: 4px 0 30px rgba(0,0,0,0.5) !important;
             }
-            [data-testid="stSidebar"] > div:first-child { padding-top: 0 !important; }
-            [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
-                font-family: 'DM Mono', monospace !important; font-size: 0.7rem !important;
-                letter-spacing: 0.15em !important; text-transform: uppercase !important;
-                color: #9CA3AF !important; margin: 14px 0 7px 0 !important; }
-            [data-testid="stSidebar"] hr { border-color: rgba(0,0,0,0.07) !important; margin: 10px 0 !important; }
+            [data-testid="stSidebar"] > div:first-child {
+                padding-top: 0 !important;
+            }
+            /* Sidebar text elements */
+            [data-testid="stSidebar"] h1,
+            [data-testid="stSidebar"] h2,
+            [data-testid="stSidebar"] h3 {
+                font-family: 'JetBrains Mono', monospace !important;
+                font-size: 0.72rem !important;
+                letter-spacing: 0.15em !important;
+                text-transform: uppercase !important;
+                color: rgba(0,210,255,0.6) !important;
+                margin: 16px 0 8px 0 !important;
+            }
+            /* Sidebar divider */
+            [data-testid="stSidebar"] hr {
+                border-color: rgba(0,210,255,0.08) !important;
+                margin: 12px 0 !important;
+            }
+            /* Sidebar selectbox */
             [data-testid="stSidebar"] .stSelectbox > div > div {
-                background: #FFFFFF !important; border: 1.5px solid rgba(0,0,0,0.11) !important;
-                border-radius: 10px !important; color: #08091A !important; }
+                background: rgba(255,255,255,0.04) !important;
+                border: 1px solid rgba(0,210,255,0.18) !important;
+                border-radius: 10px !important;
+                color: #e2e8f0 !important;
+                font-family: 'Space Grotesk', sans-serif !important;
+                font-size: 0.88rem !important;
+                transition: border-color 0.2s ease !important;
+            }
+            [data-testid="stSidebar"] .stSelectbox > div > div:hover {
+                border-color: rgba(0,210,255,0.45) !important;
+            }
+            /* Sidebar text inputs */
             [data-testid="stSidebar"] .stTextInput > div > div > input {
-                background: #FFFFFF !important; border: 1.5px solid rgba(0,0,0,0.11) !important;
-                color: #08091A !important; border-radius: 10px !important; }
-            [data-testid="stSidebar"] p, [data-testid="stSidebar"] div { color: #2A2D45; }
-            [data-testid="stSidebar"] .stMarkdown { color: #2A2D45 !important; }
+                background: rgba(255,255,255,0.04) !important;
+                border: 1px solid rgba(0,210,255,0.2) !important;
+                border-radius: 10px !important;
+                color: #e2e8f0 !important;
+                font-family: 'Space Grotesk', sans-serif !important;
+                font-size: 0.88rem !important;
+            }
+            [data-testid="stSidebar"] .stTextInput > div > div > input:focus {
+                border-color: #00d2ff !important;
+                box-shadow: 0 0 0 2px rgba(0,210,255,0.15) !important;
+            }
+            /* Sidebar expander */
+            [data-testid="stSidebar"] .stExpander {
+                background: rgba(255,255,255,0.02) !important;
+                border: 1px solid rgba(0,210,255,0.1) !important;
+                border-radius: 10px !important;
+            }
 
-            /* ── INPUTS (global) ── */
-            .stTextInput > div > div > input, .stTextArea > div > div > textarea {
-                background: #FFFFFF !important; border: 1.5px solid rgba(0,0,0,0.11) !important;
-                color: #08091A !important; border-radius: 10px !important;
-                font-family: 'Plus Jakarta Sans', sans-serif !important; }
-            .stTextInput > div > div > input:focus, .stTextArea > div > div > textarea:focus {
-                border-color: #1C54F0 !important; box-shadow: 0 0 0 3px rgba(28,84,240,0.1) !important; }
-            .stSelectbox > div > div {
-                background: #FFFFFF !important; border: 1.5px solid rgba(0,0,0,0.11) !important;
-                color: #08091A !important; border-radius: 10px !important; }
+            /* ── TABS ── */
+            .stTabs [data-baseweb="tab-list"] {
+                background: rgba(255,255,255,0.025) !important;
+                border-radius: 12px !important;
+                padding: 5px !important;
+                border: 1px solid rgba(0,210,255,0.1) !important;
+                gap: 2px !important;
+            }
+            .stTabs [data-baseweb="tab"] {
+                font-family: 'JetBrains Mono', monospace !important;
+                font-size: 0.72rem !important;
+                letter-spacing: 0.08em !important;
+                text-transform: uppercase !important;
+                border-radius: 8px !important;
+                color: #64748b !important;
+                transition: all 0.2s ease !important;
+                padding: 8px 14px !important;
+            }
+            .stTabs [data-baseweb="tab"]:hover {
+                background: rgba(0,210,255,0.08) !important;
+                color: #00d2ff !important;
+            }
+            .stTabs [aria-selected="true"] {
+                background: linear-gradient(90deg, rgba(0,210,255,0.18), rgba(58,123,213,0.12)) !important;
+                color: #00d2ff !important;
+                box-shadow: 0 2px 12px rgba(0,210,255,0.2) !important;
+            }
 
             /* ── BUTTONS ── */
             .stButton > button {
-                background: linear-gradient(135deg, #1C54F0, #6366F1) !important;
-                color: #FFFFFF !important; border: none !important; border-radius: 100px !important;
-                font-family: 'Plus Jakarta Sans', sans-serif !important; font-weight: 700 !important;
-                font-size: 0.88rem !important; padding: 10px 24px !important;
-                box-shadow: 0 4px 18px rgba(28,84,240,0.3) !important;
-                transition: transform 0.15s, filter 0.15s !important; letter-spacing: 0 !important; text-transform: none !important; }
-            .stButton > button:hover { filter: brightness(1.08) !important; transform: translateY(-1px) !important; box-shadow: 0 8px 28px rgba(28,84,240,0.45) !important; }
-            .stDownloadButton > button {
-                background: linear-gradient(135deg, #1C54F0, #6366F1) !important;
-                color: white !important; border: none !important; border-radius: 100px !important;
-                font-family: 'Plus Jakarta Sans', sans-serif !important; font-weight: 700 !important; }
+                font-family: 'Space Grotesk', sans-serif !important;
+                font-weight: 700 !important;
+                letter-spacing: 0.08em !important;
+                text-transform: uppercase !important;
+                font-size: 0.82rem !important;
+                background: #00d2ff !important;
+                border-radius: 50px !important;
+                border: none !important;
+                color: #060c18 !important;
+                padding: 10px 24px !important;
+                box-shadow: 0 0 20px rgba(0,210,255,0.3) !important;
+                transition: all 0.2s ease !important;
+            }
+            .stButton > button:hover {
+                background: #33dbff !important;
+                box-shadow: 0 0 35px rgba(0,210,255,0.55) !important;
+                transform: translateY(-2px) !important;
+            }
+            .stButton > button:active { transform: translateY(0px) !important; }
 
-            /* ── EXPANDER ── */
-            .stExpander { border: 1px solid rgba(0,0,0,0.07) !important; border-radius: 14px !important; background: rgba(255,255,255,0.9) !important; box-shadow: 0 2px 10px rgba(0,0,0,0.05) !important; }
-            details[data-testid="stExpander"] summary { color: #08091A !important; font-family: 'Plus Jakarta Sans', sans-serif !important; font-weight: 600 !important; }
+            /* ── CARDS ── */
+            .result-card {
+                background: rgba(255,255,255,0.03) !important;
+                backdrop-filter: blur(20px) !important;
+                border-radius: 16px !important;
+                border: 1px solid rgba(255,255,255,0.07) !important;
+                padding: 28px !important;
+                margin-bottom: 20px;
+                animation: fadeUp 0.5s ease-out;
+                transition: all 0.3s ease;
+                position: relative; overflow: hidden;
+            }
+            .result-card::before {
+                content: '';
+                position: absolute; inset: -2px;
+                background: linear-gradient(45deg,#00d2ff,#3a7bd5,#a855f7,#00d2ff);
+                background-size: 300% 300%;
+                border-radius: 18px;
+                z-index: -1;
+                animation: borderRotate 4s linear infinite;
+                opacity: 0.3;
+            }
+            .result-card:hover {
+                border-color: rgba(0,210,255,0.25) !important;
+                transform: translateY(-4px);
+                box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,210,255,0.15);
+            }
+            .result-card h3 { font-size: 1.1rem !important; font-weight: 700 !important; text-transform: none !important; color: #e2e8f0 !important; margin-bottom: 10px; letter-spacing: -0.01em !important; }
 
-            /* ── TABS ── */
-            .stTabs [data-baseweb="tab-list"] { gap: 4px; border-bottom: 1px solid rgba(0,0,0,0.07) !important; background: transparent; }
-            .stTabs [data-baseweb="tab"] { border-radius: 8px 8px 0 0; font-family: 'Plus Jakarta Sans', sans-serif !important; font-weight: 500; color: #6B7280 !important; background: transparent; border: none; padding: 8px 18px; }
-            .stTabs [aria-selected="true"] { color: #1C54F0 !important; border-bottom: 2px solid #1C54F0 !important; font-weight: 700 !important; }
+            /* ── EXPANDERS ── */
+            .stExpander { border: 1px solid rgba(0,210,255,0.12) !important; border-radius: 12px !important; background: rgba(255,255,255,0.02) !important; transition: all 0.25s ease !important; }
+            .stExpander:hover { border-color: rgba(0,210,255,0.3) !important; box-shadow: 0 8px 24px rgba(0,210,255,0.07) !important; }
 
-            /* ── SLIDER ── */
-            .stSlider > div > div > div > div { background: linear-gradient(90deg, #1C54F0, #6366F1) !important; }
-            .stSlider label { color: #6B7280 !important; }
+            /* ── INPUTS ── */
+            .stTextInput > div > div > input,
+            .stTextArea > div > div > textarea {
+                background: rgba(255,255,255,0.04) !important;
+                border: 1px solid rgba(0,210,255,0.18) !important;
+                border-radius: 10px !important;
+                color: #e2e8f0 !important;
+                font-family: 'Space Grotesk', sans-serif !important;
+                font-size: 0.95rem !important;
+                transition: all 0.25s ease !important;
+            }
+            .stTextInput > div > div > input:focus,
+            .stTextArea > div > div > textarea:focus {
+                border-color: #00d2ff !important;
+                box-shadow: 0 0 0 2px rgba(0,210,255,0.15) !important;
+                background: rgba(0,210,255,0.03) !important;
+            }
 
-            /* ── SPINNER ── */
-            .stSpinner > div { border-top-color: #1C54F0 !important; }
+            /* ── PROGRESS / ALERTS / MISC ── */
+            .stAlert { border-radius: 12px !important; animation: fadeUp 0.4s ease-out !important; font-family: 'Space Grotesk', sans-serif !important; }
+            .stProgress > div > div > div { background: linear-gradient(90deg,#00d2ff,#3a7bd5,#a855f7,#00d2ff) !important; background-size: 200% auto !important; animation: shimmer 1.5s linear infinite !important; border-radius: 10px !important; box-shadow: 0 0 14px rgba(0,210,255,0.5) !important; }
+            hr { border: none !important; height: 1px !important; background: linear-gradient(90deg,transparent,rgba(0,210,255,0.35),rgba(168,85,247,0.35),transparent) !important; margin: 20px 0 !important; }
+            ::-webkit-scrollbar { width: 4px; }
+            ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+            ::-webkit-scrollbar-thumb { background: linear-gradient(180deg,#00d2ff,#3a7bd5); border-radius: 10px; }
+            iframe { border: none !important; }
+            .stSelectbox > div > div, .stMultiSelect > div > div { background: rgba(255,255,255,0.04) !important; border: 1px solid rgba(0,210,255,0.18) !important; border-radius: 10px !important; font-family: 'Space Grotesk', sans-serif !important; transition: border-color 0.2s ease !important; }
+            .stSelectbox > div > div:hover, .stMultiSelect > div > div:hover { border-color: rgba(0,210,255,0.45) !important; }
 
-            /* ── ALERTS ── */
-            .stSuccess { background: rgba(28,84,240,0.05) !important; border: 1px solid rgba(28,84,240,0.18) !important; border-radius: 12px !important; color: #1C54F0 !important; }
-            .stError { background: rgba(239,68,68,0.05) !important; border: 1px solid rgba(239,68,68,0.18) !important; border-radius: 12px !important; }
-            .stWarning { background: rgba(245,158,11,0.05) !important; border: 1px solid rgba(245,158,11,0.18) !important; border-radius: 12px !important; }
-            .stInfo { background: rgba(28,84,240,0.04) !important; border: 1px solid rgba(28,84,240,0.12) !important; border-radius: 12px !important; }
+            /* ── SKILL BADGES ── */
+            .skill-badge { display:inline-block; padding:4px 12px; border-radius:20px; font-family:'JetBrains Mono',monospace; font-size:0.72rem; font-weight:500; letter-spacing:0.05em; margin:3px; border:1px solid rgba(0,210,255,0.35); background:rgba(0,210,255,0.08); color:#7dd3fc; transition:all 0.2s ease; cursor:default; }
+            .skill-badge:hover { background:rgba(0,210,255,0.18); border-color:#00d2ff; transform:translateY(-2px); box-shadow:0 4px 15px rgba(0,210,255,0.2); }
+            .skill-badge.purple { border-color:rgba(168,85,247,0.35); background:rgba(168,85,247,0.08); color:#c084fc; }
+            .skill-badge.green  { border-color:rgba(52,211,153,0.35);  background:rgba(52,211,153,0.08);  color:#6ee7b7; }
 
-            /* ── CHAT ── */
-            .stChatMessage { background: rgba(255,255,255,0.9) !important; border: 1px solid rgba(0,0,0,0.07) !important; border-radius: 14px !important; }
-            .stChatInputContainer { background: #FFFFFF !important; border: 1.5px solid rgba(0,0,0,0.11) !important; border-radius: 14px !important; }
-            .stChatInputContainer:focus-within { border-color: #1C54F0 !important; box-shadow: 0 0 0 3px rgba(28,84,240,0.1) !important; }
+            /* ── MATCH RING ── */
+            .match-ring-wrap { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; }
+            .match-ring { position:relative; width:88px; height:88px; }
+            .match-ring svg { transform:rotate(-90deg); }
+            .match-ring .ring-bg   { fill:none; stroke:rgba(255,255,255,0.06); stroke-width:7; }
+            .match-ring .ring-fill { fill:none; stroke-width:7; stroke-linecap:round; transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1); filter:drop-shadow(0 0 6px currentColor); }
+            .match-ring .ring-text { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; }
+            .match-ring .ring-pct  { font-size:1.3rem; font-weight:700; line-height:1; background:linear-gradient(135deg,#00d2ff,#a855f7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+            .match-ring .ring-label { font-size:0.6rem; color:#64748b; letter-spacing:0.08em; text-transform:uppercase; }
+
+            /* ── JOB LINKS ── */
+            .job-links-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+            .job-link-btn { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:8px; font-family:'Space Grotesk',sans-serif; font-size:0.78rem; font-weight:600; text-decoration:none!important; transition:all 0.22s ease; border:1px solid; }
+            .job-link-btn:hover { transform:translateY(-2px); text-decoration:none!important; }
+            .job-link-btn.linkedin  { background:rgba(10,102,194,0.15);  border-color:rgba(10,102,194,0.5);  color:#60a5fa; }
+            .job-link-btn.linkedin:hover  { background:rgba(10,102,194,0.3);  box-shadow:0 6px 20px rgba(10,102,194,0.25); }
+            .job-link-btn.naukri    { background:rgba(255,96,22,0.12);   border-color:rgba(255,96,22,0.4);   color:#fb923c; }
+            .job-link-btn.naukri:hover    { background:rgba(255,96,22,0.25);   box-shadow:0 6px 20px rgba(255,96,22,0.2); }
+            .job-link-btn.indeed    { background:rgba(37,154,0,0.12);    border-color:rgba(37,154,0,0.4);    color:#4ade80; }
+            .job-link-btn.indeed:hover    { background:rgba(37,154,0,0.25);    box-shadow:0 6px 20px rgba(37,154,0,0.2); }
+            .job-link-btn.glassdoor { background:rgba(15,164,107,0.12);  border-color:rgba(15,164,107,0.4);  color:#34d399; }
+            .job-link-btn.glassdoor:hover { background:rgba(15,164,107,0.25);  box-shadow:0 6px 20px rgba(15,164,107,0.2); }
+            .job-link-btn.remoteok  { background:rgba(139,92,246,0.12);  border-color:rgba(139,92,246,0.4);  color:#c084fc; }
+            .job-link-btn.remoteok:hover  { background:rgba(139,92,246,0.25);  box-shadow:0 6px 20px rgba(139,92,246,0.2); }
 
             /* ── SIDEBAR NAV BUTTONS ── */
-            [data-testid="stSidebar"] .nav-btn-wrap .stButton > button {
-                width: 100% !important; text-align: left !important; justify-content: flex-start !important;
-                background: transparent !important; border: 1px solid transparent !important;
-                border-radius: 10px !important; color: #6B7280 !important;
-                font-family: 'Plus Jakarta Sans', sans-serif !important; font-size: 0.86rem !important;
-                font-weight: 500 !important; padding: 9px 12px !important; letter-spacing: 0 !important;
-                text-transform: none !important; box-shadow: none !important; margin-bottom: 2px !important; }
-            [data-testid="stSidebar"] .nav-btn-wrap .stButton > button:hover {
-                background: rgba(28,84,240,0.06) !important; border-color: rgba(28,84,240,0.2) !important; color: #1C54F0 !important; }
-            [data-testid="stSidebar"] .nav-btn-active .stButton > button {
-                background: rgba(28,84,240,0.08) !important; border-color: rgba(28,84,240,0.25) !important;
-                color: #1C54F0 !important; font-weight: 700 !important; box-shadow: none !important; }
+            #jl-hamburger {
+                position: fixed;
+                top: 16px;
+                right: 16px;
+                z-index: 99999;
+                width: 44px;
+                height: 44px;
+                background: rgba(6, 12, 24, 0.55);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border: 1px solid rgba(0, 210, 255, 0.2);
+                border-radius: 12px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 5px;
+                cursor: pointer !important;
+                transition: all 0.2s ease;
+                box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+            }
+            #jl-hamburger:hover {
+                background: rgba(0, 210, 255, 0.12);
+                border-color: rgba(0, 210, 255, 0.5);
+                box-shadow: 0 0 20px rgba(0,210,255,0.2);
+            }
+            #jl-hamburger span {
+                display: block;
+                width: 18px;
+                height: 1.5px;
+                background: #00d2ff;
+                border-radius: 2px;
+                transition: all 0.25s ease;
+            }
+            #jl-hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+            #jl-hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+            #jl-hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
 
-            /* ── TOOL PAGE SECTIONS ── */
-            .section-eyebrow {
-                font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.2em;
-                text-transform: uppercase; color: #9CA3AF; display: block; margin-bottom: 10px; }
-            .section-title {
-                font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2.2rem; font-weight: 800;
-                letter-spacing: -0.05em; line-height: 0.95; color: #08091A; margin-bottom: 10px; }
-            .section-title .g {
-                background: linear-gradient(135deg, #1C54F0, #6366F1);
-                -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+            #jl-nav-panel {
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: 260px;
+                height: 100vh;
+                background: rgba(6, 10, 20, 0.92);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border-left: 1px solid rgba(0, 210, 255, 0.12);
+                z-index: 99998;
+                transform: translateX(100%);
+                transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                padding: 80px 20px 24px 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                box-shadow: -8px 0 40px rgba(0,0,0,0.5);
+                overflow-y: auto;
+            }
+            #jl-nav-panel.open { transform: translateX(0); }
 
-            /* ── CAREER ANALYSIS CARDS ── */
-            .career-card {
-                background: rgba(255,255,255,0.9); border: 1px solid rgba(0,0,0,0.07);
-                border-radius: 16px; padding: 20px 22px; position: relative; overflow: hidden;
-                backdrop-filter: blur(10px); box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-                transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-                margin-bottom: 14px; }
-            .career-card:hover { transform: translateY(-3px); border-color: rgba(28,84,240,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-            .career-card::before {
-                content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
-                background: linear-gradient(to bottom, #1C54F0, #6366F1);
-                transform: scaleY(0); transform-origin: bottom;
-                transition: transform 0.28s ease; border-radius: 16px 0 0 16px; }
-            .career-card:hover::before { transform: scaleY(1); }
-            .match-ring-wrap { text-align: center; }
-            .match-ring { position: relative; display: inline-block; }
-            .match-ring svg .ring-bg { fill: none; stroke: rgba(0,0,0,0.06); stroke-width: 6; }
-            .match-ring svg .ring-fill { fill: none; stroke-width: 6; stroke-linecap: round; transform: rotate(-90deg); transform-origin: center; }
-            .ring-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-            .ring-pct { font-size: 1.1rem; font-weight: 800; color: #1C54F0; letter-spacing: -0.04em; }
-            .ring-label { font-family: 'DM Mono', monospace; font-size: 0.5rem; letter-spacing: 0.1em; text-transform: uppercase; color: #9CA3AF; }
-            .skill-badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 100px; font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.05em; border: 1px solid rgba(28,84,240,0.2); background: rgba(28,84,240,0.05); color: #1C54F0; margin: 2px 3px 2px 0; }
-            .job-links-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
-            .job-link-btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 14px; border-radius: 100px; font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.06em; text-decoration: none; border: 1px solid rgba(0,0,0,0.11); color: #6B7280; background: #F8F9FD; transition: all 0.15s; }
-            .job-link-btn:hover { border-color: rgba(28,84,240,0.3); color: #1C54F0; background: rgba(28,84,240,0.04); }
-            .learn-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 0.88rem; color: #2A2D45; }
-            .learn-item::before { content: "📖"; flex-shrink: 0; }
+            #jl-nav-panel .nav-label {
+                font-family: 'JetBrains Mono', monospace;
+                font-size: 0.58rem;
+                letter-spacing: 0.22em;
+                text-transform: uppercase;
+                color: rgba(0,210,255,0.35);
+                margin: 0 0 8px 4px;
+            }
+            #jl-nav-panel .nav-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 14px;
+                border-radius: 10px;
+                border: 1px solid transparent;
+                cursor: pointer !important;
+                font-family: 'Space Grotesk', sans-serif;
+                font-size: 0.88rem;
+                font-weight: 500;
+                color: #64748b;
+                transition: all 0.18s ease;
+                text-decoration: none;
+            }
+            #jl-nav-panel .nav-item:hover {
+                background: rgba(0,210,255,0.07);
+                border-color: rgba(0,210,255,0.15);
+                color: #e2e8f0;
+            }
+            #jl-nav-panel .nav-item.active {
+                background: rgba(0,210,255,0.1);
+                border-color: rgba(0,210,255,0.25);
+                color: #00d2ff;
+            }
+            #jl-nav-panel .nav-divider {
+                height: 1px;
+                background: linear-gradient(90deg, transparent, rgba(0,210,255,0.15), transparent);
+                margin: 10px 0;
+            }
+            #jl-nav-panel .settings-btn {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 14px;
+                border-radius: 10px;
+                border: 1px solid rgba(0,210,255,0.2);
+                cursor: pointer !important;
+                font-family: 'Space Grotesk', sans-serif;
+                font-size: 0.88rem;
+                font-weight: 600;
+                color: #00d2ff;
+                background: rgba(0,210,255,0.06);
+                transition: all 0.18s ease;
+                margin-top: 4px;
+            }
+            #jl-nav-panel .settings-btn:hover {
+                background: rgba(0,210,255,0.14);
+                border-color: rgba(0,210,255,0.4);
+            }
+            #jl-nav-overlay {
+                position: fixed;
+                inset: 0;
+                z-index: 99997;
+                display: none;
+            }
+            #jl-nav-overlay.open { display: block; }
+            [data-testid="stSidebar"] .stButton > button {
+                background: transparent !important;
+                border: 1px solid transparent !important;
+                border-radius: 8px !important;
+                color: #64748b !important;
+                font-family: 'JetBrains Mono', monospace !important;
+                font-size: 0.72rem !important;
+                letter-spacing: 0.1em !important;
+                text-transform: uppercase !important;
+                font-weight: 400 !important;
+                padding: 9px 12px !important;
+                text-align: left !important;
+                box-shadow: none !important;
+                animation: none !important;
+                justify-content: flex-start !important;
+            }
+            [data-testid="stSidebar"] .stButton > button:hover {
+                background: rgba(255,255,255,0.05) !important;
+                color: #94a3b8 !important;
+                transform: none !important;
+                box-shadow: none !important;
+            }
 
-            /* ── RESUME BUILDER ── */
-            .compare-header { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.2rem; font-weight: 800; letter-spacing: -0.04em; color: #08091A; margin-bottom: 6px; }
-            .compare-cell { background: rgba(255,255,255,0.9); border: 1px solid rgba(0,0,0,0.07); border-radius: 14px; padding: 16px; height: 100%; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-
-            /* ── RESOURCES ── */
-            .resource-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; margin: 12px 0; }
-            .resource-card { background: rgba(255,255,255,0.9); border: 1px solid rgba(0,0,0,0.07); border-radius: 14px; padding: 18px; transition: all 0.25s ease; text-decoration: none; display: block; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
-            .resource-card:hover { border-color: rgba(28,84,240,0.25); transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,0.1); }
-            .resource-card .rc-icon { font-size: 1.6rem; margin-bottom: 8px; }
-            .resource-card .rc-name { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.95rem; font-weight: 700; color: #08091A; margin-bottom: 4px; }
-            .resource-card .rc-desc { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.78rem; color: #6B7280; line-height: 1.55; }
-            .resource-card .rc-tag { display: inline-block; margin-top: 10px; font-family: 'DM Mono', monospace; font-size: 0.62rem; padding: 3px 10px; border-radius: 100px; background: rgba(28,84,240,0.06); color: #1C54F0; border: 1px solid rgba(28,84,240,0.15); }
+            /* ── STATS ── */
+            .stats-row { display:flex; gap:16px; margin:20px 0; flex-wrap:wrap; }
+            .stat-card { flex:1; min-width:110px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,210,255,0.1); border-radius:14px; padding:16px 18px; text-align:center; transition:all 0.3s ease; }
+            .stat-card:hover { border-color:rgba(0,210,255,0.35); transform:translateY(-3px); box-shadow:0 12px 30px rgba(0,210,255,0.08); }
+            .stat-card .stat-num { font-family:'Bebas Neue',sans-serif; font-size:2rem; line-height:1; background:linear-gradient(135deg,#00d2ff,#a855f7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+            .stat-card .stat-lbl { font-family:'JetBrains Mono',monospace; font-size:0.65rem; color:#64748b; text-transform:uppercase; letter-spacing:0.1em; margin-top:4px; }
+            .hist-card { background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.07); border-radius:14px; padding:18px 22px; margin-bottom:12px; transition:all 0.25s ease; }
+            .hist-card:hover { border-color:rgba(0,210,255,0.25); transform:translateX(4px); }
+            .tip-item  { display:flex; gap:10px; align-items:flex-start; padding:8px 12px; border-radius:8px; background:rgba(168,85,247,0.06); border:1px solid rgba(168,85,247,0.15); margin-bottom:8px; font-size:0.88rem; color:#c4b5fd; font-family:'Space Grotesk',sans-serif; }
+            .tip-item::before  { content:"💡"; flex-shrink:0; }
+            .learn-item { display:flex; gap:10px; align-items:center; padding:8px 12px; border-radius:8px; background:rgba(52,211,153,0.05); border:1px solid rgba(52,211,153,0.15); margin-bottom:8px; font-size:0.88rem; color:#6ee7b7; font-family:'Space Grotesk',sans-serif; }
+            .learn-item::before { content:"📖"; flex-shrink:0; }
+            .compare-header { font-family:'Bebas Neue',sans-serif; font-size:1.4rem; letter-spacing:0.06em; color:#e2e8f0; margin-bottom:6px; }
+            .compare-cell { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:12px; padding:16px; height:100%; }
+            .resource-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px; margin:12px 0; }
+            .resource-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:14px; padding:18px; transition:all 0.25s ease; text-decoration:none; display:block; }
+            .resource-card:hover { border-color:rgba(0,210,255,0.35); transform:translateY(-3px); box-shadow:0 12px 30px rgba(0,0,0,0.3); text-decoration:none; }
+            .resource-card .rc-icon { display:flex; align-items:center; justify-content:flex-start; margin-bottom:8px; color:#38bdf8; }
+            .resource-card .rc-name { font-family:'Space Grotesk',sans-serif; font-size:0.95rem; font-weight:600; color:#e2e8f0; margin-bottom:4px; }
+            .resource-card .rc-desc { font-family:'Space Grotesk',sans-serif; font-size:0.78rem; color:#64748b; line-height:1.5; }
+            .resource-card .rc-tag  { display:inline-block; margin-top:10px; font-family:'JetBrains Mono',monospace; font-size:0.62rem; padding:2px 8px; border-radius:4px; background:rgba(0,210,255,0.1); color:#38bdf8; border:1px solid rgba(0,210,255,0.2); }
         </style>
         """
         st.markdown(css, unsafe_allow_html=True)
@@ -2052,27 +2347,27 @@ class UIComponents:
                         var s = pdoc.createElement('style'); s.id = 'nexstep-injected-css';
                         s.textContent = [
                             '* { cursor: none !important; }',
-                            '#ns-dot { position:fixed!important; left:0!important; top:0!important; width:10px!important; height:10px!important; background:#1C54F0!important; border-radius:50%!important; pointer-events:none!important; z-index:2147483647!important; will-change:transform!important; box-shadow:0 0 10px #00d2ff,0 0 24px rgba(0,210,255,.5)!important; transition:width .15s,height .15s,background .15s!important; mix-blend-mode:screen!important; }',
-                            '#ns-dot.ns-click { width:5px!important; height:5px!important; background:#6366F1!important; box-shadow:0 0 12px rgba(99,102,241,0.7)!important; }',
-                            '#ns-ring { position:fixed!important; left:0!important; top:0!important; width:34px!important; height:34px!important; border:1.5px solid rgba(28,84,240,.45)!important; border-radius:50%!important; pointer-events:none!important; z-index:2147483646!important; will-change:transform!important; transition:width .2s ease,height .2s ease,border-color .2s ease,background .2s ease!important; }',
-                            '#ns-ring.ns-hover { width:56px!important; height:56px!important; border-color:#6366F1!important; background:rgba(99,102,241,.05)!important; }',
+                            '#ns-dot { position:fixed!important; left:0!important; top:0!important; width:10px!important; height:10px!important; background:#00d2ff!important; border-radius:50%!important; pointer-events:none!important; z-index:2147483647!important; will-change:transform!important; box-shadow:0 0 10px #00d2ff,0 0 24px rgba(0,210,255,.5)!important; transition:width .15s,height .15s,background .15s!important; mix-blend-mode:screen!important; }',
+                            '#ns-dot.ns-click { width:5px!important; height:5px!important; background:#a855f7!important; box-shadow:0 0 12px #a855f7!important; }',
+                            '#ns-ring { position:fixed!important; left:0!important; top:0!important; width:34px!important; height:34px!important; border:1.5px solid rgba(0,210,255,.6)!important; border-radius:50%!important; pointer-events:none!important; z-index:2147483646!important; will-change:transform!important; transition:width .2s ease,height .2s ease,border-color .2s ease,background .2s ease!important; }',
+                            '#ns-ring.ns-hover { width:56px!important; height:56px!important; border-color:#a855f7!important; background:rgba(168,85,247,.06)!important; }',
                             '.jl-ghost-btn { position:fixed!important; top:-9999px!important; left:-9999px!important; width:1px!important; height:1px!important; overflow:hidden!important; opacity:0!important; pointer-events:none!important; }',
                             /* hamburger button */
-                            '#jl-hbg { position:fixed!important; top:14px!important; right:14px!important; z-index:2147483640!important; width:42px!important; height:42px!important; background:rgba(255,255,255,0.9)!important; backdrop-filter:blur(12px)!important; -webkit-backdrop-filter:blur(12px)!important; border:1px solid rgba(28,84,240,0.2)!important; border-radius:11px!important; display:flex!important; flex-direction:column!important; align-items:center!important; justify-content:center!important; gap:5px!important; cursor:pointer!important; transition:all 0.2s ease!important; box-shadow:0 4px 20px rgba(0,0,0,0.5)!important; }',
-                            '#jl-hbg:hover { background:rgba(28,84,240,0.1)!important; border-color:rgba(28,84,240,0.5)!important; box-shadow:0 0 20px rgba(28,84,240,0.18)!important; }',
-                            '#jl-hbg span { display:block!important; width:17px!important; height:1.5px!important; background:#1C54F0!important; border-radius:2px!important; transition:all 0.25s ease!important; pointer-events:none!important; }',
+                            '#jl-hbg { position:fixed!important; top:14px!important; right:14px!important; z-index:2147483640!important; width:42px!important; height:42px!important; background:rgba(6,12,24,0.65)!important; backdrop-filter:blur(12px)!important; -webkit-backdrop-filter:blur(12px)!important; border:1px solid rgba(0,210,255,0.25)!important; border-radius:11px!important; display:flex!important; flex-direction:column!important; align-items:center!important; justify-content:center!important; gap:5px!important; cursor:pointer!important; transition:all 0.2s ease!important; box-shadow:0 4px 20px rgba(0,0,0,0.5)!important; }',
+                            '#jl-hbg:hover { background:rgba(0,210,255,0.15)!important; border-color:rgba(0,210,255,0.6)!important; box-shadow:0 0 20px rgba(0,210,255,0.25)!important; }',
+                            '#jl-hbg span { display:block!important; width:17px!important; height:1.5px!important; background:#00d2ff!important; border-radius:2px!important; transition:all 0.25s ease!important; pointer-events:none!important; }',
                             '#jl-hbg.open span:nth-child(1) { transform:translateY(6.5px) rotate(45deg)!important; }',
                             '#jl-hbg.open span:nth-child(2) { opacity:0!important; transform:scaleX(0)!important; }',
                             '#jl-hbg.open span:nth-child(3) { transform:translateY(-6.5px) rotate(-45deg)!important; }',
                             /* nav panel */
-                            '#jl-panel { position:fixed!important; top:0!important; right:0!important; width:230px!important; height:100vh!important; background:rgba(255,255,255,0.97)!important; backdrop-filter:blur(24px)!important; -webkit-backdrop-filter:blur(24px)!important; border-left:1px solid rgba(0,0,0,0.07)!important; z-index:2147483639!important; transform:translateX(100%)!important; transition:transform 0.3s cubic-bezier(0.16,1,0.3,1)!important; padding:68px 16px 24px!important; display:flex!important; flex-direction:column!important; gap:3px!important; box-shadow:-8px 0 40px rgba(0,0,0,0.6)!important; overflow-y:auto!important; }',
+                            '#jl-panel { position:fixed!important; top:0!important; right:0!important; width:230px!important; height:100vh!important; background:rgba(5,9,18,0.97)!important; backdrop-filter:blur(24px)!important; -webkit-backdrop-filter:blur(24px)!important; border-left:1px solid rgba(0,210,255,0.12)!important; z-index:2147483639!important; transform:translateX(100%)!important; transition:transform 0.3s cubic-bezier(0.16,1,0.3,1)!important; padding:68px 16px 24px!important; display:flex!important; flex-direction:column!important; gap:3px!important; box-shadow:-8px 0 40px rgba(0,0,0,0.6)!important; overflow-y:auto!important; }',
                             '#jl-panel.open { transform:translateX(0)!important; }',
                             '#jl-overlay { position:fixed!important; inset:0!important; z-index:2147483638!important; display:none!important; }',
                             '#jl-overlay.open { display:block!important; }',
-                            '.jl-nlbl { font-family:monospace!important; font-size:0.58rem!important; letter-spacing:0.2em!important; text-transform:uppercase!important; color:#9CA3AF!important; margin:0 0 10px 4px!important; }',
-                            '.jl-ni { display:flex!important; align-items:center!important; gap:10px!important; padding:10px 14px!important; border-radius:10px!important; border:1px solid transparent!important; cursor:pointer!important; font-family:sans-serif!important; font-size:0.88rem!important; font-weight:500!important; color:#6B7280!important; transition:all 0.18s ease!important; margin-bottom:2px!important; }',
-                            '.jl-ni:hover { background:rgba(28,84,240,0.06)!important; border-color:rgba(28,84,240,0.18)!important; color:#1C54F0!important; }',
-                            '.jl-ni.active { background:rgba(28,84,240,0.08)!important; border-color:rgba(28,84,240,0.25)!important; color:#1C54F0!important; font-weight:600!important; }'
+                            '.jl-nlbl { font-family:monospace!important; font-size:0.58rem!important; letter-spacing:0.2em!important; text-transform:uppercase!important; color:rgba(0,210,255,0.35)!important; margin:0 0 10px 4px!important; }',
+                            '.jl-ni { display:flex!important; align-items:center!important; gap:10px!important; padding:10px 14px!important; border-radius:10px!important; border:1px solid transparent!important; cursor:pointer!important; font-family:sans-serif!important; font-size:0.88rem!important; font-weight:500!important; color:#64748b!important; transition:all 0.18s ease!important; margin-bottom:2px!important; }',
+                            '.jl-ni:hover { background:rgba(0,210,255,0.08)!important; border-color:rgba(0,210,255,0.18)!important; color:#e2e8f0!important; }',
+                            '.jl-ni.active { background:rgba(0,210,255,0.11)!important; border-color:rgba(0,210,255,0.28)!important; color:#00d2ff!important; font-weight:600!important; }'
                         ].join('');
                         pdoc.head.appendChild(s);
                     }
@@ -2080,10 +2375,14 @@ class UIComponents:
                     // ── Build hamburger in parent doc ─────────────────────
                     if (!pdoc.getElementById('jl-hbg')) {
                         var NAV_DEFS = [
-                            ['home','🏠','Home'],['career','📊','Career Analysis'],
-                            ['resume','📝','Resume Builder'],['interview','🎤','Mock Interview'],
-                            ['pyq','📂','PYQ Hub'],['resources','📚','Resources'],
-                            ['compare','⚖️','Compare'],['history','🕒','History']
+                            ['home','<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>','Home'],
+                            ['career','<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>','Career Analysis'],
+                            ['resume','<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>','Resume Builder'],
+                            ['interview','<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>','Mock Interview'],
+                            ['pyq','<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>','PYQ Hub'],
+                            ['resources','<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>','Resources'],
+                            ['compare','<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>','Compare'],
+                            ['history','<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>','History']
                         ];
                         var curPage = (new URLSearchParams(P.location.search)).get('page') || 'home';
 
@@ -2276,7 +2575,7 @@ html,body{background:#050a12!important;overflow:hidden;font-family:'DM Sans',san
 .slabel-txt{font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(0,210,255,.55)}
 .stitle{font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;color:#f1f5f9;margin-bottom:10px;line-height:1.2}
 .stitle span{background:linear-gradient(90deg,#00d2ff,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.input-field{background:rgba(255,255,255,.04);border:1px solid rgba(0,210,255,.2);border-radius:8px;padding:7px 11px;font-size:.67rem;color:#6B7280;font-family:'DM Mono',monospace;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.input-field{background:rgba(255,255,255,.04);border:1px solid rgba(0,210,255,.2);border-radius:8px;padding:7px 11px;font-size:.67rem;color:#94a3b8;font-family:'DM Mono',monospace;margin-bottom:10px;display:flex;align-items:center;gap:6px}
 .input-field::before{content:'>';color:rgba(0,210,255,.4);font-size:.55rem}
 .cursor{display:inline-block;width:1.5px;height:10px;background:#00d2ff;margin-left:2px;vertical-align:middle;animation:blink .9s step-end infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
@@ -2613,7 +2912,7 @@ def _render_career_results(data: Dict):
     </div>
   </div>
 </div>'''
-        steps_html = "".join(f'<li style="color:#6B7280;font-size:.88rem;margin-bottom:5px;">{s}</li>'
+        steps_html = "".join(f'<li style="color:#94a3b8;font-size:.88rem;margin-bottom:5px;">{s}</li>'
                              for s in job.get('next_steps', []))
 
         with st.expander(f"**{idx}. {job['title']}** — {score}% Match", expanded=(idx == 1)):
@@ -2622,7 +2921,7 @@ def _render_career_results(data: Dict):
                 st.markdown(f"""
                 <div style="padding-right:16px;">
                   <span style="font-family:'JetBrains Mono',monospace;font-size:.85rem;color:#4ade80;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);border-radius:6px;padding:4px 12px;display:inline-block;margin-bottom:12px;">💰 {job['salary_range']}</span>
-                  <p style="color:#6B7280;font-size:.9rem;line-height:1.65;margin-bottom:14px;">{job.get('reason','')}</p>
+                  <p style="color:#94a3b8;font-size:.9rem;line-height:1.65;margin-bottom:14px;">{job.get('reason','')}</p>
                   <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:#00d2ff;text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;">▸ NEXT STEPS</div>
                   <ul style="margin:0;padding-left:18px;">{steps_html}</ul>
                   {"<div style='font-family:JetBrains Mono,monospace;font-size:.65rem;color:#00d2ff;text-transform:uppercase;letter-spacing:.12em;margin:12px 0 6px;'>▸ TOP COMPANIES</div>" + comp_badges if companies else ""}
@@ -2743,39 +3042,56 @@ def render_tab_compare():
 
 def render_tab_resources():
     """Tab 4 — Learning & Career Resources."""
-    st.markdown("### 📚 Learning & Career Resources")
+    st.markdown("### Learning & Career Resources")
 
-    st.markdown("#### 🎓 Top Learning Platforms")
-    st.markdown("""
+    # Define SVG icons inline
+    _SVG = {
+        'grad': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>',
+        'code': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
+        'brief': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>',
+        'book': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>',
+        'fire': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 11-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 3z"/></svg>',
+        'search': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+        'globe': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>',
+        'users': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>',
+        'star': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+        'cloud': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>',
+        'award': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>',
+        'zap': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+        'clip': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+    }
+
+    st.markdown("#### Top Learning Platforms")
+    st.markdown(f"""
     <div class="resource-grid">
-      <a href="https://coursera.org" target="_blank" class="resource-card"><div class="rc-icon">🎓</div><div class="rc-name">Coursera</div><div class="rc-desc">University-backed courses, Google & IBM certificates</div><span class="rc-tag">FREE AUDIT</span></a>
-      <a href="https://www.udemy.com" target="_blank" class="resource-card"><div class="rc-icon">🧑‍💻</div><div class="rc-name">Udemy</div><div class="rc-desc">Practical skills — dev, design, business, data science</div><span class="rc-tag">PAID</span></a>
-      <a href="https://linkedin.com/learning" target="_blank" class="resource-card"><div class="rc-icon">💼</div><div class="rc-name">LinkedIn Learning</div><div class="rc-desc">Business & tech courses linked to your LinkedIn profile</div><span class="rc-tag">1 MONTH FREE</span></a>
-      <a href="https://nptel.ac.in" target="_blank" class="resource-card"><div class="rc-icon">🇮🇳</div><div class="rc-name">NPTEL</div><div class="rc-desc">IIT-quality courses, free with certifications</div><span class="rc-tag">FREE</span></a>
-      <a href="https://www.freecodecamp.org" target="_blank" class="resource-card"><div class="rc-icon">🔥</div><div class="rc-name">freeCodeCamp</div><div class="rc-desc">Full stack development, data science — completely free</div><span class="rc-tag">FREE</span></a>
-      <a href="https://grow.google/certificates" target="_blank" class="resource-card"><div class="rc-icon">🔵</div><div class="rc-name">Google Career Certs</div><div class="rc-desc">Data Analytics, PM, Cybersecurity, UX Design</div><span class="rc-tag">CERTIFICATE</span></a>
+      <a href="https://coursera.org" target="_blank" class="resource-card"><div class="rc-icon">{_SVG['grad']}</div><div class="rc-name">Coursera</div><div class="rc-desc">University-backed courses, Google & IBM certificates</div><span class="rc-tag">FREE AUDIT</span></a>
+      <a href="https://www.udemy.com" target="_blank" class="resource-card"><div class="rc-icon">{_SVG['code']}</div><div class="rc-name">Udemy</div><div class="rc-desc">Practical skills — dev, design, business, data science</div><span class="rc-tag">PAID</span></a>
+      <a href="https://linkedin.com/learning" target="_blank" class="resource-card"><div class="rc-icon">{_SVG['brief']}</div><div class="rc-name">LinkedIn Learning</div><div class="rc-desc">Business & tech courses linked to your LinkedIn profile</div><span class="rc-tag">1 MONTH FREE</span></a>
+      <a href="https://nptel.ac.in" target="_blank" class="resource-card"><div class="rc-icon">{_SVG['book']}</div><div class="rc-name">NPTEL</div><div class="rc-desc">IIT-quality courses, free with certifications</div><span class="rc-tag">FREE</span></a>
+      <a href="https://www.freecodecamp.org" target="_blank" class="resource-card"><div class="rc-icon">{_SVG['fire']}</div><div class="rc-name">freeCodeCamp</div><div class="rc-desc">Full stack development, data science — completely free</div><span class="rc-tag">FREE</span></a>
+      <a href="https://grow.google/certificates" target="_blank" class="resource-card"><div class="rc-icon">{_SVG['award']}</div><div class="rc-name">Google Career Certs</div><div class="rc-desc">Data Analytics, PM, Cybersecurity, UX Design</div><span class="rc-tag">CERTIFICATE</span></a>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("#### 🔍 Job Search Portals")
-    st.markdown("""
+    st.markdown("#### Job Search Portals")
+    st.markdown(f"""
     <div class="resource-grid">
-      <a href="https://www.linkedin.com/jobs" target="_blank" class="resource-card"><div class="rc-icon">🔵</div><div class="rc-name">LinkedIn Jobs</div><div class="rc-desc">World's largest professional network</div><span class="rc-tag">GLOBAL</span></a>
-      <a href="https://www.naukri.com" target="_blank" class="resource-card"><div class="rc-icon">🟠</div><div class="rc-name">Naukri.com</div><div class="rc-desc">India's #1 job portal — 70k+ active listings daily</div><span class="rc-tag">INDIA</span></a>
-      <a href="https://in.indeed.com" target="_blank" class="resource-card"><div class="rc-icon">🟢</div><div class="rc-name">Indeed India</div><div class="rc-desc">Aggregated listings, company reviews, salary insights</div><span class="rc-tag">INDIA + GLOBAL</span></a>
-      <a href="https://www.glassdoor.co.in" target="_blank" class="resource-card"><div class="rc-icon">💚</div><div class="rc-name">Glassdoor</div><div class="rc-desc">Jobs + salary data + anonymous company reviews</div><span class="rc-tag">SALARY INTEL</span></a>
-      <a href="https://angel.co/jobs" target="_blank" class="resource-card"><div class="rc-icon">👼</div><div class="rc-name">Wellfound (AngelList)</div><div class="rc-desc">Startup jobs — equity, remote, early-stage</div><span class="rc-tag">STARTUPS</span></a>
-      <a href="https://www.instahyre.com" target="_blank" class="resource-card"><div class="rc-icon">⚡</div><div class="rc-name">Instahyre</div><div class="rc-desc">AI-matched jobs for tech professionals in India</div><span class="rc-tag">TECH INDIA</span></a>
+      <a href="https://www.linkedin.com/jobs" target="_blank" class="resource-card"><div class="rc-icon">{_SVG['users']}</div><div class="rc-name">LinkedIn Jobs</div><div class="rc-desc">World's largest professional network</div><span class="rc-tag">GLOBAL</span></a>
+      <a href="https://www.naukri.com" target="_blank" class="resource-card"><div class="rc-icon">{_SVG['search']}</div><div class="rc-name">Naukri.com</div><div class="rc-desc">India's #1 job portal — 70k+ active listings daily</div><span class="rc-tag">INDIA</span></a>
+      <a href="https://in.indeed.com" target="_blank" class="resource-card"><div class="rc-icon">{_SVG['globe']}</div><div class="rc-name">Indeed India</div><div class="rc-desc">Aggregated listings, company reviews, salary insights</div><span class="rc-tag">INDIA + GLOBAL</span></a>
+      <a href="https://www.glassdoor.co.in" target="_blank" class="resource-card"><div class="rc-icon">{_SVG['star']}</div><div class="rc-name">Glassdoor</div><div class="rc-desc">Jobs + salary data + anonymous company reviews</div><span class="rc-tag">SALARY INTEL</span></a>
+      <a href="https://angel.co/jobs" target="_blank" class="resource-card"><div class="rc-icon">{_SVG['zap']}</div><div class="rc-name">Wellfound (AngelList)</div><div class="rc-desc">Startup jobs — equity, remote, early-stage</div><span class="rc-tag">STARTUPS</span></a>
+      <a href="https://www.instahyre.com" target="_blank" class="resource-card"><div class="rc-icon">{_SVG['zap']}</div><div class="rc-name">Instahyre</div><div class="rc-desc">AI-matched jobs for tech professionals in India</div><span class="rc-tag">TECH INDIA</span></a>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("#### 🏅 Certifications Worth Getting")
-    st.markdown("""
+    st.markdown("#### Certifications Worth Getting")
+    st.markdown(f"""
     <div class="resource-grid">
-      <a href="https://aws.amazon.com/certification" target="_blank" class="resource-card"><div class="rc-icon">☁️</div><div class="rc-name">AWS Certifications</div><div class="rc-desc">Cloud Computing — most in-demand certs globally</div><span class="rc-tag">CLOUD</span></a>
-      <a href="https://cloud.google.com/certification" target="_blank" class="resource-card"><div class="rc-icon">🔶</div><div class="rc-name">Google Cloud</div><div class="rc-desc">GCP certs for data engineers and ML engineers</div><span class="rc-tag">CLOUD + ML</span></a>
-      <a href="https://www.credly.com/org/microsoft-certification" target="_blank" class="resource-card"><div class="rc-icon">🪟</div><div class="rc-name">Microsoft Azure</div><div class="rc-desc">AZ-900, AZ-104, DP-900 — top corporate demand</div><span class="rc-tag">ENTERPRISE</span></a>
-      <a href="https://www.pmi.org/certifications/project-management-pmp" target="_blank" class="resource-card"><div class="rc-icon">📋</div><div class="rc-name">PMP</div><div class="rc-desc">Project Management Professional — salary booster</div><span class="rc-tag">MANAGEMENT</span></a>
+      <a href="https://aws.amazon.com/certification" target="_blank" class="resource-card"><div class="rc-icon">{_SVG['cloud']}</div><div class="rc-name">AWS Certifications</div><div class="rc-desc">Cloud Computing — most in-demand certs globally</div><span class="rc-tag">CLOUD</span></a>
+      <a href="https://cloud.google.com/certification" target="_blank" class="resource-card"><div class="rc-icon">{_SVG['cloud']}</div><div class="rc-name">Google Cloud</div><div class="rc-desc">GCP certs for data engineers and ML engineers</div><span class="rc-tag">CLOUD + ML</span></a>
+      <a href="https://www.credly.com/org/microsoft-certification" target="_blank" class="resource-card"><div class="rc-icon">{_SVG['award']}</div><div class="rc-name">Microsoft Azure</div><div class="rc-desc">AZ-900, AZ-104, DP-900 — top corporate demand</div><span class="rc-tag">ENTERPRISE</span></a>
+      <a href="https://www.pmi.org/certifications/project-management-pmp" target="_blank" class="resource-card"><div class="rc-icon">{_SVG['clip']}</div><div class="rc-name">PMP</div><div class="rc-desc">Project Management Professional — salary booster</div><span class="rc-tag">MANAGEMENT</span></a>
     </div>
     """, unsafe_allow_html=True)
 
@@ -2785,9 +3101,18 @@ def render_tab_resume_builder(ai_handler: AIHandler, selected_model: str):
     st.markdown("### 📝 ATS-Friendly Resume Builder")
     st.markdown("""
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px;">
-      <div style="flex:1;min-width:180px;background:rgba(0,210,255,0.07);border:1px solid rgba(0,210,255,0.2);border-radius:12px;padding:14px 16px;text-align:center;"><div style="font-size:1.5rem;">1️⃣</div><div style="color:#00d2ff;font-weight:600;font-size:0.88rem;margin-top:4px;">Fill Your Details</div></div>
-      <div style="flex:1;min-width:180px;background:rgba(168,85,247,0.07);border:1px solid rgba(168,85,247,0.2);border-radius:12px;padding:14px 16px;text-align:center;"><div style="font-size:1.5rem;">2️⃣</div><div style="color:#a855f7;font-weight:600;font-size:0.88rem;margin-top:4px;">Paste Job Description</div></div>
-      <div style="flex:1;min-width:180px;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.2);border-radius:12px;padding:14px 16px;text-align:center;"><div style="font-size:1.5rem;">3️⃣</div><div style="color:#22c55e;font-weight:600;font-size:0.88rem;margin-top:4px;">Get ATS Resume</div></div>
+      <div style="flex:1;min-width:180px;background:rgba(0,210,255,0.07);border:1px solid rgba(0,210,255,0.2);border-radius:12px;padding:14px 16px;text-align:center;">
+        <div style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(0,210,255,0.2);border:1.5px solid rgba(0,210,255,0.5);font-family:'Space Grotesk',sans-serif;font-size:0.9rem;font-weight:700;color:#00d2ff;margin:0 auto 6px;">1</div>
+        <div style="color:#00d2ff;font-weight:600;font-size:0.88rem;">Fill Your Details</div>
+      </div>
+      <div style="flex:1;min-width:180px;background:rgba(168,85,247,0.07);border:1px solid rgba(168,85,247,0.2);border-radius:12px;padding:14px 16px;text-align:center;">
+        <div style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(168,85,247,0.2);border:1.5px solid rgba(168,85,247,0.5);font-family:'Space Grotesk',sans-serif;font-size:0.9rem;font-weight:700;color:#a855f7;margin:0 auto 6px;">2</div>
+        <div style="color:#a855f7;font-weight:600;font-size:0.88rem;">Paste Job Description</div>
+      </div>
+      <div style="flex:1;min-width:180px;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.2);border-radius:12px;padding:14px 16px;text-align:center;">
+        <div style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(34,197,94,0.2);border:1.5px solid rgba(34,197,94,0.5);font-family:'Space Grotesk',sans-serif;font-size:0.9rem;font-weight:700;color:#22c55e;margin:0 auto 6px;">3</div>
+        <div style="color:#22c55e;font-weight:600;font-size:0.88rem;">Get ATS Resume</div>
+      </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -2880,7 +3205,7 @@ def _render_resume_output(res: Dict):
     <div style="display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap;">
       <div style="flex:1;min-width:160px;background:rgba(0,0,0,0.3);border:1px solid {score_color}40;border-radius:12px;padding:18px;text-align:center;">
         <div style="font-size:2.5rem;font-weight:900;color:{score_color};font-family:'Orbitron',sans-serif;">{ats_score}</div>
-        <div style="color:#6B7280;font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;">ATS Score</div>
+        <div style="color:#94a3b8;font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;">ATS Score</div>
       </div>
       <div style="flex:2;min-width:200px;background:rgba(0,0,0,0.3);border:1px solid rgba(0,210,255,0.15);border-radius:12px;padding:18px;">
         <div style="color:#00d2ff;font-weight:600;margin-bottom:8px;">✅ Keywords Found</div>
@@ -2898,7 +3223,7 @@ def _render_resume_output(res: Dict):
         st.markdown(f"""
         <div style="background:rgba(168,85,247,0.08);border-left:3px solid #a855f7;border-radius:8px;padding:12px 16px;margin-bottom:20px;">
           <div style="color:#a855f7;font-weight:600;margin-bottom:6px;">💡 ATS Optimization Tips</div>
-          {''.join(f'<div style="color:#6B7280;font-size:0.9rem;margin:4px 0;">• {t}</div>' for t in tips)}
+          {''.join(f'<div style="color:#94a3b8;font-size:0.9rem;margin:4px 0;">• {t}</div>' for t in tips)}
         </div>
         """, unsafe_allow_html=True)
 
@@ -2914,7 +3239,7 @@ def _render_resume_output(res: Dict):
 
     exp_html = ""
     for exp in experience:
-        bullets_html = "".join(f'<li style="color:#6B7280;margin:4px 0;font-size:0.9rem;">{b}</li>'
+        bullets_html = "".join(f'<li style="color:#94a3b8;margin:4px 0;font-size:0.9rem;">{b}</li>'
                                for b in exp.get("bullets", []))
         exp_html += f"""
         <div style="margin-bottom:14px;">
@@ -2929,14 +3254,14 @@ def _render_resume_output(res: Dict):
     edu_html = "".join(
         f'<div style="display:flex;justify-content:space-between;margin-bottom:6px;">'
         f'<div><span style="color:#e2e8f0;font-weight:600;">{e.get("degree","")}</span> — '
-        f'<span style="color:#6B7280;">{e.get("institution","")}</span></div>'
+        f'<span style="color:#94a3b8;">{e.get("institution","")}</span></div>'
         f'<div style="color:#64748b;font-size:0.85rem;">{e.get("year","")} '
         f'{"| GPA: " + e.get("gpa","") if e.get("gpa") else ""}</div></div>'
         for e in education)
 
     proj_html = "".join(
         f'<div style="margin-bottom:10px;"><span style="color:#e2e8f0;font-weight:600;">{p.get("name","")}</span>'
-        f'<p style="color:#6B7280;font-size:0.88rem;margin:4px 0 0 0;">{p.get("description","")}</p></div>'
+        f'<p style="color:#94a3b8;font-size:0.88rem;margin:4px 0 0 0;">{p.get("description","")}</p></div>'
         for p in projects)
 
     skills_badges = " ".join(
@@ -2955,7 +3280,7 @@ def _render_resume_output(res: Dict):
       {"<div style='margin-bottom:20px;'><div style='color:#00d2ff;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:700;margin-bottom:8px;'>Skills</div><div>" + skills_badges + "</div></div>" if all_skills else ""}
       {"<div style='margin-bottom:20px;'><div style='color:#00d2ff;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:700;margin-bottom:8px;'>Education</div>" + edu_html + "</div>" if edu_html else ""}
       {"<div style='margin-bottom:20px;'><div style='color:#00d2ff;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:700;margin-bottom:8px;'>Projects</div>" + proj_html + "</div>" if proj_html else ""}
-      {"<div><div style='color:#00d2ff;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:700;margin-bottom:6px;'>Certifications</div><div style='color:#6B7280;font-size:0.9rem;'>" + certs_text + "</div></div>" if certs else ""}
+      {"<div><div style='color:#00d2ff;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:700;margin-bottom:6px;'>Certifications</div><div style='color:#94a3b8;font-size:0.9rem;'>" + certs_text + "</div></div>" if certs else ""}
     </div>
     """, unsafe_allow_html=True)
 
@@ -3595,7 +3920,7 @@ def _conv_interview_setup_ui():
     st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
     st.markdown("""
     <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px 18px;margin-bottom:16px;">
-        <div style="color:#6B7280;font-size:0.78rem;font-family:'JetBrains Mono',monospace;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">▸ HOW IT WORKS</div>
+        <div style="color:#94a3b8;font-size:0.78rem;font-family:'JetBrains Mono',monospace;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">▸ HOW IT WORKS</div>
         <div style="color:#64748b;font-size:0.83rem;line-height:1.75;">
             1. An <strong style="color:#e2e8f0;">animated AI avatar</strong> appears and introduces itself — and speaks to you<br>
             2. <strong style="color:#e2e8f0;">Click the mic 🎤</strong> and speak your answer naturally<br>
@@ -3687,7 +4012,7 @@ def _render_conversational_interview(ai_handler, selected_model: str):
           <div style="background:rgba(0,210,255,.12);border:1px solid rgba(0,210,255,.3);
                       border-radius:20px;padding:3px 12px;font-family:'DM Mono',monospace;
                       font-size:.62rem;color:#00d2ff;letter-spacing:.1em;">{label}</div>
-          <span style="color:#6B7280;font-size:.82rem;font-weight:600;">{role}</span>
+          <span style="color:#94a3b8;font-size:.82rem;font-weight:600;">{role}</span>
           <span style="color:#475569;font-size:.82rem;">· {level}</span>
           <span style="color:#334155;font-size:.75rem;">{exchanges} exchanges</span>
         </div>
@@ -3739,7 +4064,7 @@ def _render_conversational_interview(ai_handler, selected_model: str):
             🎓 Interview Complete
           </div>
           <div style="color:#64748b;font-size:.82rem;">
-            Your full review is above. Click <strong style="color:#6B7280;">New</strong> to practice again.
+            Your full review is above. Click <strong style="color:#94a3b8;">New</strong> to practice again.
           </div>
         </div>
         """, unsafe_allow_html=True)
@@ -4106,7 +4431,7 @@ def _render_interview_session(ai_handler: AIHandler, selected_model: str):
         "#a855f7" if progress_pct < 1 else "#22c55e")
     st.markdown(f"""
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-      <span style="color:#6B7280;font-size:0.85rem;min-width:80px;">Progress</span>
+      <span style="color:#94a3b8;font-size:0.85rem;min-width:80px;">Progress</span>
       <div style="flex:1;background:rgba(255,255,255,0.08);border-radius:20px;height:8px;">
         <div style="width:{progress_pct*100:.0f}%;height:100%;background:{prog_color};border-radius:20px;transition:width 0.5s;"></div>
       </div>
@@ -4184,7 +4509,7 @@ def _render_interview_session(ai_handler: AIHandler, selected_model: str):
             st.markdown(f"""
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center;">
               <span style="background:{cat_col}20;color:{cat_col};padding:3px 10px;border-radius:20px;font-size:0.78rem;">{cat}</span>
-              <span style="background:rgba(255,255,255,0.05);color:#6B7280;padding:3px 10px;border-radius:20px;font-size:0.78rem;">{diff_badge} {diff}</span>
+              <span style="background:rgba(255,255,255,0.05);color:#94a3b8;padding:3px 10px;border-radius:20px;font-size:0.78rem;">{diff_badge} {diff}</span>
               {"<span style='color:#64748b;font-size:0.75rem;'>asked at:</span> " + companies_html if companies_html else ""}
             </div>
             <div style="color:#e2e8f0;font-size:1.05rem;font-weight:500;margin-bottom:10px;">{q_text}</div>
@@ -4259,7 +4584,7 @@ def _render_question_feedback(fb: Dict):
         </div>
         <div style="flex:1;min-width:180px;">
           <div style="color:{fb_color};font-size:1.05rem;font-weight:700;margin-bottom:4px;">{verdict_emoji} {verdict}</div>
-          <div style="color:#6B7280;font-size:0.88rem;line-height:1.5;">"{one_liner}"</div>
+          <div style="color:#94a3b8;font-size:0.88rem;line-height:1.5;">"{one_liner}"</div>
         </div>
         <div style="background:{crack_color}12;border:1px solid {crack_color}40;border-radius:10px;padding:10px 14px;text-align:center;">
           <div style="font-size:1rem;">{crack_emoji}</div>
@@ -4277,19 +4602,19 @@ def _render_question_feedback(fb: Dict):
             st.markdown('<div style="color:#22c55e;font-weight:700;font-size:0.85rem;letter-spacing:0.05em;margin:16px 0 8px 0;">✅ WHAT YOU DID WELL</div>', unsafe_allow_html=True)
             for s in well:
                 st.markdown(
-                    f'<div style="background:rgba(34,197,94,0.07);border-left:2px solid #22c55e;border-radius:6px;padding:8px 12px;margin-bottom:6px;color:#6B7280;font-size:0.87rem;">{s}</div>', unsafe_allow_html=True)
+                    f'<div style="background:rgba(34,197,94,0.07);border-left:2px solid #22c55e;border-radius:6px;padding:8px 12px;margin-bottom:6px;color:#94a3b8;font-size:0.87rem;">{s}</div>', unsafe_allow_html=True)
     with fc2:
         if wrong:
             st.markdown('<div style="color:#f59e0b;font-weight:700;font-size:0.85rem;letter-spacing:0.05em;margin:16px 0 8px 0;">⚠️ WHAT WENT WRONG</div>', unsafe_allow_html=True)
             for w in wrong:
                 st.markdown(
-                    f'<div style="background:rgba(245,158,11,0.07);border-left:2px solid #f59e0b;border-radius:6px;padding:8px 12px;margin-bottom:6px;color:#6B7280;font-size:0.87rem;">{w}</div>', unsafe_allow_html=True)
+                    f'<div style="background:rgba(245,158,11,0.07);border-left:2px solid #f59e0b;border-radius:6px;padding:8px 12px;margin-bottom:6px;color:#94a3b8;font-size:0.87rem;">{w}</div>', unsafe_allow_html=True)
 
     if how_fix:
         st.markdown('<div style="color:#00d2ff;font-weight:700;font-size:0.85rem;letter-spacing:0.05em;margin:12px 0 6px 0;">🔧 HOW TO IMPROVE</div>', unsafe_allow_html=True)
         for fix in how_fix:
             st.markdown(
-                f'<div style="background:rgba(0,210,255,0.06);border-left:2px solid #00d2ff;border-radius:6px;padding:8px 12px;margin-bottom:6px;color:#6B7280;font-size:0.87rem;">{fix}</div>', unsafe_allow_html=True)
+                f'<div style="background:rgba(0,210,255,0.06);border-left:2px solid #00d2ff;border-radius:6px;padding:8px 12px;margin-bottom:6px;color:#94a3b8;font-size:0.87rem;">{fix}</div>', unsafe_allow_html=True)
 
     kw_html = ""
     if kw_used:
@@ -4335,7 +4660,7 @@ def _render_final_verdict(ai_handler: AIHandler, selected_model: str,
         # Fallback: just show average score
         grade_color = "#22c55e" if avg_score >= 90 else (
             "#00d2ff" if avg_score >= 75 else ("#f59e0b" if avg_score >= 60 else "#ef4444"))
-        st.markdown(f'<div style="text-align:center;padding:24px;"><div style="font-size:3rem;font-weight:900;color:{grade_color};">{avg_score:.0f}</div><div style="color:#6B7280;">Overall Score</div></div>',
+        st.markdown(f'<div style="text-align:center;padding:24px;"><div style="font-size:3rem;font-weight:900;color:{grade_color};">{avg_score:.0f}</div><div style="color:#94a3b8;">Overall Score</div></div>',
                     unsafe_allow_html=True)
         return
 
@@ -4392,12 +4717,12 @@ def _render_final_verdict(ai_handler: AIHandler, selected_model: str,
         st.markdown('<div style="color:#22c55e;font-weight:700;font-size:0.85rem;letter-spacing:0.05em;margin:16px 0 8px 0;">🌟 TOP STRENGTHS</div>', unsafe_allow_html=True)
         for s in strengths:
             st.markdown(
-                f'<div style="background:rgba(34,197,94,0.07);border-left:3px solid #22c55e;border-radius:8px;padding:10px 14px;margin-bottom:8px;color:#6B7280;font-size:0.88rem;line-height:1.5;">{s}</div>', unsafe_allow_html=True)
+                f'<div style="background:rgba(34,197,94,0.07);border-left:3px solid #22c55e;border-radius:8px;padding:10px 14px;margin-bottom:8px;color:#94a3b8;font-size:0.88rem;line-height:1.5;">{s}</div>', unsafe_allow_html=True)
     with wv_col:
         st.markdown('<div style="color:#ef4444;font-weight:700;font-size:0.85rem;letter-spacing:0.05em;margin:16px 0 8px 0;">⚠️ TOP WEAKNESSES</div>', unsafe_allow_html=True)
         for w in weaknesses:
             st.markdown(
-                f'<div style="background:rgba(239,68,68,0.07);border-left:3px solid #ef4444;border-radius:8px;padding:10px 14px;margin-bottom:8px;color:#6B7280;font-size:0.88rem;line-height:1.5;">{w}</div>', unsafe_allow_html=True)
+                f'<div style="background:rgba(239,68,68,0.07);border-left:3px solid #ef4444;border-radius:8px;padding:10px 14px;margin-bottom:8px;color:#94a3b8;font-size:0.88rem;line-height:1.5;">{w}</div>', unsafe_allow_html=True)
 
     if action_plan:
         st.markdown('<div style="color:#00d2ff;font-weight:700;font-size:0.85rem;letter-spacing:0.05em;margin:16px 0 8px 0;">🎯 YOUR PRIORITY ACTION PLAN</div>', unsafe_allow_html=True)
@@ -4430,16 +4755,16 @@ def render_sidebar(config: Config) -> tuple[str, str, str, bool, bool]:
             st.markdown("""
         <div style="padding: 24px 16px 8px 16px;">
             <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-                <div style="width:38px;height:38px;background:linear-gradient(135deg,#1C54F0,#6366F1);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:0 0 16px rgba(0,210,255,0.35);">⚡</div>
-                <span style="font-family:'Space Grotesk',sans-serif;font-size:1.05rem;font-weight:700;color:#08091A;letter-spacing:0.04em;">JOBLESS AI</span>
+                <div style="width:38px;height:38px;background:linear-gradient(135deg,#00d2ff,#3a7bd5);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:0 0 16px rgba(0,210,255,0.35);">⚡</div>
+                <span style="font-family:'Space Grotesk',sans-serif;font-size:1.05rem;font-weight:700;color:#ffffff;letter-spacing:0.04em;">JOBLESS AI</span>
             </div>
         </div>
         """, unsafe_allow_html=True)
-            st.markdown('<div style="height:1px;background:linear-gradient(90deg,transparent,rgba(28,84,240,0.15),transparent);margin:0 0 8px 0;"></div>', unsafe_allow_html=True)
+            st.markdown('<div style="height:1px;background:linear-gradient(90deg,transparent,rgba(0,210,255,0.2),transparent);margin:0 0 8px 0;"></div>', unsafe_allow_html=True)
 
             # ── PRIMARY NAVIGATION (reliable Streamlit buttons) ──────────
             cur = st.session_state.get('current_page', 'home')
-            st.markdown('<div style="font-family:\'JetBrains Mono\',monospace;font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:#9CA3AF;margin-bottom:6px;padding:0 4px;">Navigation</div>', unsafe_allow_html=True)
+            st.markdown('<div style="font-family:\'JetBrains Mono\',monospace;font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(0,210,255,0.35);margin-bottom:6px;padding:0 4px;">Navigation</div>', unsafe_allow_html=True)
 
             NAV_ITEMS = [
                 ('home',      '🏠', 'Home'),
@@ -4499,8 +4824,8 @@ def render_sidebar(config: Config) -> tuple[str, str, str, bool, bool]:
                     st.rerun()
                 st.markdown('</div>', unsafe_allow_html=True)
 
-            st.markdown('<div style="height:1px;background:linear-gradient(90deg,transparent,rgba(28,84,240,0.15),transparent);margin:12px 0 16px 0;"></div>', unsafe_allow_html=True)
-            st.markdown('<div style="font-family:JetBrains Mono,monospace;font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:#9CA3AF;margin-bottom:10px;">Settings</div>', unsafe_allow_html=True)
+            st.markdown('<div style="height:1px;background:linear-gradient(90deg,transparent,rgba(0,210,255,0.2),transparent);margin:12px 0 16px 0;"></div>', unsafe_allow_html=True)
+            st.markdown('<div style="font-family:JetBrains Mono,monospace;font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(0,210,255,0.4);margin-bottom:10px;">Settings</div>', unsafe_allow_html=True)
         else:
             lottie_brain = load_lottieurl(
                 "https://lottie.host/880ffc06-b30a-406d-a60d-7734e5659837/92k6e3z3tK.json")
@@ -4509,7 +4834,7 @@ def render_sidebar(config: Config) -> tuple[str, str, str, bool, bool]:
             st.markdown("### ⚙️ Settings")
 
         # Provider selector
-        st.markdown("""<div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;letter-spacing:0.15em;text-transform:uppercase;color:#1C54F0;margin-bottom:6px;">🤖 AI Provider</div>""", unsafe_allow_html=True)
+        st.markdown("""<div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(0,210,255,0.75);margin-bottom:6px;">🤖 AI Provider</div>""", unsafe_allow_html=True)
         provider_icons = {
             "Google Gemini  🆓": "🔵 Google Gemini  🆓",
             "Groq  🆓⚡":        "⚡ Groq  🆓  (Ultra-fast)",
@@ -4527,7 +4852,7 @@ def render_sidebar(config: Config) -> tuple[str, str, str, bool, bool]:
             st.rerun()
 
         # Model selector
-        st.markdown("""<div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;letter-spacing:0.15em;text-transform:uppercase;color:#1C54F0;margin:10px 0 6px 0;">🧠 Model</div>""", unsafe_allow_html=True)
+        st.markdown("""<div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(0,210,255,0.75);margin:10px 0 6px 0;">🧠 Model</div>""", unsafe_allow_html=True)
         model_list = PROVIDER_MODELS[selected_provider]
         saved_model = st.session_state.get("selected_model", model_list[0])
         default_idx = model_list.index(
@@ -4544,7 +4869,7 @@ def render_sidebar(config: Config) -> tuple[str, str, str, bool, bool]:
         key_url = PROVIDER_KEY_URLS[selected_provider]
         free_txt = PROVIDER_FREE_TIER[selected_provider]
         st.markdown(
-            f"""<div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;letter-spacing:0.15em;text-transform:uppercase;color:#1C54F0;margin-bottom:6px;">🔑 {selected_provider} API Key</div>""", unsafe_allow_html=True)
+            f"""<div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(0,210,255,0.75);margin-bottom:6px;">🔑 {selected_provider} API Key</div>""", unsafe_allow_html=True)
 
         current_key = config.get_api_key(selected_provider)
         api_key_input = st.text_input(
@@ -4579,7 +4904,7 @@ def render_sidebar(config: Config) -> tuple[str, str, str, bool, bool]:
 
         with st.expander("🔒 Privacy & Data Notice", expanded=False):
             st.markdown("""
-            <div style="font-family:'Space Grotesk',sans-serif;font-size:0.82rem;line-height:1.7;color:#6B7280;">
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:0.82rem;line-height:1.7;color:#94a3b8;">
             <div style="color:#00d2ff;font-weight:700;margin-bottom:8px;">What happens to your data</div>
             Resume/profile text is sent to the AI provider you selected. It is <b>not stored by JobLess AI</b>.
             API keys are held only in your browser session and cleared on tab close.
@@ -5513,16 +5838,22 @@ def render_tab_pyq_hub(ai_handler, selected_model: str):
     st.markdown("""
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px;">
       <div style="flex:1;min-width:150px;background:rgba(99,102,241,0.07);border:1px solid rgba(99,102,241,0.25);border-radius:12px;padding:12px 16px;text-align:center;">
-        <div style="font-size:1.4rem;">📄</div>
-        <div style="color:#818cf8;font-weight:600;font-size:0.85rem;margin-top:4px;">Download PDF Instantly</div>
+        <div style="margin-bottom:6px;display:flex;justify-content:center;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <div style="color:#818cf8;font-weight:600;font-size:0.85rem;">Download PDF Instantly</div>
       </div>
       <div style="flex:1;min-width:150px;background:rgba(168,85,247,0.07);border:1px solid rgba(168,85,247,0.25);border-radius:12px;padding:12px 16px;text-align:center;">
-        <div style="font-size:1.4rem;">🤖</div>
-        <div style="color:#a855f7;font-weight:600;font-size:0.85rem;margin-top:4px;">AI-Generated for Any Exam</div>
+        <div style="margin-bottom:6px;display:flex;justify-content:center;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        </div>
+        <div style="color:#a855f7;font-weight:600;font-size:0.85rem;">AI-Generated for Any Exam</div>
       </div>
       <div style="flex:1;min-width:150px;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.25);border-radius:12px;padding:12px 16px;text-align:center;">
-        <div style="font-size:1.4rem;">✅</div>
-        <div style="color:#22c55e;font-weight:600;font-size:0.85rem;margin-top:4px;">Answers + Explanations</div>
+        <div style="margin-bottom:6px;display:flex;justify-content:center;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div style="color:#22c55e;font-weight:600;font-size:0.85rem;">Answers + Explanations</div>
       </div>
     </div>
     """, unsafe_allow_html=True)
@@ -5541,11 +5872,11 @@ def render_tab_pyq_hub(ai_handler, selected_model: str):
 
         # Exam cards with download buttons
         EXAM_META = {
-            "TCS NQT":           {"icon": "🔷", "color": "#3b82f6", "desc": "Aptitude · Verbal · Reasoning · Coding", "tag": "Mass Recruiter"},
-            "Infosys (SP/DSE)":  {"icon": "🟣", "color": "#7c3aed", "desc": "Quantitative · Logical · Verbal · Pseudocode", "tag": "Mass Recruiter"},
-            "Amazon SDE / AWS":  {"icon": "🟡", "color": "#f59e0b", "desc": "DSA · OA Problems · System Design · LP", "tag": "Product Company"},
-            "Wipro NLTH":        {"icon": "🟠", "color": "#d97706", "desc": "Aptitude · English · Automata Fix · Coding", "tag": "Mass Recruiter"},
-            "GATE (CS/IT)":      {"icon": "🎓", "color": "#6366f1", "desc": "GA · Maths · DS&Algo · OS · Networks · CO", "tag": "PSU / Higher Studies"},
+            "TCS NQT":           {"icon": '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>', "color": "#3b82f6", "desc": "Aptitude · Verbal · Reasoning · Coding", "tag": "Mass Recruiter"},
+            "Infosys (SP/DSE)":  {"icon": '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>', "color": "#7c3aed", "desc": "Quantitative · Logical · Verbal · Pseudocode", "tag": "Mass Recruiter"},
+            "Amazon SDE / AWS":  {"icon": '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>', "color": "#f59e0b", "desc": "DSA · OA Problems · System Design · LP", "tag": "Product Company"},
+            "Wipro NLTH":        {"icon": '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', "color": "#d97706", "desc": "Aptitude · English · Automata Fix · Coding", "tag": "Mass Recruiter"},
+            "GATE (CS/IT)":      {"icon": '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>', "color": "#6366f1", "desc": "GA · Maths · DS&Algo · OS · Networks · CO", "tag": "PSU / Higher Studies"},
         }
 
         cols = st.columns(2)
@@ -5556,7 +5887,7 @@ def render_tab_pyq_hub(ai_handler, selected_model: str):
                 <div style="background:rgba(0,0,0,0.25);border:1px solid {color}40;
                 border-radius:14px;padding:18px 20px;margin-bottom:4px;">
                   <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
-                    <span style="font-size:1.6rem;">{meta['icon']}</span>
+                    <span style="display:flex;align-items:center;flex-shrink:0;">{meta['icon']}</span>
                     <div>
                       <div style="color:#e2e8f0;font-weight:700;font-size:0.95rem;">{exam_key}</div>
                       <div style="color:#64748b;font-size:0.78rem;">{meta['desc']}</div>
@@ -5864,76 +6195,293 @@ def main():
         show_get_started=(page == 'home')
     )
 
-    # Home: redesigned dashboard with tool cards
+    # Home: editorial SVG art feature cards
     if page == 'home':
         cards_html = """<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Epilogue:ital,wght@0,300;0,400;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
-html,body{background:#FFFFFF;overflow:hidden;}
-
-.dash{padding:10px 4px 8px;}
-
-/* greeting */
-.greeting{margin-bottom:18px;}
-.greeting-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:1.3rem;font-weight:800;letter-spacing:-0.04em;color:#08091A;line-height:1.1;margin-bottom:3px;}
-.greeting-title .g{background:linear-gradient(135deg,#1C54F0,#6366F1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.greeting-sub{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.78rem;color:#9CA3AF;}
-.model-chip{display:inline-flex;align-items:center;gap:8px;padding:4px 12px;background:#F2F4FB;border:1px solid rgba(0,0,0,0.07);border-radius:100px;font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.08em;color:#6B7280;margin-bottom:14px;}
-.green-dot{width:6px;height:6px;border-radius:50%;background:#22c55e;animation:blink 2s infinite;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
-
-/* tools grid */
-.tools-lbl{font-family:'DM Mono',monospace;font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:#9CA3AF;display:flex;align-items:center;gap:12px;margin-bottom:12px;}
-.tools-lbl::after{content:'';flex:1;height:1px;background:rgba(0,0,0,0.07);}
-.tools-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-
-.tc{background:rgba(255,255,255,0.9);border:1px solid rgba(0,0,0,0.07);border-radius:14px;padding:16px 14px;backdrop-filter:blur(10px);box-shadow:0 2px 10px rgba(0,0,0,0.04);transition:transform .22s cubic-bezier(.16,1,.3,1),box-shadow .22s,border-color .22s;cursor:pointer;position:relative;overflow:hidden;}
-.tc:hover{transform:translateY(-4px) scale(1.01);box-shadow:0 14px 36px rgba(0,0,0,0.09),0 0 0 1px rgba(28,84,240,0.1);border-color:rgba(28,84,240,0.2);}
-.tc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#1C54F0,#6366F1);transform:scaleX(0);transform-origin:left;transition:transform .28s cubic-bezier(.16,1,.3,1);}
-.tc:hover::before{transform:scaleX(1);}
-.tc-n{font-family:'DM Mono',monospace;font-size:0.5rem;letter-spacing:0.14em;color:#9CA3AF;margin-bottom:8px;}
-.tc-ico{font-size:1.3rem;margin-bottom:8px;display:block;line-height:1;}
-.tc-t{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.85rem;font-weight:700;letter-spacing:-0.02em;color:#08091A;margin-bottom:4px;}
-.tc-d{font-family:'Plus Jakarta Sans',sans-serif;font-size:0.7rem;color:#6B7280;line-height:1.5;margin-bottom:10px;}
-.tc-cta{font-family:'DM Mono',monospace;font-size:0.55rem;letter-spacing:0.1em;text-transform:uppercase;background:linear-gradient(90deg,#1C54F0,#6366F1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;transition:letter-spacing .2s;}
-.tc:hover .tc-cta{letter-spacing:0.16em;}
+:root{--paper:#F5F2EC;--ink:#0C0C0C;--blue:#0047FF;--gray:#7A7A7A;--rule:#D4D0C8;--soft:#E8E4DC;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{background:var(--paper);color:var(--ink);font-family:'Epilogue',sans-serif;overflow:hidden;}
+.sec-header{padding:32px 28px 24px;border-bottom:1px solid var(--rule);}
+.sec-eye{font-family:'Space Mono',monospace;font-size:0.56rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gray);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.sec-eye::before{content:'';width:5px;height:5px;background:var(--blue);border-radius:50%;display:inline-block;animation:blink 2s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+.sec-h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.55rem;letter-spacing:-0.04em;line-height:1.05;color:var(--ink);}
+.sec-h2 em{font-family:'Epilogue',sans-serif;font-style:italic;font-weight:300;}
+.sec-h2 .bl{color:var(--blue);}
+.tools-grid{display:grid;grid-template-columns:repeat(3,1fr);}
+.tc{border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);overflow:hidden;position:relative;cursor:pointer;transition:background 0.28s;}
+.tc:hover{background:var(--ink);}
+.tc:nth-child(3n){border-right:none;}
+.tc:nth-child(n+4){border-bottom:none;}
+.tc-art{height:148px;border-bottom:1px solid var(--rule);overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;background:var(--soft);transition:background 0.28s,border-color 0.28s;}
+.tc:hover .tc-art{background:#111;border-color:rgba(255,255,255,.06);}
+.tc-art svg{width:100%;height:100%;overflow:visible;}
+.tc-body{padding:18px 20px 28px;}
+.tc-n{font-family:'Space Mono',monospace;font-size:0.54rem;letter-spacing:0.12em;color:var(--rule);margin-bottom:10px;transition:color 0.28s;}
+.tc:hover .tc-n{color:rgba(255,255,255,.2);}
+.tc-t{font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;letter-spacing:-0.02em;color:var(--ink);margin-bottom:6px;transition:color 0.28s;}
+.tc:hover .tc-t{color:#fff;}
+.tc-d{font-size:0.74rem;font-weight:300;line-height:1.58;color:var(--gray);transition:color 0.28s;}
+.tc:hover .tc-d{color:rgba(255,255,255,.38);}
+.tc-arrow{position:absolute;bottom:14px;right:16px;font-size:1rem;color:var(--rule);transition:color 0.22s,transform 0.22s;}
+.tc:hover .tc-arrow{color:var(--blue);transform:translate(3px,-3px);}
+.gs-footer{padding:16px 28px;border-top:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between;}
+.gs-btn{font-family:'Syne',sans-serif;font-size:0.76rem;font-weight:700;letter-spacing:0.03em;background:var(--ink);color:var(--paper);border:none;padding:10px 24px;border-radius:3px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:background 0.2s,transform 0.15s;}
+.gs-btn:hover{background:var(--blue);transform:translateY(-1px);}
+.gs-hint{font-family:'Space Mono',monospace;font-size:0.52rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gray);}
 </style>
 </head>
 <body>
-<div class="dash">
-  <div class="greeting">
-    <div class="greeting-title">Good to have you,<br><span class="g">let's get to work.</span></div>
-    <div class="greeting-sub">Pick a tool below. Your session is private — nothing is saved.</div>
+<div class="sec-header">
+  <div class="sec-eye">Intelligence Suite</div>
+  <div class="sec-h2">Tools Built for <em>Winning</em> — All <span class="bl">Free</span></div>
+</div>
+<div class="tools-grid">
+
+  <!-- 01 Career Analysis -->
+  <div class="tc" data-page="career">
+    <div class="tc-art">
+      <svg viewBox="0 0 280 148" preserveAspectRatio="xMidYMid meet">
+        <g stroke="#D4D0C8" stroke-width="0.8" fill="none">
+          <polygon points="140,28 178,62 164,108 116,108 102,62" opacity=".6"/>
+          <polygon points="140,44 164,68 154,98 126,98 116,68" opacity=".35"/>
+          <polygon points="140,58 152,76 147,92 133,92 128,76" opacity=".2"/>
+        </g>
+        <g stroke="#D4D0C8" stroke-width="0.7">
+          <line x1="140" y1="28" x2="140" y2="108"/>
+          <line x1="178" y1="62" x2="102" y2="62"/>
+          <line x1="164" y1="108" x2="116" y2="28"/>
+          <line x1="116" y1="108" x2="164" y2="28"/>
+        </g>
+        <polygon points="140,38 172,66 159,104 121,104 108,66" fill="rgba(212,208,200,.22)" stroke="rgba(212,208,200,.65)" stroke-width="1.2"/>
+        <polygon points="140,50 163,70 154,98 126,98 120,70" fill="rgba(0,71,255,.1)" stroke="#0047FF" stroke-width="1.8"/>
+        <circle cx="140" cy="50" r="3.5" fill="#0047FF"/>
+        <circle cx="163" cy="70" r="3.5" fill="#0047FF"/>
+        <circle cx="154" cy="98" r="3.5" fill="#0047FF"/>
+        <circle cx="126" cy="98" r="3.5" fill="#0047FF"/>
+        <circle cx="120" cy="70" r="3.5" fill="#0047FF"/>
+        <text x="140" y="22" text-anchor="middle" font-family="Space Mono" font-size="5.5" fill="#7A7A7A">DSA</text>
+        <text x="188" y="65" text-anchor="start" font-family="Space Mono" font-size="5.5" fill="#7A7A7A">ML/AI</text>
+        <text x="164" y="120" text-anchor="middle" font-family="Space Mono" font-size="5.5" fill="#7A7A7A">Cloud</text>
+        <text x="116" y="120" text-anchor="middle" font-family="Space Mono" font-size="5.5" fill="#7A7A7A">SysD</text>
+        <text x="88" y="65" text-anchor="end" font-family="Space Mono" font-size="5.5" fill="#7A7A7A">Comm</text>
+        <rect x="202" y="28" width="6" height="6" rx="1" fill="rgba(0,71,255,.5)"/>
+        <text x="212" y="34" font-family="Space Mono" font-size="5" fill="#0047FF">YOU</text>
+        <rect x="202" y="40" width="6" height="6" rx="1" fill="rgba(212,208,200,.8)"/>
+        <text x="212" y="46" font-family="Space Mono" font-size="5" fill="#7A7A7A">MARKET</text>
+      </svg>
+    </div>
+    <div class="tc-body">
+      <div class="tc-n">01 ─ Career Analysis</div>
+      <div class="tc-t">Career Analysis</div>
+      <div class="tc-d">AI maps skills to the best paths with match scores, salary bands, and learning roadmaps.</div>
+      <span class="tc-arrow">↗</span>
+    </div>
   </div>
-  <div class="model-chip"><div class="green-dot"></div>AI Connected · Ready</div>
-  <div class="tools-lbl">Your Tools</div>
-  <div class="tools-grid">
-    <div class="tc" data-page="career"><div class="tc-n">01 / 06</div><span class="tc-ico">📊</span><div class="tc-t">Career Analysis</div><div class="tc-d">Map your skills to the best paths with AI match scores and roadmaps.</div><div class="tc-cta">Open →</div></div>
-    <div class="tc" data-page="resume"><div class="tc-n">02 / 06</div><span class="tc-ico">📝</span><div class="tc-t">Resume Builder</div><div class="tc-d">Generate an ATS-optimized resume that scores 90+ and lands interviews.</div><div class="tc-cta">Open →</div></div>
-    <div class="tc" data-page="interview"><div class="tc-n">03 / 06</div><span class="tc-ico">🎤</span><div class="tc-t">Mock Interview</div><div class="tc-d">Live AI interviewer with real reactions and honest talent review.</div><div class="tc-cta">Open →</div></div>
-    <div class="tc" data-page="pyq"><div class="tc-n">04 / 06</div><span class="tc-ico">📂</span><div class="tc-t">PYQ Hub</div><div class="tc-d">Find previous year questions from your target companies and roles.</div><div class="tc-cta">Open →</div></div>
-    <div class="tc" data-page="resources"><div class="tc-n">05 / 06</div><span class="tc-ico">📚</span><div class="tc-t">Resources</div><div class="tc-d">Curated free courses and certifications for every domain.</div><div class="tc-cta">Open →</div></div>
-    <div class="tc" data-page="compare"><div class="tc-n">06 / 06</div><span class="tc-ico">⚖️</span><div class="tc-t">Career Compare</div><div class="tc-d">Data-driven comparison of two career paths with clear AI verdict.</div><div class="tc-cta">Open →</div></div>
+
+  <!-- 02 Resume Builder -->
+  <div class="tc" data-page="resume">
+    <div class="tc-art">
+      <svg viewBox="0 0 280 148" preserveAspectRatio="xMidYMid meet">
+        <rect x="30" y="18" width="78" height="110" rx="4" fill="none" stroke="#D4D0C8" stroke-width="1.5"/>
+        <line x1="42" y1="38" x2="96" y2="38" stroke="#D4D0C8" stroke-width="1.5"/>
+        <line x1="42" y1="51" x2="86" y2="51" stroke="#D4D0C8" stroke-width="1"/>
+        <line x1="42" y1="61" x2="90" y2="61" stroke="#D4D0C8" stroke-width="1"/>
+        <line x1="42" y1="71" x2="78" y2="71" stroke="#D4D0C8" stroke-width="1"/>
+        <line x1="42" y1="81" x2="88" y2="81" stroke="#D4D0C8" stroke-width="1"/>
+        <line x1="42" y1="91" x2="82" y2="91" stroke="#D4D0C8" stroke-width="1"/>
+        <line x1="42" y1="101" x2="74" y2="101" stroke="#D4D0C8" stroke-width="1"/>
+        <text x="69" y="14" text-anchor="middle" font-family="Space Mono" font-size="6" fill="#7A7A7A">BEFORE</text>
+        <line x1="122" y1="73" x2="152" y2="73" stroke="#0047FF" stroke-width="2" stroke-linecap="round"/>
+        <polygon points="152,68 162,73 152,78" fill="#0047FF"/>
+        <circle cx="137" cy="73" r="3" fill="#0047FF" opacity=".4">
+          <animate attributeName="r" values="3;6;3" dur="1.5s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values=".4;0;.4" dur="1.5s" repeatCount="indefinite"/>
+        </circle>
+        <rect x="170" y="18" width="78" height="110" rx="4" fill="rgba(0,71,255,.04)" stroke="#0047FF" stroke-width="1.5" stroke-opacity=".6"/>
+        <line x1="182" y1="38" x2="236" y2="38" stroke="#0047FF" stroke-width="2.5" stroke-opacity=".8"/>
+        <line x1="182" y1="50" x2="234" y2="50" stroke="#0047FF" stroke-width="1" stroke-opacity=".4"/>
+        <line x1="182" y1="60" x2="232" y2="60" stroke="#0047FF" stroke-width="1" stroke-opacity=".4"/>
+        <line x1="182" y1="70" x2="234" y2="70" stroke="#0047FF" stroke-width="1" stroke-opacity=".4"/>
+        <line x1="182" y1="80" x2="228" y2="80" stroke="#0047FF" stroke-width="1" stroke-opacity=".4"/>
+        <line x1="182" y1="90" x2="234" y2="90" stroke="#0047FF" stroke-width="1" stroke-opacity=".4"/>
+        <line x1="182" y1="100" x2="230" y2="100" stroke="#0047FF" stroke-width="1" stroke-opacity=".4"/>
+        <rect x="188" y="112" width="38" height="10" rx="5" fill="#0047FF"/>
+        <text x="207" y="120" text-anchor="middle" font-family="Space Mono" font-size="5" fill="white">ATS 92%</text>
+        <text x="209" y="14" text-anchor="middle" font-family="Space Mono" font-size="6" fill="#0047FF">AFTER</text>
+      </svg>
+    </div>
+    <div class="tc-body">
+      <div class="tc-n">02 ─ Resume Builder</div>
+      <div class="tc-t">Resume Builder</div>
+      <div class="tc-d">ATS-crushing resumes tailored to the job description. AI rewrites, scores, exports as PDF.</div>
+      <span class="tc-arrow">↗</span>
+    </div>
   </div>
+
+  <!-- 03 Mock Interview -->
+  <div class="tc" data-page="interview">
+    <div class="tc-art">
+      <svg viewBox="0 0 280 148" preserveAspectRatio="xMidYMid meet">
+        <rect x="127" y="12" width="26" height="40" rx="13" fill="none" stroke="#0047FF" stroke-width="2"/>
+        <path d="M140,52 Q140,72 140,77" stroke="#0047FF" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M116,63 Q116,82 140,82 Q164,82 164,63" stroke="#0047FF" stroke-width="2" fill="none"/>
+        <circle cx="140" cy="32" r="4" fill="#0047FF" opacity=".5"/>
+        <g fill="#0047FF">
+          <rect x="28" y="91" width="7" height="22" rx="3.5" opacity=".3"><animate attributeName="height" values="22;42;16;36;22" dur="1.8s" repeatCount="indefinite"/><animate attributeName="y" values="91;71;97;77;91" dur="1.8s" repeatCount="indefinite"/></rect>
+          <rect x="40" y="84" width="7" height="35" rx="3.5" opacity=".5"><animate attributeName="height" values="35;16;50;20;35" dur="1.4s" repeatCount="indefinite" begin=".1s"/><animate attributeName="y" values="84;97;68;94;84" dur="1.4s" repeatCount="indefinite" begin=".1s"/></rect>
+          <rect x="52" y="76" width="7" height="52" rx="3.5" opacity=".7"><animate attributeName="height" values="52;26;62;30;52" dur="1.6s" repeatCount="indefinite" begin=".2s"/><animate attributeName="y" values="76;90;68;94;76" dur="1.6s" repeatCount="indefinite" begin=".2s"/></rect>
+          <rect x="64" y="84" width="7" height="35" rx="3.5" opacity=".9"><animate attributeName="height" values="35;55;20;46;35" dur="1.2s" repeatCount="indefinite" begin=".15s"/><animate attributeName="y" values="84;68;100;77;84" dur="1.2s" repeatCount="indefinite" begin=".15s"/></rect>
+          <rect x="76" y="79" width="7" height="48" rx="3.5"><animate attributeName="height" values="48;22;56;28;48" dur="1.5s" repeatCount="indefinite" begin=".05s"/><animate attributeName="y" values="79;97;71;90;79" dur="1.5s" repeatCount="indefinite" begin=".05s"/></rect>
+          <rect x="88" y="87" width="7" height="30" rx="3.5" opacity=".7"><animate attributeName="height" values="30;50;18;40;30" dur="1.7s" repeatCount="indefinite" begin=".25s"/><animate attributeName="y" values="87;70;102;80;87" dur="1.7s" repeatCount="indefinite" begin=".25s"/></rect>
+        </g>
+        <g fill="#4ADE80">
+          <rect x="166" y="87" width="7" height="30" rx="3.5" opacity=".7"><animate attributeName="height" values="30;48;16;38;30" dur="1.9s" repeatCount="indefinite" begin=".3s"/><animate attributeName="y" values="87;72;104;82;87" dur="1.9s" repeatCount="indefinite" begin=".3s"/></rect>
+          <rect x="178" y="79" width="7" height="48" rx="3.5"><animate attributeName="height" values="48;24;58;32;48" dur="1.3s" repeatCount="indefinite" begin=".08s"/><animate attributeName="y" values="79;98;70;88;79" dur="1.3s" repeatCount="indefinite" begin=".08s"/></rect>
+          <rect x="190" y="84" width="7" height="36" rx="3.5" opacity=".9"><animate attributeName="height" values="36;56;22;44;36" dur="1.6s" repeatCount="indefinite" begin=".18s"/><animate attributeName="y" values="84;66;98;76;84" dur="1.6s" repeatCount="indefinite" begin=".18s"/></rect>
+          <rect x="202" y="90" width="7" height="24" rx="3.5" opacity=".6"><animate attributeName="height" values="24;44;14;32;24" dur="1.4s" repeatCount="indefinite" begin=".22s"/><animate attributeName="y" values="90;73;103;85;90" dur="1.4s" repeatCount="indefinite" begin=".22s"/></rect>
+          <rect x="214" y="85" width="7" height="34" rx="3.5" opacity=".5"><animate attributeName="height" values="34;18;46;22;34" dur="2s" repeatCount="indefinite" begin=".12s"/><animate attributeName="y" values="85;102;72;96;85" dur="2s" repeatCount="indefinite" begin=".12s"/></rect>
+          <rect x="226" y="92" width="7" height="20" rx="3.5" opacity=".3"><animate attributeName="height" values="20;38;12;28;20" dur="1.8s" repeatCount="indefinite" begin=".28s"/><animate attributeName="y" values="92;77;103;87;92" dur="1.8s" repeatCount="indefinite" begin=".28s"/></rect>
+        </g>
+        <line x1="140" y1="66" x2="140" y2="124" stroke="#D4D0C8" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="83" y="135" text-anchor="middle" font-family="Space Mono" font-size="5.5" fill="#7A7A7A">YOU</text>
+        <text x="197" y="135" text-anchor="middle" font-family="Space Mono" font-size="5.5" fill="#4ADE80">AI COACH</text>
+      </svg>
+    </div>
+    <div class="tc-body">
+      <div class="tc-n">03 ─ Mock Interview</div>
+      <div class="tc-t">Mock Interview</div>
+      <div class="tc-d">Role-specific technical and behavioural questions. AI evaluates and coaches you live.</div>
+      <span class="tc-arrow">↗</span>
+    </div>
+  </div>
+
+  <!-- 04 PYQ Hub -->
+  <div class="tc" data-page="pyq">
+    <div class="tc-art">
+      <svg viewBox="0 0 280 148" preserveAspectRatio="xMidYMid meet">
+        <rect x="82" y="36" width="116" height="84" rx="5" fill="none" stroke="#D4D0C8" stroke-width="1.5" transform="rotate(-5 140 78)"/>
+        <rect x="82" y="34" width="116" height="84" rx="5" fill="none" stroke="#D4D0C8" stroke-width="1.5" transform="rotate(-2 140 76)"/>
+        <rect x="82" y="30" width="116" height="86" rx="5" fill="white" stroke="#D4D0C8" stroke-width="1.5"/>
+        <rect x="82" y="30" width="116" height="22" rx="5" fill="#0047FF"/>
+        <rect x="82" y="46" width="116" height="6" fill="#0047FF"/>
+        <line x1="96" y1="66" x2="184" y2="66" stroke="#D4D0C8" stroke-width="1.2"/>
+        <line x1="96" y1="76" x2="170" y2="76" stroke="#D4D0C8" stroke-width="1"/>
+        <line x1="96" y1="85" x2="178" y2="85" stroke="#D4D0C8" stroke-width="1"/>
+        <line x1="96" y1="94" x2="165" y2="94" stroke="#D4D0C8" stroke-width="1"/>
+        <circle cx="192" cy="108" r="18" fill="#0047FF" opacity=".1" stroke="#0047FF" stroke-width="1.5"/>
+        <text x="192" y="114" text-anchor="middle" font-family="Syne,sans-serif" font-size="16" font-weight="800" fill="#0047FF">?</text>
+        <rect x="94" y="34" width="30" height="10" rx="2" fill="rgba(255,255,255,.25)"/>
+        <text x="109" y="42" text-anchor="middle" font-family="Space Mono" font-size="5.5" fill="white">PYQs</text>
+        <text x="98" y="116" font-family="Space Mono" font-size="5" fill="#7A7A7A">TCS · Infosys · Amazon · GATE</text>
+      </svg>
+    </div>
+    <div class="tc-body">
+      <div class="tc-n">04 ─ PYQ Hub</div>
+      <div class="tc-t">PYQ Hub</div>
+      <div class="tc-d">Previous year questions from 200+ companies — curated by role, verified for accuracy.</div>
+      <span class="tc-arrow">↗</span>
+    </div>
+  </div>
+
+  <!-- 05 Resources -->
+  <div class="tc" data-page="resources">
+    <div class="tc-art">
+      <svg viewBox="0 0 280 148" preserveAspectRatio="xMidYMid meet">
+        <circle cx="50" cy="74" r="16" fill="none" stroke="#0047FF" stroke-width="2"/>
+        <circle cx="50" cy="74" r="8" fill="#0047FF" opacity=".18"/>
+        <circle cx="50" cy="74" r="4" fill="#0047FF"/>
+        <line x1="66" y1="74" x2="92" y2="74" stroke="#D4D0C8" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <circle cx="110" cy="74" r="18" fill="rgba(0,71,255,.07)" stroke="#0047FF" stroke-width="2"/>
+        <circle cx="110" cy="74" r="9" fill="#0047FF" opacity=".28"/>
+        <circle cx="110" cy="74" r="5" fill="#0047FF"/>
+        <circle cx="110" cy="74" r="16" fill="none" stroke="#0047FF" stroke-width="1" opacity=".3">
+          <animate attributeName="r" values="16;22;16" dur="2s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values=".3;0;.3" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <line x1="128" y1="74" x2="152" y2="74" stroke="#D4D0C8" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <circle cx="170" cy="74" r="16" fill="none" stroke="#D4D0C8" stroke-width="1.5"/>
+        <circle cx="170" cy="74" r="4" fill="#D4D0C8"/>
+        <line x1="186" y1="74" x2="212" y2="74" stroke="#D4D0C8" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <circle cx="230" cy="74" r="16" fill="none" stroke="#D4D0C8" stroke-width="1.5"/>
+        <circle cx="230" cy="74" r="4" fill="#D4D0C8"/>
+        <text x="50" y="100" text-anchor="middle" font-family="Space Mono" font-size="5.5" fill="#0047FF">DSA</text>
+        <text x="110" y="102" text-anchor="middle" font-family="Space Mono" font-size="5.5" fill="#0047FF">System</text>
+        <text x="110" y="109" text-anchor="middle" font-family="Space Mono" font-size="5.5" fill="#0047FF">Design</text>
+        <text x="170" y="100" text-anchor="middle" font-family="Space Mono" font-size="5.5" fill="#7A7A7A">MLOps</text>
+        <text x="230" y="100" text-anchor="middle" font-family="Space Mono" font-size="5.5" fill="#7A7A7A">Career</text>
+        <rect x="36" y="42" width="28" height="20" rx="2" fill="none" stroke="#D4D0C8" stroke-width="1"/>
+        <line x1="50" y1="42" x2="50" y2="62" stroke="#D4D0C8" stroke-width="1"/>
+        <rect x="96" y="38" width="28" height="22" rx="2" fill="rgba(0,71,255,.1)" stroke="#0047FF" stroke-width="1.2"/>
+        <line x1="110" y1="38" x2="110" y2="60" stroke="#0047FF" stroke-width="1"/>
+      </svg>
+    </div>
+    <div class="tc-body">
+      <div class="tc-n">05 ─ Resources</div>
+      <div class="tc-t">Resources</div>
+      <div class="tc-d">Curated courses, certs, and roadmaps for every domain. Zero filler — only what works.</div>
+      <span class="tc-arrow">↗</span>
+    </div>
+  </div>
+
+  <!-- 06 Career Compare -->
+  <div class="tc" data-page="compare">
+    <div class="tc-art">
+      <svg viewBox="0 0 280 148" preserveAspectRatio="xMidYMid meet">
+        <line x1="140" y1="32" x2="140" y2="116" stroke="#D4D0C8" stroke-width="2"/>
+        <circle cx="140" cy="32" r="5" fill="#0047FF"/>
+        <line x1="58" y1="70" x2="222" y2="66" stroke="#0C0C0C" stroke-width="2" stroke-linecap="round"/>
+        <line x1="78" y1="70" x2="78" y2="90" stroke="#D4D0C8" stroke-width="1.5"/>
+        <line x1="58" y1="70" x2="98" y2="70" stroke="#D4D0C8" stroke-width="1"/>
+        <ellipse cx="78" cy="93" rx="22" ry="6" fill="rgba(0,71,255,.1)" stroke="#0047FF" stroke-width="1.5"/>
+        <text x="78" y="90" text-anchor="middle" font-family="Syne,sans-serif" font-size="7" font-weight="700" fill="#0047FF">SDE</text>
+        <line x1="202" y1="66" x2="202" y2="88" stroke="#D4D0C8" stroke-width="1.5"/>
+        <line x1="182" y1="66" x2="222" y2="66" stroke="#D4D0C8" stroke-width="1"/>
+        <ellipse cx="202" cy="91" rx="22" ry="6" fill="rgba(74,222,128,.1)" stroke="#4ADE80" stroke-width="1.5"/>
+        <text x="202" y="88" text-anchor="middle" font-family="Syne,sans-serif" font-size="7" font-weight="700" fill="#4ADE80">DS</text>
+        <polygon points="130,116 140,101 150,116" fill="#D4D0C8"/>
+        <line x1="120" y1="116" x2="160" y2="116" stroke="#D4D0C8" stroke-width="2"/>
+        <text x="78" y="110" text-anchor="middle" font-family="Space Mono" font-size="5" fill="#0047FF">₹28L avg</text>
+        <text x="202" y="106" text-anchor="middle" font-family="Space Mono" font-size="5" fill="#4ADE80">₹32L avg</text>
+        <rect x="108" y="122" width="64" height="14" rx="7" fill="#0047FF"/>
+        <text x="140" y="132" text-anchor="middle" font-family="Space Mono" font-size="5.5" fill="white">AI VERDICT ↗</text>
+      </svg>
+    </div>
+    <div class="tc-body">
+      <div class="tc-n">06 ─ Career Compare</div>
+      <div class="tc-t">Career Compare</div>
+      <div class="tc-d">Side-by-side comparison of two paths with salary, growth trajectory, and AI verdict.</div>
+      <span class="tc-arrow">↗</span>
+    </div>
+  </div>
+
+</div>
+<div class="gs-footer">
+  <span class="gs-hint">Everything free · Your API key · Your data</span>
+  <button class="gs-btn" id="gsBtn">Get Started →</button>
 </div>
 <script>
-document.querySelectorAll('.tc').forEach(function(card){
-  card.addEventListener('click',function(){
-    window.parent.postMessage({type:'jl-nav',page:card.dataset.page},'*');
+document.querySelectorAll('.tc').forEach(function(card) {
+  card.addEventListener('click', function() {
+    window.parent.postMessage({ type: 'jl-nav', page: card.dataset.page }, '*');
   });
 });
-document.addEventListener('mousemove',function(e){
-  var rect=window.frameElement?window.frameElement.getBoundingClientRect():{left:0,top:0};
-  window.parent.postMessage({type:'ns-move',x:e.clientX+rect.left,y:e.clientY+rect.top},'*');
-},{passive:true});
+document.getElementById('gsBtn').addEventListener('click', function() {
+  window.parent.postMessage({ type: 'jl-nav', page: 'career' }, '*');
+});
+document.addEventListener('mousemove', function(e) {
+  var rect = window.frameElement ? window.frameElement.getBoundingClientRect() : {left:0, top:0};
+  window.parent.postMessage({ type: 'ns-move', x: e.clientX + rect.left, y: e.clientY + rect.top }, '*');
+}, {passive: true});
 </script>
 </body>
 </html>"""
-        components.html(cards_html, height=440, scrolling=False)
+        components.html(cards_html, height=760, scrolling=False)
 
     # Section pages — render directly below the compact robot
     if page != 'home':
@@ -5957,7 +6505,7 @@ document.addEventListener('mousemove',function(e){
 
     # Footer
     st.markdown(f"""
-        <div style="text-align:center;padding:20px;color:#6B7280;">
+        <div style="text-align:center;padding:20px;color:#94a3b8;">
             © {datetime.date.today().year} JobLess AI | Created by Anubhab Mondal
             <br>
             <span style="font-size:0.77rem;color:#475569;">
