@@ -32,43 +32,49 @@ from streamlit_lottie import st_lottie
 import os
 from typing import Dict, List, Optional
 
-# ── Lucide Icon Helper ─────────────────────────────────────────────────────
-# SVG path data for every Lucide icon used in the UI (HTML double-quote safe)
-_LUCIDE_PATHS: dict = {
-    "layout-dashboard":    '<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="3" y="15" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/>',
-    "trending-up":         '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
-    "file-edit":           '<path d="M4 13.5V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2h-5.5"/><polyline points="14 2 14 8 20 8"/><path d="M10.42 12.61a2.1 2.1 0 1 1 2.97 2.97L7.95 21 4 22l.99-3.95 5.43-5.44Z"/>',
-    "mic-2":               '<path d="m12 8-9.04 9.06a2.82 2.82 0 1 0 3.98 3.98L16 12"/><circle cx="17" cy="7" r="5"/>',
-    "archive":             '<rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>',
-    "library":             '<path d="m16 6 4 14"/><path d="M12 6v14"/><path d="M8 8v12"/><path d="M4 4v16"/>',
-    "git-compare":         '<circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M11 18H8a2 2 0 0 1-2-2V9"/>',
-    "history":             '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
-    "message-square-text": '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M13 8H7"/><path d="M17 12H7"/>',
-    "audio-waveform":      '<path d="M2 13a2 2 0 0 0 2-2V7a2 2 0 0 1 4 0v13a2 2 0 0 0 4 0V4a2 2 0 0 1 4 0v13a2 2 0 0 0 4 0v-4a2 2 0 0 0-2-2"/>',
-    "crosshair":           '<circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="6"/><line x1="12" x2="12" y1="18" y2="22"/>',
-    "list-checks":         '<path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/>',
-    "bar-chart-3":         '<path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
-    "file-down":           '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/>',
-    "brain-circuit":       '<path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M9 13a4.5 4.5 0 0 0 3-4"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M12 13h4"/><path d="M12 18h6a2 2 0 0 1 2 2v1"/><path d="M12 8h8"/><path d="M16 8V5a2 2 0 0 1 2-2"/><circle cx="16" cy="13" r=".5"/><circle cx="18" cy="3" r=".5"/><circle cx="20" cy="21" r=".5"/><circle cx="20" cy="8" r=".5"/>',
-    "lightbulb":           '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+# ── Lucide Icon SVG Helper ─────────────────────────────────────────────────
+# Self-contained SVG strings for every icon used in the UI.
+# Using dict lookup avoids any dependency on external packages.
+_L = {
+    "dashboard":   '<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="3" y="15" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/>',
+    "trending-up": '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
+    "file-edit":   '<path d="M4 13.5V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2h-5.5"/><polyline points="14 2 14 8 20 8"/><path d="M10.42 12.61a2.1 2.1 0 1 1 2.97 2.97L7.95 21 4 22l.99-3.95 5.43-5.44Z"/>',
+    "mic":         '<path d="m12 8-9.04 9.06a2.82 2.82 0 1 0 3.98 3.98L16 12"/><circle cx="17" cy="7" r="5"/>',
+    "archive":     '<rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>',
+    "library":     '<path d="m16 6 4 14"/><path d="M12 6v14"/><path d="M8 8v12"/><path d="M4 4v16"/>',
+    "compare":     '<circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M11 18H8a2 2 0 0 1-2-2V9"/>',
+    "history":     '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+    "crosshair":   '<circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="6"/><line x1="12" x2="12" y1="18" y2="22"/>',
+    "checklist":   '<path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/>',
+    "barchart":    '<path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+    "file-down":   '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/>',
+    "brain":       '<path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M9 13a4.5 4.5 0 0 0 3-4"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M12 13h4"/><path d="M12 18h6a2 2 0 0 1 2 2v1"/><path d="M12 8h8"/><path d="M16 8V5a2 2 0 0 1 2-2"/><circle cx="16" cy="13" r=".5"/><circle cx="18" cy="3" r=".5"/><circle cx="20" cy="21" r=".5"/><circle cx="20" cy="8" r=".5"/>',
+    "lightbulb":   '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+    "waveform":    '<path d="M2 13a2 2 0 0 0 2-2V7a2 2 0 0 1 4 0v13a2 2 0 0 0 4 0V4a2 2 0 0 1 4 0v13a2 2 0 0 0 4 0v-4a2 2 0 0 0-2-2"/>',
 }
 
-# JS path-data map — injected into the cursor script so icons are built natively in JS
-# This avoids any string-quoting issues when SVGs are embedded inside JS string literals.
-_LUCIDE_JS_MAP = "{\n" + ",\n".join(
-    f'  "{k}": "{v.replace(chr(34), chr(39))}"'   # swap " → ' inside path data only
-    for k, v in _LUCIDE_PATHS.items()
-) + "\n}"
+# Lucide path data as a JS object literal (single quotes in values, safe inside HTML script tags)
+_LUCIDE_JS = (
+    "{" +
+    ",".join(
+        '"' + k + '":"' + v.replace('"', "'") + '"'
+        for k, v in _L.items()
+    ) +
+    "}"
+)
 
 
-def lucide_svg(icon: str, size: int = 20, color: str = "currentColor", sw: float = 1.6) -> str:
-    """Inline SVG string safe for use inside Python f-string HTML (double-quote delimited)."""
-    paths = _LUCIDE_PATHS.get(icon, "")
+def _svg(key, size=20, color="currentColor"):
+    """Return a minimal Lucide SVG string, safe for HTML injection via f-strings."""
+    p = _L.get(key, "")
     return (
-        f'<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" '
-        f'viewBox="0 0 24 24" fill="none" stroke="{color}" '
-        f'stroke-width="{sw}" stroke-linecap="round" stroke-linejoin="round" '
-        f'style="display:inline-block;vertical-align:middle;">{paths}</svg>'
+        '<svg xmlns="http://www.w3.org/2000/svg"'
+        ' width="' + str(size) + '" height="' + str(size) + '"'
+        ' viewBox="0 0 24 24" fill="none"'
+        ' stroke="' + color + '"'
+        ' stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"'
+        ' style="display:inline-block;vertical-align:middle;">'
+        + p + '</svg>'
     )
 
 
@@ -2021,33 +2027,27 @@ class UIComponents:
 
                     // ── Build hamburger in parent doc ─────────────────────
                     if (!pdoc.getElementById('jl-hbg')) {
-                        // ── Lucide icon builder (paths injected from Python) ──
-                        var LUCIDE = __LUCIDE_JS_MAP__;
-                        function mkIcon(name, size, color) {
-                            size = size || 18; color = color || 'currentColor';
-                            var ns = 'http://www.w3.org/2000/svg';
-                            var svg = pdoc.createElementNS(ns, 'svg');
-                            svg.setAttribute('width', size); svg.setAttribute('height', size);
-                            svg.setAttribute('viewBox', '0 0 24 24');
-                            svg.setAttribute('fill', 'none');
-                            svg.setAttribute('stroke', color);
-                            svg.setAttribute('stroke-width', '1.6');
-                            svg.setAttribute('stroke-linecap', 'round');
-                            svg.setAttribute('stroke-linejoin', 'round');
-                            svg.style.cssText = 'display:inline-block;vertical-align:middle;flex-shrink:0;';
-                            svg.innerHTML = LUCIDE[name] || '';
-                            return svg;
+                        var L=__LUCIDE_JS__;
+                        function _mkSvg(k,sz,col){
+                            var ns='http://www.w3.org/2000/svg';
+                            var s=document.createElementNS(ns,'svg');
+                            s.setAttribute('width',sz);s.setAttribute('height',sz);
+                            s.setAttribute('viewBox','0 0 24 24');s.setAttribute('fill','none');
+                            s.setAttribute('stroke',col||'currentColor');
+                            s.setAttribute('stroke-width','1.6');
+                            s.setAttribute('stroke-linecap','round');s.setAttribute('stroke-linejoin','round');
+                            s.style.cssText='display:inline-block;vertical-align:middle;flex-shrink:0;margin-right:2px;';
+                            s.innerHTML=L[k]||'';return s;
                         }
-
                         var NAV_DEFS = [
-                            ['home',      'layout-dashboard', 'Home'],
-                            ['career',    'trending-up',      'Career Analysis'],
-                            ['resume',    'file-edit',        'Resume Builder'],
-                            ['interview', 'mic-2',            'Mock Interview'],
-                            ['pyq',       'archive',          'PYQ Hub'],
-                            ['resources', 'library',          'Resources'],
-                            ['compare',   'git-compare',      'Compare'],
-                            ['history',   'history',          'History']
+                            ['home',     'dashboard',   'Home'],
+                            ['career',   'trending-up', 'Career Analysis'],
+                            ['resume',   'file-edit',   'Resume Builder'],
+                            ['interview','mic',         'Mock Interview'],
+                            ['pyq',      'archive',     'PYQ Hub'],
+                            ['resources','library',     'Resources'],
+                            ['compare',  'compare',     'Compare'],
+                            ['history',  'history',     'History']
                         ];
                         var curPage = (new URLSearchParams(P.location.search)).get('page') || 'home';
 
@@ -2061,13 +2061,9 @@ class UIComponents:
                             var item = pdoc.createElement('div');
                             item.className = 'jl-ni' + (nd[0] === curPage ? ' active' : '');
                             item.setAttribute('data-page', nd[0]);
-                            var iconColor = nd[0] === curPage ? '#0047FF' : 'currentColor';
-                            var svgEl = mkIcon(nd[1], 17, iconColor);
-                            var nbsp = pdoc.createTextNode('\u00a0\u00a0');
-                            var label = pdoc.createTextNode(nd[2]);
-                            item.appendChild(svgEl);
-                            item.appendChild(nbsp);
-                            item.appendChild(label);
+                            var col = nd[0] === curPage ? '#0047FF' : 'currentColor';
+                            item.appendChild(_mkSvg(nd[1], 17, col));
+                            item.appendChild(pdoc.createTextNode('\u00a0' + nd[2]));
                             item.addEventListener('click', function() {
                                 P.postMessage({type:'jl-nav', page:nd[0]}, '*');
                                 try { P.history.pushState({page:nd[0]},'','?page='+nd[0]); } catch(e){}
@@ -2155,8 +2151,7 @@ class UIComponents:
         })();
         </script>
         """
-        # Inject the Lucide path data map into the JS string
-        cursor_js = cursor_js.replace('__LUCIDE_JS_MAP__', _LUCIDE_JS_MAP)
+        cursor_js = cursor_js.replace('__LUCIDE_JS__', _LUCIDE_JS)
         components.html(cursor_js, height=1, scrolling=False)
 
     @staticmethod
@@ -3575,7 +3570,12 @@ def _conv_interview_setup_ui():
         "Others — Type My Own Role",
     ]
 
-    st.markdown(f"""
+    _hdr_icon  = _svg("brain",    32, "#FAFAF7")
+    _tag_voice = _svg("waveform", 13, "#0047FF")
+    _tag_ai    = _svg("crosshair",13, "#FFFFFF")
+    _tag_rev   = _svg("checklist",13, "#22c55e")
+    _tag_score = _svg("barchart", 13, "#f59e0b")
+    st.markdown("""
     <div style="
         background: linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(0,71,255,0.08) 100%);
         border: 1px solid rgba(255,255,255,0.30);
@@ -3584,7 +3584,7 @@ def _conv_interview_setup_ui():
         margin-bottom: 24px;
     ">
         <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
-            <span>{lucide_svg("brain-circuit", 32, "#FAFAF7")}</span>
+            <span>""" + _hdr_icon + """</span>
             <div>
                 <div style="font-family:'Inter',sans-serif; font-size:1.15rem;
                             font-weight:700; color:#FAFAF7; letter-spacing:-0.01em;">
@@ -3598,16 +3598,16 @@ def _conv_interview_setup_ui():
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
             <span style="background:rgba(0,71,255,0.10); border:1px solid rgba(0,71,255,0.25);
                          border-radius:20px; padding:4px 12px; font-size:0.72rem;
-                         color:#0047FF; font-family:'Space Mono',monospace;">{lucide_svg("audio-waveform", 13, "#0047FF")} Voice-first</span>
+                         color:#0047FF; font-family:'Space Mono',monospace;">""" + _tag_voice + """ Voice-first</span>
             <span style="background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.25);
                          border-radius:20px; padding:4px 12px; font-size:0.72rem;
-                         color:#FFFFFF; font-family:'Space Mono',monospace;">{lucide_svg("crosshair", 13, "#FFFFFF")} Adaptive AI</span>
+                         color:#FFFFFF; font-family:'Space Mono',monospace;">""" + _tag_ai + """ Adaptive AI</span>
             <span style="background:rgba(34,197,94,0.10); border:1px solid rgba(34,197,94,0.25);
                          border-radius:20px; padding:4px 12px; font-size:0.72rem;
-                         color:#22c55e; font-family:'Space Mono',monospace;">{lucide_svg("list-checks", 13, "#22c55e")} Full talent review</span>
+                         color:#22c55e; font-family:'Space Mono',monospace;">""" + _tag_rev + """ Full talent review</span>
             <span style="background:rgba(245,158,11,0.10); border:1px solid rgba(245,158,11,0.25);
                          border-radius:20px; padding:4px 12px; font-size:0.72rem;
-                         color:#f59e0b; font-family:'Space Mono',monospace;">{lucide_svg("bar-chart-3", 13, "#f59e0b")} Honest score</span>
+                         color:#f59e0b; font-family:'Space Mono',monospace;">""" + _tag_score + """ Honest score</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -3981,20 +3981,14 @@ def render_tab_mock_interview(ai_handler: AIHandler, selected_model: str):
         return
 
     # ── TEXT MODE (original — unchanged) ─────────────────────────
-    st.markdown(f"""
+    _ic1 = _svg("crosshair", 26, "#FFFFFF")
+    _ic2 = _svg("checklist", 26, "#0047FF")
+    _ic3 = _svg("barchart",  26, "#22c55e")
+    st.markdown("""
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px;">
-      <div style="flex:1;min-width:160px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:12px 16px;text-align:center;">
-        <div style="margin-bottom:6px;">{lucide_svg("crosshair", 26, "#FFFFFF")}</div>
-        <div style="color:#FFFFFF;font-weight:600;font-size:0.85rem;margin-top:4px;">Pick Role + Level</div>
-      </div>
-      <div style="flex:1;min-width:160px;background:rgba(0,71,255,0.07);border:1px solid rgba(0,71,255,0.2);border-radius:12px;padding:12px 16px;text-align:center;">
-        <div style="margin-bottom:6px;">{lucide_svg("list-checks", 26, "#0047FF")}</div>
-        <div style="color:#0047FF;font-weight:600;font-size:0.85rem;margin-top:4px;">Answer 8 Questions</div>
-      </div>
-      <div style="flex:1;min-width:160px;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.2);border-radius:12px;padding:12px 16px;text-align:center;">
-        <div style="margin-bottom:6px;">{lucide_svg("bar-chart-3", 26, "#22c55e")}</div>
-        <div style="color:#22c55e;font-weight:600;font-size:0.85rem;margin-top:4px;">Get AI Feedback + Score</div>
-      </div>
+      <div style="flex:1;min-width:160px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:12px 16px;text-align:center;"><div style="margin-bottom:6px;">""" + _ic1 + """</div><div style="color:#FFFFFF;font-weight:600;font-size:0.85rem;margin-top:4px;">Pick Role + Level</div></div>
+      <div style="flex:1;min-width:160px;background:rgba(0,71,255,0.07);border:1px solid rgba(0,71,255,0.2);border-radius:12px;padding:12px 16px;text-align:center;"><div style="margin-bottom:6px;">""" + _ic2 + """</div><div style="color:#0047FF;font-weight:600;font-size:0.85rem;margin-top:4px;">Answer 8 Questions</div></div>
+      <div style="flex:1;min-width:160px;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.2);border-radius:12px;padding:12px 16px;text-align:center;"><div style="margin-bottom:6px;">""" + _ic3 + """</div><div style="color:#22c55e;font-weight:600;font-size:0.85rem;margin-top:4px;">Get AI Feedback + Score</div></div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -5498,19 +5492,21 @@ def build_pyq_pdf(exam_name: str) -> bytes:
 def render_tab_pyq_hub(ai_handler, selected_model: str):
     """Tab 7 — PYQ Hub: Download PDF question banks for major exams."""
     st.markdown("### ◈ PYQ Hub — Download Previous Year Question Papers")
-
-    st.markdown(f"""
+    _pyq1 = _svg("file-down", 26, "#818cf8")
+    _pyq2 = _svg("brain",     26, "#FFFFFF")
+    _pyq3 = _svg("lightbulb", 26, "#22c55e")
+    st.markdown("""
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px;">
       <div style="flex:1;min-width:150px;background:rgba(99,102,241,0.07);border:1px solid rgba(99,102,241,0.25);border-radius:12px;padding:12px 16px;text-align:center;">
-        <div style="margin-bottom:6px;">{lucide_svg("file-down", 26, "#818cf8")}</div>
+        <div style="margin-bottom:6px;">""" + _pyq1 + """</div>
         <div style="color:#818cf8;font-weight:600;font-size:0.85rem;margin-top:4px;">Download PDF Instantly</div>
       </div>
       <div style="flex:1;min-width:150px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.25);border-radius:12px;padding:12px 16px;text-align:center;">
-        <div style="margin-bottom:6px;">{lucide_svg("brain-circuit", 26, "#FFFFFF")}</div>
+        <div style="margin-bottom:6px;">""" + _pyq2 + """</div>
         <div style="color:#FFFFFF;font-weight:600;font-size:0.85rem;margin-top:4px;">AI-Generated for Any Exam</div>
       </div>
       <div style="flex:1;min-width:150px;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.25);border-radius:12px;padding:12px 16px;text-align:center;">
-        <div style="margin-bottom:6px;">{lucide_svg("lightbulb", 26, "#22c55e")}</div>
+        <div style="margin-bottom:6px;">""" + _pyq3 + """</div>
         <div style="color:#22c55e;font-weight:600;font-size:0.85rem;margin-top:4px;">Answers + Explanations</div>
       </div>
     </div>
@@ -5971,21 +5967,21 @@ html, body { background: #060606 !important; background-color: #060606 !importan
 }
 
 .card-icon {
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 10px;
   background: rgba(0,71,255,0.09);
   border: 1px solid rgba(0,71,255,0.20);
-  border-radius: 11px;
-  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 10px;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 .card:hover .card-icon {
   background: rgba(0,71,255,0.18);
-  border-color: rgba(0,71,255,0.40);
-  box-shadow: 0 0 14px rgba(0,71,255,0.25);
+  border-color: rgba(0,71,255,0.42);
+  box-shadow: 0 0 12px rgba(0,71,255,0.28);
 }
 
 .card-title {
@@ -6062,37 +6058,37 @@ html, body { background: #060606 !important; background-color: #060606 !importan
 <body>
 <div class="grid" id="cardGrid">
   <div class="card" data-page="career">
-    <span class="card-icon">__CARD_CAREER__</span>
+    <span class="card-icon">##CAREER##</span>
     <div class="card-title">Career Analysis</div>
     <div class="card-desc">AI-powered career path suggestions tailored to your profile</div>
     <span class="card-arrow">↗</span>
   </div>
   <div class="card" data-page="resume">
-    <span class="card-icon">__CARD_RESUME__</span>
+    <span class="card-icon">##RESUME##</span>
     <div class="card-title">Resume Builder</div>
     <div class="card-desc">ATS-optimized resume generation in seconds</div>
     <span class="card-arrow">↗</span>
   </div>
   <div class="card" data-page="interview">
-    <span class="card-icon">__CARD_INTERVIEW__</span>
+    <span class="card-icon">##INTERVIEW##</span>
     <div class="card-title">Mock Interview</div>
     <div class="card-desc">Practice with AI-generated role-specific questions</div>
     <span class="card-arrow">↗</span>
   </div>
   <div class="card" data-page="pyq">
-    <span class="card-icon">__CARD_PYQ__</span>
+    <span class="card-icon">##PYQ##</span>
     <div class="card-title">PYQ Hub</div>
     <div class="card-desc">Previous year question papers for every domain</div>
     <span class="card-arrow">↗</span>
   </div>
   <div class="card" data-page="resources">
-    <span class="card-icon">__CARD_RESOURCES__</span>
+    <span class="card-icon">##RESOURCES##</span>
     <div class="card-title">Resources</div>
     <div class="card-desc">Curated learning materials and career roadmaps</div>
     <span class="card-arrow">↗</span>
   </div>
   <div class="card" data-page="compare">
-    <span class="card-icon">__CARD_COMPARE__</span>
+    <span class="card-icon">##COMPARE##</span>
     <div class="card-title">Compare</div>
     <div class="card-desc">Side-by-side career path comparison and insights</div>
     <span class="card-arrow">↗</span>
@@ -6133,17 +6129,15 @@ document.addEventListener('mousemove', function(e) {
 </script>
 </body>
 </html>"""
-        # Substitute Lucide SVG icons into home card tokens (HTML-safe, no JS quoting issues)
-        _card_icons = {
-            "__CARD_CAREER__":    lucide_svg("trending-up",  22, "#0047FF"),
-            "__CARD_RESUME__":    lucide_svg("file-edit",    22, "#0047FF"),
-            "__CARD_INTERVIEW__": lucide_svg("mic-2",        22, "#0047FF"),
-            "__CARD_PYQ__":       lucide_svg("archive",      22, "#0047FF"),
-            "__CARD_RESOURCES__": lucide_svg("library",      22, "#0047FF"),
-            "__CARD_COMPARE__":   lucide_svg("git-compare",  22, "#0047FF"),
-        }
-        for token, svg in _card_icons.items():
-            cards_html = cards_html.replace(token, svg)
+        for _tok, _key, _col in [
+            ("##CAREER##",    "trending-up", "#0047FF"),
+            ("##RESUME##",    "file-edit",   "#0047FF"),
+            ("##INTERVIEW##", "mic",         "#0047FF"),
+            ("##PYQ##",       "archive",     "#0047FF"),
+            ("##RESOURCES##", "library",     "#0047FF"),
+            ("##COMPARE##",   "compare",     "#0047FF"),
+        ]:
+            cards_html = cards_html.replace(_tok, _svg(_key, 22, _col))
         components.html(cards_html, height=380, scrolling=False)
 
     # Section pages — render directly below the compact robot
