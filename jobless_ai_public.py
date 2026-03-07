@@ -33,46 +33,42 @@ import os
 from typing import Dict, List, Optional
 
 # ── Lucide Icon Helper ─────────────────────────────────────────────────────
-
-# SVG path data for each Lucide icon used in the UI
-_LUCIDE_PATHS = {
-    "layout-dashboard": '<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="3" y="15" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/>',
-    "trending-up":      '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
-    "file-edit":        '<path d="M4 13.5V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2h-5.5"/><polyline points="14 2 14 8 20 8"/><path d="M10.42 12.61a2.1 2.1 0 1 1 2.97 2.97L7.95 21 4 22l.99-3.95 5.43-5.44Z"/>',
-    "mic-2":            '<path d="m12 8-9.04 9.06a2.82 2.82 0 1 0 3.98 3.98L16 12"/><circle cx="17" cy="7" r="5"/>',
-    "archive":          '<rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>',
-    "library":          '<path d="m16 6 4 14"/><path d="M12 6v14"/><path d="M8 8v12"/><path d="M4 4v16"/>',
-    "git-compare":      '<circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M11 18H8a2 2 0 0 1-2-2V9"/>',
-    "history":          '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+# SVG path data for every Lucide icon used in the UI (HTML double-quote safe)
+_LUCIDE_PATHS: dict = {
+    "layout-dashboard":    '<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="3" y="15" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/>',
+    "trending-up":         '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
+    "file-edit":           '<path d="M4 13.5V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2h-5.5"/><polyline points="14 2 14 8 20 8"/><path d="M10.42 12.61a2.1 2.1 0 1 1 2.97 2.97L7.95 21 4 22l.99-3.95 5.43-5.44Z"/>',
+    "mic-2":               '<path d="m12 8-9.04 9.06a2.82 2.82 0 1 0 3.98 3.98L16 12"/><circle cx="17" cy="7" r="5"/>',
+    "archive":             '<rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>',
+    "library":             '<path d="m16 6 4 14"/><path d="M12 6v14"/><path d="M8 8v12"/><path d="M4 4v16"/>',
+    "git-compare":         '<circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M11 18H8a2 2 0 0 1-2-2V9"/>',
+    "history":             '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
     "message-square-text": '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M13 8H7"/><path d="M17 12H7"/>',
-    "audio-waveform":   '<path d="M2 13a2 2 0 0 0 2-2V7a2 2 0 0 1 4 0v13a2 2 0 0 0 4 0V4a2 2 0 0 1 4 0v13a2 2 0 0 0 4 0v-4a2 2 0 0 0-2-2"/>',
-    "crosshair":        '<circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="6"/><line x1="12" x2="12" y1="18" y2="22"/>',
-    "list-checks":      '<path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/>',
-    "bar-chart-3":      '<path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
-    "file-down":        '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/>',
-    "brain-circuit":    '<path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M9 13a4.5 4.5 0 0 0 3-4"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M12 13h4"/><path d="M12 18h6a2 2 0 0 1 2 2v1"/><path d="M12 8h8"/><path d="M16 8V5a2 2 0 0 1 2-2"/><circle cx="16" cy="13" r=".5"/><circle cx="18" cy="3" r=".5"/><circle cx="20" cy="21" r=".5"/><circle cx="20" cy="8" r=".5"/>',
-    "lightbulb":        '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
-    "rocket":           '<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>',
+    "audio-waveform":      '<path d="M2 13a2 2 0 0 0 2-2V7a2 2 0 0 1 4 0v13a2 2 0 0 0 4 0V4a2 2 0 0 1 4 0v13a2 2 0 0 0 4 0v-4a2 2 0 0 0-2-2"/>',
+    "crosshair":           '<circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="6"/><line x1="12" x2="12" y1="18" y2="22"/>',
+    "list-checks":         '<path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/>',
+    "bar-chart-3":         '<path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+    "file-down":           '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/>',
+    "brain-circuit":       '<path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M9 13a4.5 4.5 0 0 0 3-4"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M12 13h4"/><path d="M12 18h6a2 2 0 0 1 2 2v1"/><path d="M12 8h8"/><path d="M16 8V5a2 2 0 0 1 2-2"/><circle cx="16" cy="13" r=".5"/><circle cx="18" cy="3" r=".5"/><circle cx="20" cy="21" r=".5"/><circle cx="20" cy="8" r=".5"/>',
+    "lightbulb":           '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
 }
 
-def lucide_svg(icon: str, size: int = 20, color: str = "currentColor", stroke_width: float = 1.6) -> str:
-    """Return an inline SVG string for a Lucide icon (HTML double-quote safe)."""
+# JS path-data map — injected into the cursor script so icons are built natively in JS
+# This avoids any string-quoting issues when SVGs are embedded inside JS string literals.
+_LUCIDE_JS_MAP = "{\n" + ",\n".join(
+    f'  "{k}": "{v.replace(chr(34), chr(39))}"'   # swap " → ' inside path data only
+    for k, v in _LUCIDE_PATHS.items()
+) + "\n}"
+
+
+def lucide_svg(icon: str, size: int = 20, color: str = "currentColor", sw: float = 1.6) -> str:
+    """Inline SVG string safe for use inside Python f-string HTML (double-quote delimited)."""
     paths = _LUCIDE_PATHS.get(icon, "")
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" '
         f'viewBox="0 0 24 24" fill="none" stroke="{color}" '
-        f'stroke-width="{stroke_width}" stroke-linecap="round" stroke-linejoin="round" '
+        f'stroke-width="{sw}" stroke-linecap="round" stroke-linejoin="round" '
         f'style="display:inline-block;vertical-align:middle;">{paths}</svg>'
-    )
-
-def lucide_svg_js(icon: str, size: int = 18, color: str = "currentColor", stroke_width: float = 1.6) -> str:
-    """Return a Lucide SVG string safe to embed inside JavaScript single-quoted strings."""
-    paths = _LUCIDE_PATHS.get(icon, "").replace('"', "'")
-    return (
-        f"<svg xmlns='http://www.w3.org/2000/svg' width='{size}' height='{size}' "
-        f"viewBox='0 0 24 24' fill='none' stroke='{color}' "
-        f"stroke-width='{stroke_width}' stroke-linecap='round' stroke-linejoin='round' "
-        f"style='display:inline-block;vertical-align:middle;'>{paths}</svg>"
     )
 
 
@@ -2025,15 +2021,33 @@ class UIComponents:
 
                     // ── Build hamburger in parent doc ─────────────────────
                     if (!pdoc.getElementById('jl-hbg')) {
+                        // ── Lucide icon builder (paths injected from Python) ──
+                        var LUCIDE = __LUCIDE_JS_MAP__;
+                        function mkIcon(name, size, color) {
+                            size = size || 18; color = color || 'currentColor';
+                            var ns = 'http://www.w3.org/2000/svg';
+                            var svg = pdoc.createElementNS(ns, 'svg');
+                            svg.setAttribute('width', size); svg.setAttribute('height', size);
+                            svg.setAttribute('viewBox', '0 0 24 24');
+                            svg.setAttribute('fill', 'none');
+                            svg.setAttribute('stroke', color);
+                            svg.setAttribute('stroke-width', '1.6');
+                            svg.setAttribute('stroke-linecap', 'round');
+                            svg.setAttribute('stroke-linejoin', 'round');
+                            svg.style.cssText = 'display:inline-block;vertical-align:middle;flex-shrink:0;';
+                            svg.innerHTML = LUCIDE[name] || '';
+                            return svg;
+                        }
+
                         var NAV_DEFS = [
-                            ['home','__ICON_HOME__','Home'],
-                            ['career','__ICON_CAREER__','Career Analysis'],
-                            ['resume','__ICON_RESUME__','Resume Builder'],
-                            ['interview','__ICON_INTERVIEW__','Mock Interview'],
-                            ['pyq','__ICON_PYQ__','PYQ Hub'],
-                            ['resources','__ICON_RESOURCES__','Resources'],
-                            ['compare','__ICON_COMPARE__','Compare'],
-                            ['history','__ICON_HISTORY__','History']
+                            ['home',      'layout-dashboard', 'Home'],
+                            ['career',    'trending-up',      'Career Analysis'],
+                            ['resume',    'file-edit',        'Resume Builder'],
+                            ['interview', 'mic-2',            'Mock Interview'],
+                            ['pyq',       'archive',          'PYQ Hub'],
+                            ['resources', 'library',          'Resources'],
+                            ['compare',   'git-compare',      'Compare'],
+                            ['history',   'history',          'History']
                         ];
                         var curPage = (new URLSearchParams(P.location.search)).get('page') || 'home';
 
@@ -2047,7 +2061,13 @@ class UIComponents:
                             var item = pdoc.createElement('div');
                             item.className = 'jl-ni' + (nd[0] === curPage ? ' active' : '');
                             item.setAttribute('data-page', nd[0]);
-                            item.innerHTML = nd[1] + '&nbsp;&nbsp;' + nd[2];
+                            var iconColor = nd[0] === curPage ? '#0047FF' : 'currentColor';
+                            var svgEl = mkIcon(nd[1], 17, iconColor);
+                            var nbsp = pdoc.createTextNode('\u00a0\u00a0');
+                            var label = pdoc.createTextNode(nd[2]);
+                            item.appendChild(svgEl);
+                            item.appendChild(nbsp);
+                            item.appendChild(label);
                             item.addEventListener('click', function() {
                                 P.postMessage({type:'jl-nav', page:nd[0]}, '*');
                                 try { P.history.pushState({page:nd[0]},'','?page='+nd[0]); } catch(e){}
@@ -2135,19 +2155,8 @@ class UIComponents:
         })();
         </script>
         """
-        # Substitute Lucide SVG icons into the nav
-        _nav_icons = {
-            "__ICON_HOME__":      lucide_svg_js("layout-dashboard", 18, "currentColor"),
-            "__ICON_CAREER__":    lucide_svg_js("trending-up",      18, "currentColor"),
-            "__ICON_RESUME__":    lucide_svg_js("file-edit",        18, "currentColor"),
-            "__ICON_INTERVIEW__": lucide_svg_js("mic-2",            18, "currentColor"),
-            "__ICON_PYQ__":       lucide_svg_js("archive",          18, "currentColor"),
-            "__ICON_RESOURCES__": lucide_svg_js("library",          18, "currentColor"),
-            "__ICON_COMPARE__":   lucide_svg_js("git-compare",      18, "currentColor"),
-            "__ICON_HISTORY__":   lucide_svg_js("history",          18, "currentColor"),
-        }
-        for token, svg in _nav_icons.items():
-            cursor_js = cursor_js.replace(token, svg)
+        # Inject the Lucide path data map into the JS string
+        cursor_js = cursor_js.replace('__LUCIDE_JS_MAP__', _LUCIDE_JS_MAP)
         components.html(cursor_js, height=1, scrolling=False)
 
     @staticmethod
@@ -3575,7 +3584,7 @@ def _conv_interview_setup_ui():
         margin-bottom: 24px;
     ">
         <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
-            <span style="font-size:1.8rem;">{lucide_svg("brain-circuit", 32, "#FAFAF7")}</span>
+            <span>{lucide_svg("brain-circuit", 32, "#FAFAF7")}</span>
             <div>
                 <div style="font-family:'Inter',sans-serif; font-size:1.15rem;
                             font-weight:700; color:#FAFAF7; letter-spacing:-0.01em;">
@@ -5962,20 +5971,21 @@ html, body { background: #060606 !important; background-color: #060606 !importan
 }
 
 .card-icon {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 8px;
-  background: rgba(0,71,255,0.08);
-  border: 1px solid rgba(0,71,255,0.18);
-  border-radius: 10px;
-  transition: background 0.2s ease, border-color 0.2s ease;
+  margin-bottom: 10px;
+  background: rgba(0,71,255,0.09);
+  border: 1px solid rgba(0,71,255,0.20);
+  border-radius: 11px;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .card:hover .card-icon {
-  background: rgba(0,71,255,0.15);
-  border-color: rgba(0,71,255,0.35);
+  background: rgba(0,71,255,0.18);
+  border-color: rgba(0,71,255,0.40);
+  box-shadow: 0 0 14px rgba(0,71,255,0.25);
 }
 
 .card-title {
@@ -6123,14 +6133,14 @@ document.addEventListener('mousemove', function(e) {
 </script>
 </body>
 </html>"""
-        # Substitute Lucide SVG icons into home cards
+        # Substitute Lucide SVG icons into home card tokens (HTML-safe, no JS quoting issues)
         _card_icons = {
-            "__CARD_CAREER__":    lucide_svg("trending-up",  24, "#0047FF"),
-            "__CARD_RESUME__":    lucide_svg("file-edit",    24, "#0047FF"),
-            "__CARD_INTERVIEW__": lucide_svg("mic-2",        24, "#0047FF"),
-            "__CARD_PYQ__":       lucide_svg("archive",      24, "#0047FF"),
-            "__CARD_RESOURCES__": lucide_svg("library",      24, "#0047FF"),
-            "__CARD_COMPARE__":   lucide_svg("git-compare",  24, "#0047FF"),
+            "__CARD_CAREER__":    lucide_svg("trending-up",  22, "#0047FF"),
+            "__CARD_RESUME__":    lucide_svg("file-edit",    22, "#0047FF"),
+            "__CARD_INTERVIEW__": lucide_svg("mic-2",        22, "#0047FF"),
+            "__CARD_PYQ__":       lucide_svg("archive",      22, "#0047FF"),
+            "__CARD_RESOURCES__": lucide_svg("library",      22, "#0047FF"),
+            "__CARD_COMPARE__":   lucide_svg("git-compare",  22, "#0047FF"),
         }
         for token, svg in _card_icons.items():
             cards_html = cards_html.replace(token, svg)
