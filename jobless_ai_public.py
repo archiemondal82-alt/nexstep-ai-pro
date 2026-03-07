@@ -32,6 +32,50 @@ from streamlit_lottie import st_lottie
 import os
 from typing import Dict, List, Optional
 
+# ── Lucide Icon Helper ─────────────────────────────────────────────────────
+
+# SVG path data for each Lucide icon used in the UI
+_LUCIDE_PATHS = {
+    "layout-dashboard": '<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="3" y="15" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/>',
+    "trending-up":      '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
+    "file-edit":        '<path d="M4 13.5V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2h-5.5"/><polyline points="14 2 14 8 20 8"/><path d="M10.42 12.61a2.1 2.1 0 1 1 2.97 2.97L7.95 21 4 22l.99-3.95 5.43-5.44Z"/>',
+    "mic-2":            '<path d="m12 8-9.04 9.06a2.82 2.82 0 1 0 3.98 3.98L16 12"/><circle cx="17" cy="7" r="5"/>',
+    "archive":          '<rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>',
+    "library":          '<path d="m16 6 4 14"/><path d="M12 6v14"/><path d="M8 8v12"/><path d="M4 4v16"/>',
+    "git-compare":      '<circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M11 18H8a2 2 0 0 1-2-2V9"/>',
+    "history":          '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+    "message-square-text": '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M13 8H7"/><path d="M17 12H7"/>',
+    "audio-waveform":   '<path d="M2 13a2 2 0 0 0 2-2V7a2 2 0 0 1 4 0v13a2 2 0 0 0 4 0V4a2 2 0 0 1 4 0v13a2 2 0 0 0 4 0v-4a2 2 0 0 0-2-2"/>',
+    "crosshair":        '<circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="6"/><line x1="12" x2="12" y1="18" y2="22"/>',
+    "list-checks":      '<path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/>',
+    "bar-chart-3":      '<path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+    "file-down":        '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/>',
+    "brain-circuit":    '<path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M9 13a4.5 4.5 0 0 0 3-4"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M12 13h4"/><path d="M12 18h6a2 2 0 0 1 2 2v1"/><path d="M12 8h8"/><path d="M16 8V5a2 2 0 0 1 2-2"/><circle cx="16" cy="13" r=".5"/><circle cx="18" cy="3" r=".5"/><circle cx="20" cy="21" r=".5"/><circle cx="20" cy="8" r=".5"/>',
+    "lightbulb":        '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+    "rocket":           '<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>',
+}
+
+def lucide_svg(icon: str, size: int = 20, color: str = "currentColor", stroke_width: float = 1.6) -> str:
+    """Return an inline SVG string for a Lucide icon (HTML double-quote safe)."""
+    paths = _LUCIDE_PATHS.get(icon, "")
+    return (
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" '
+        f'viewBox="0 0 24 24" fill="none" stroke="{color}" '
+        f'stroke-width="{stroke_width}" stroke-linecap="round" stroke-linejoin="round" '
+        f'style="display:inline-block;vertical-align:middle;">{paths}</svg>'
+    )
+
+def lucide_svg_js(icon: str, size: int = 18, color: str = "currentColor", stroke_width: float = 1.6) -> str:
+    """Return a Lucide SVG string safe to embed inside JavaScript single-quoted strings."""
+    paths = _LUCIDE_PATHS.get(icon, "").replace('"', "'")
+    return (
+        f"<svg xmlns='http://www.w3.org/2000/svg' width='{size}' height='{size}' "
+        f"viewBox='0 0 24 24' fill='none' stroke='{color}' "
+        f"stroke-width='{stroke_width}' stroke-linecap='round' stroke-linejoin='round' "
+        f"style='display:inline-block;vertical-align:middle;'>{paths}</svg>"
+    )
+
+
 # ── Spline 3D Component ────────────────────────────────────────────────────
 
 
@@ -1982,10 +2026,14 @@ class UIComponents:
                     // ── Build hamburger in parent doc ─────────────────────
                     if (!pdoc.getElementById('jl-hbg')) {
                         var NAV_DEFS = [
-                            ['home','🏠','Home'],['career','📊','Career Analysis'],
-                            ['resume','📝','Resume Builder'],['interview','🎤','Mock Interview'],
-                            ['pyq','📂','PYQ Hub'],['resources','📚','Resources'],
-                            ['compare','⚖️','Compare'],['history','🕒','History']
+                            ['home','__ICON_HOME__','Home'],
+                            ['career','__ICON_CAREER__','Career Analysis'],
+                            ['resume','__ICON_RESUME__','Resume Builder'],
+                            ['interview','__ICON_INTERVIEW__','Mock Interview'],
+                            ['pyq','__ICON_PYQ__','PYQ Hub'],
+                            ['resources','__ICON_RESOURCES__','Resources'],
+                            ['compare','__ICON_COMPARE__','Compare'],
+                            ['history','__ICON_HISTORY__','History']
                         ];
                         var curPage = (new URLSearchParams(P.location.search)).get('page') || 'home';
 
@@ -2087,6 +2135,19 @@ class UIComponents:
         })();
         </script>
         """
+        # Substitute Lucide SVG icons into the nav
+        _nav_icons = {
+            "__ICON_HOME__":      lucide_svg_js("layout-dashboard", 18, "currentColor"),
+            "__ICON_CAREER__":    lucide_svg_js("trending-up",      18, "currentColor"),
+            "__ICON_RESUME__":    lucide_svg_js("file-edit",        18, "currentColor"),
+            "__ICON_INTERVIEW__": lucide_svg_js("mic-2",            18, "currentColor"),
+            "__ICON_PYQ__":       lucide_svg_js("archive",          18, "currentColor"),
+            "__ICON_RESOURCES__": lucide_svg_js("library",          18, "currentColor"),
+            "__ICON_COMPARE__":   lucide_svg_js("git-compare",      18, "currentColor"),
+            "__ICON_HISTORY__":   lucide_svg_js("history",          18, "currentColor"),
+        }
+        for token, svg in _nav_icons.items():
+            cursor_js = cursor_js.replace(token, svg)
         components.html(cursor_js, height=1, scrolling=False)
 
     @staticmethod
@@ -2419,6 +2480,7 @@ def render_global_background():
 </body></html>""", height=0)
 
 # ==================== TAB RENDER FUNCTIONS ====================
+
 
 def render_tab_career_analysis(ai_handler: AIHandler, pdf_handler: PDFHandler,
                                history_manager: HistoryManager, selected_model: str,
@@ -3504,7 +3566,7 @@ def _conv_interview_setup_ui():
         "Others — Type My Own Role",
     ]
 
-    st.markdown("""
+    st.markdown(f"""
     <div style="
         background: linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(0,71,255,0.08) 100%);
         border: 1px solid rgba(255,255,255,0.30);
@@ -3513,7 +3575,7 @@ def _conv_interview_setup_ui():
         margin-bottom: 24px;
     ">
         <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
-            <span style="font-size:1.8rem;">🤖</span>
+            <span style="font-size:1.8rem;">{lucide_svg("brain-circuit", 32, "#FAFAF7")}</span>
             <div>
                 <div style="font-family:'Inter',sans-serif; font-size:1.15rem;
                             font-weight:700; color:#FAFAF7; letter-spacing:-0.01em;">
@@ -3527,16 +3589,16 @@ def _conv_interview_setup_ui():
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
             <span style="background:rgba(0,71,255,0.10); border:1px solid rgba(0,71,255,0.25);
                          border-radius:20px; padding:4px 12px; font-size:0.72rem;
-                         color:#0047FF; font-family:'Space Mono',monospace;">🎙️ Voice-first</span>
+                         color:#0047FF; font-family:'Space Mono',monospace;">{lucide_svg("audio-waveform", 13, "#0047FF")} Voice-first</span>
             <span style="background:rgba(255,255,255,0.10); border:1px solid rgba(255,255,255,0.25);
                          border-radius:20px; padding:4px 12px; font-size:0.72rem;
-                         color:#FFFFFF; font-family:'Space Mono',monospace;">🤖 Animated AI avatar</span>
+                         color:#FFFFFF; font-family:'Space Mono',monospace;">{lucide_svg("crosshair", 13, "#FFFFFF")} Adaptive AI</span>
             <span style="background:rgba(34,197,94,0.10); border:1px solid rgba(34,197,94,0.25);
                          border-radius:20px; padding:4px 12px; font-size:0.72rem;
-                         color:#22c55e; font-family:'Space Mono',monospace;">📋 Full talent review</span>
+                         color:#22c55e; font-family:'Space Mono',monospace;">{lucide_svg("list-checks", 13, "#22c55e")} Full talent review</span>
             <span style="background:rgba(245,158,11,0.10); border:1px solid rgba(245,158,11,0.25);
                          border-radius:20px; padding:4px 12px; font-size:0.72rem;
-                         color:#f59e0b; font-family:'Space Mono',monospace;">⭐ Honest score</span>
+                         color:#f59e0b; font-family:'Space Mono',monospace;">{lucide_svg("bar-chart-3", 13, "#f59e0b")} Honest score</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -3877,12 +3939,12 @@ def render_tab_mock_interview(ai_handler: AIHandler, selected_model: str):
     mode = st.session_state.get("interview_mode", "text")
     m1, m2 = st.columns(2)
     with m1:
-        if st.button("📝 Text Interview", use_container_width=True,
+        if st.button("✦ Text Interview", use_container_width=True,
                      type="primary" if mode == "text" else "secondary", key="mode_text"):
             st.session_state.interview_mode = "text"
             st.rerun()
     with m2:
-        if st.button("🎙️ AI Voice Assistant  🔥", use_container_width=True,
+        if st.button("◉ AI Voice Assistant  🔥", use_container_width=True,
                      type="primary" if mode == "conv" else "secondary", key="mode_conv"):
             st.session_state.interview_mode = "conv"
             st.rerun()
@@ -3910,11 +3972,20 @@ def render_tab_mock_interview(ai_handler: AIHandler, selected_model: str):
         return
 
     # ── TEXT MODE (original — unchanged) ─────────────────────────
-    st.markdown("""
+    st.markdown(f"""
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px;">
-      <div style="flex:1;min-width:160px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:12px 16px;text-align:center;"><div style="font-size:1.4rem;">🎯</div><div style="color:#FFFFFF;font-weight:600;font-size:0.85rem;margin-top:4px;">Pick Role + Level</div></div>
-      <div style="flex:1;min-width:160px;background:rgba(0,71,255,0.07);border:1px solid rgba(0,71,255,0.2);border-radius:12px;padding:12px 16px;text-align:center;"><div style="font-size:1.4rem;">💬</div><div style="color:#0047FF;font-weight:600;font-size:0.85rem;margin-top:4px;">Answer 8 Questions</div></div>
-      <div style="flex:1;min-width:160px;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.2);border-radius:12px;padding:12px 16px;text-align:center;"><div style="font-size:1.4rem;">🤖</div><div style="color:#22c55e;font-weight:600;font-size:0.85rem;margin-top:4px;">Get AI Feedback + Score</div></div>
+      <div style="flex:1;min-width:160px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:12px 16px;text-align:center;">
+        <div style="margin-bottom:6px;">{lucide_svg("crosshair", 26, "#FFFFFF")}</div>
+        <div style="color:#FFFFFF;font-weight:600;font-size:0.85rem;margin-top:4px;">Pick Role + Level</div>
+      </div>
+      <div style="flex:1;min-width:160px;background:rgba(0,71,255,0.07);border:1px solid rgba(0,71,255,0.2);border-radius:12px;padding:12px 16px;text-align:center;">
+        <div style="margin-bottom:6px;">{lucide_svg("list-checks", 26, "#0047FF")}</div>
+        <div style="color:#0047FF;font-weight:600;font-size:0.85rem;margin-top:4px;">Answer 8 Questions</div>
+      </div>
+      <div style="flex:1;min-width:160px;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.2);border-radius:12px;padding:12px 16px;text-align:center;">
+        <div style="margin-bottom:6px;">{lucide_svg("bar-chart-3", 26, "#22c55e")}</div>
+        <div style="color:#22c55e;font-weight:600;font-size:0.85rem;margin-top:4px;">Get AI Feedback + Score</div>
+      </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -5417,20 +5488,20 @@ def build_pyq_pdf(exam_name: str) -> bytes:
 
 def render_tab_pyq_hub(ai_handler, selected_model: str):
     """Tab 7 — PYQ Hub: Download PDF question banks for major exams."""
-    st.markdown("### 📂 PYQ Hub — Download Previous Year Question Papers")
+    st.markdown("### ◈ PYQ Hub — Download Previous Year Question Papers")
 
-    st.markdown("""
+    st.markdown(f"""
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px;">
       <div style="flex:1;min-width:150px;background:rgba(99,102,241,0.07);border:1px solid rgba(99,102,241,0.25);border-radius:12px;padding:12px 16px;text-align:center;">
-        <div style="font-size:1.4rem;">📄</div>
+        <div style="margin-bottom:6px;">{lucide_svg("file-down", 26, "#818cf8")}</div>
         <div style="color:#818cf8;font-weight:600;font-size:0.85rem;margin-top:4px;">Download PDF Instantly</div>
       </div>
       <div style="flex:1;min-width:150px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.25);border-radius:12px;padding:12px 16px;text-align:center;">
-        <div style="font-size:1.4rem;">🤖</div>
+        <div style="margin-bottom:6px;">{lucide_svg("brain-circuit", 26, "#FFFFFF")}</div>
         <div style="color:#FFFFFF;font-weight:600;font-size:0.85rem;margin-top:4px;">AI-Generated for Any Exam</div>
       </div>
       <div style="flex:1;min-width:150px;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.25);border-radius:12px;padding:12px 16px;text-align:center;">
-        <div style="font-size:1.4rem;">✅</div>
+        <div style="margin-bottom:6px;">{lucide_svg("lightbulb", 26, "#22c55e")}</div>
         <div style="color:#22c55e;font-weight:600;font-size:0.85rem;margin-top:4px;">Answers + Explanations</div>
       </div>
     </div>
@@ -5891,10 +5962,20 @@ html, body { background: #060606 !important; background-color: #060606 !importan
 }
 
 .card-icon {
-  font-size: 1.3rem;
-  margin-bottom: 6px;
-  display: block;
-  line-height: 1;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  background: rgba(0,71,255,0.08);
+  border: 1px solid rgba(0,71,255,0.18);
+  border-radius: 10px;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.card:hover .card-icon {
+  background: rgba(0,71,255,0.15);
+  border-color: rgba(0,71,255,0.35);
 }
 
 .card-title {
@@ -5971,44 +6052,44 @@ html, body { background: #060606 !important; background-color: #060606 !importan
 <body>
 <div class="grid" id="cardGrid">
   <div class="card" data-page="career">
-    <span class="card-icon">📊</span>
+    <span class="card-icon">__CARD_CAREER__</span>
     <div class="card-title">Career Analysis</div>
     <div class="card-desc">AI-powered career path suggestions tailored to your profile</div>
     <span class="card-arrow">↗</span>
   </div>
   <div class="card" data-page="resume">
-    <span class="card-icon">📝</span>
+    <span class="card-icon">__CARD_RESUME__</span>
     <div class="card-title">Resume Builder</div>
     <div class="card-desc">ATS-optimized resume generation in seconds</div>
     <span class="card-arrow">↗</span>
   </div>
   <div class="card" data-page="interview">
-    <span class="card-icon">🎤</span>
+    <span class="card-icon">__CARD_INTERVIEW__</span>
     <div class="card-title">Mock Interview</div>
     <div class="card-desc">Practice with AI-generated role-specific questions</div>
     <span class="card-arrow">↗</span>
   </div>
   <div class="card" data-page="pyq">
-    <span class="card-icon">📂</span>
+    <span class="card-icon">__CARD_PYQ__</span>
     <div class="card-title">PYQ Hub</div>
     <div class="card-desc">Previous year question papers for every domain</div>
     <span class="card-arrow">↗</span>
   </div>
   <div class="card" data-page="resources">
-    <span class="card-icon">📚</span>
+    <span class="card-icon">__CARD_RESOURCES__</span>
     <div class="card-title">Resources</div>
     <div class="card-desc">Curated learning materials and career roadmaps</div>
     <span class="card-arrow">↗</span>
   </div>
   <div class="card" data-page="compare">
-    <span class="card-icon">⚖️</span>
+    <span class="card-icon">__CARD_COMPARE__</span>
     <div class="card-title">Compare</div>
     <div class="card-desc">Side-by-side career path comparison and insights</div>
     <span class="card-arrow">↗</span>
   </div>
 </div>
 <div class="gs-wrap">
-  <button class="gs-btn" id="gsBtn">🚀 &nbsp;Get Started →</button>
+  <button class="gs-btn" id="gsBtn">→ &nbsp;Get Started</button>
 </div>
 
 <script>
@@ -6042,6 +6123,17 @@ document.addEventListener('mousemove', function(e) {
 </script>
 </body>
 </html>"""
+        # Substitute Lucide SVG icons into home cards
+        _card_icons = {
+            "__CARD_CAREER__":    lucide_svg("trending-up",  24, "#0047FF"),
+            "__CARD_RESUME__":    lucide_svg("file-edit",    24, "#0047FF"),
+            "__CARD_INTERVIEW__": lucide_svg("mic-2",        24, "#0047FF"),
+            "__CARD_PYQ__":       lucide_svg("archive",      24, "#0047FF"),
+            "__CARD_RESOURCES__": lucide_svg("library",      24, "#0047FF"),
+            "__CARD_COMPARE__":   lucide_svg("git-compare",  24, "#0047FF"),
+        }
+        for token, svg in _card_icons.items():
+            cards_html = cards_html.replace(token, svg)
         components.html(cards_html, height=380, scrolling=False)
 
     # Section pages — render directly below the compact robot
