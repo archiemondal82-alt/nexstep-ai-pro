@@ -6,7 +6,7 @@ groq>=0.4.0
 cohere>=5.0.0
 
 # PDF Processing
-pymupdf==1.23.8 --only-binary=:all:
+pdfplumber==0.11.4
 reportlab==4.0.9
 
 # Data Processing
