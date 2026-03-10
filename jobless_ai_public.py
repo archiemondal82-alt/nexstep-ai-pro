@@ -2166,7 +2166,7 @@ class UIComponents:
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{background:#050a12!important;overflow:hidden;font-family:'DM Sans',sans-serif}
+html,body{background:#050a12!important;font-family:'DM Sans',sans-serif}
 .wrap{display:flex;height:340px;gap:0;position:relative}
 .L{flex:0 0 44%;padding:22px 24px 18px 24px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;border-right:1px solid rgba(255,255,255,0.06)}
 .L::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 10% 0%,rgba(0,71,255,0.07) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 90% 100%,rgba(255,255,255,0.06) 0%,transparent 60%),linear-gradient(160deg,#070d1a 0%,#060b16 100%);z-index:0}
@@ -2273,12 +2273,26 @@ html,body{background:#050a12!important;overflow:hidden;font-family:'DM Sans',san
 .pyq-meta{font-size:.57rem;color:rgba(255,255,255,.3);font-family:'DM Mono',monospace}
 .pyq-count{background:rgba(0,71,255,.1);border:1px solid rgba(0,71,255,.2);border-radius:6px;padding:2px 7px;font-family:'DM Mono',monospace;font-size:.58rem;color:#0047FF;flex-shrink:0}
 
-/* ── Mobile: hide decorative right panel, let left take full width ── */
+/* ── Mobile: stack panels vertically so Live Preview stays visible ── */
 @media (max-width: 520px) {
-  .wrap { height: auto !important; min-height: 320px; }
-  .R { display: none !important; }
-  .L { flex: 1 1 100% !important; border-right: none !important; padding: 18px 16px 16px 16px !important; }
-  .ltitle { font-size: 1.15rem !important; }
+  .wrap {
+    flex-direction: column !important;
+    height: auto !important;
+  }
+  .L {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+    padding: 18px 16px 16px 16px !important;
+  }
+  .R {
+    flex: 0 0 260px !important;
+    width: 100% !important;
+    height: 260px !important;
+    min-height: 260px !important;
+  }
+  .ltitle { font-size: 1.1rem !important; }
   .prow { gap: 6px !important; padding: 7px 8px !important; }
   .pbadge { font-size: .58rem !important; padding: 2px 6px !important; }
   .pname { font-size: .66rem !important; }
@@ -2418,9 +2432,23 @@ function goSlide(n){
 function schedNext(){clearTimeout(timer);timer=setTimeout(function(){goSlide((cur+1)%4);},5800);}
 anim(0);schedNext();
 document.addEventListener('mousemove',function(e){var rect=window.frameElement?window.frameElement.getBoundingClientRect():{left:0,top:0};window.parent.postMessage({type:'ns-move',x:e.clientX+rect.left,y:e.clientY+rect.top},'*');},{passive:true});
+
+// Auto-resize iframe to content height so desktop has no dead whitespace
+(function resizeParent(){
+  try{
+    var h = document.body.scrollHeight || document.documentElement.scrollHeight;
+    if(window.frameElement) window.frameElement.style.height = (h+4)+'px';
+  }catch(e){}
+})();
+window.addEventListener('resize', function(){
+  try{
+    var h = document.body.scrollHeight || document.documentElement.scrollHeight;
+    if(window.frameElement) window.frameElement.style.height = (h+4)+'px';
+  }catch(e){}
+});
 </script>
 </body>
-</html>""", height=380, scrolling=False)
+</html>""", height=640, scrolling=False)
 
 
 # ==================== GLOBAL BACKGROUND ====================
