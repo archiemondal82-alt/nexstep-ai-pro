@@ -1,7 +1,0 @@
-services:
-  - type: web
-    name: jobless-ai
-    runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: streamlit run jobless_ai_public.py --server.port $PORT --server.address 0.0.0.0
-    plan: free
