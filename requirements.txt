@@ -1,17 +1,17 @@
 streamlit==1.31.0
 
-# AI Providers (all free tier)
-google-generativeai>=0.4.1
-groq>=0.4.0
-cohere>=5.0.0
+# AI Providers
+google-generativeai==0.7.2
+groq==0.9.0
+cohere==5.5.8
 
 # PDF Processing
 pdfplumber==0.11.4
 reportlab==4.0.9
 
 # Data Processing
-pandas==2.1.4
-numpy==1.26.3
+pandas==2.2.2
+numpy==1.26.4
 
 # Visualization
 altair==5.2.0
