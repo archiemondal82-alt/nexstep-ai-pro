@@ -2223,7 +2223,7 @@ html,body{background:#050a12!important;font-family:'DM Sans',sans-serif}
 .tab.active{background:rgba(0,71,255,.12);border-color:rgba(0,71,255,.35);color:#0047FF;box-shadow:0 0 14px rgba(0,71,255,.15)}
 .tab-icon{font-size:.65rem}
 .slides{position:absolute;inset:0;bottom:38px}
-.slide{position:absolute;inset:0;padding:18px 18px 10px 18px;display:flex;flex-direction:column;opacity:0;transform:translateY(14px) scale(.98);transition:opacity .5s cubic-bezier(.4,0,.2,1),transform .5s cubic-bezier(.4,0,.2,1);pointer-events:none}
+.slide{position:absolute;inset:0;padding:18px 18px 10px 18px;display:flex;flex-direction:column;opacity:0;transform:translateY(14px) scale(.98);transition:opacity .5s cubic-bezier(.4,0,.2,1),transform .5s cubic-bezier(.4,0,.2,1);pointer-events:none;overflow:hidden}
 .slide.active{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
 .slide.exit{opacity:0;transform:translateY(-10px) scale(.98)}
 .slabel{display:flex;align-items:center;gap:6px;margin-bottom:10px}
@@ -2297,11 +2297,18 @@ html,body{background:#050a12!important;font-family:'DM Sans',sans-serif}
     padding: 18px 16px 16px 16px !important;
   }
   .R {
-    flex: 0 0 260px !important;
+    flex: 0 0 320px !important;
     width: 100% !important;
-    height: 260px !important;
-    min-height: 260px !important;
+    height: 320px !important;
+    min-height: 320px !important;
   }
+  /* tighter slide padding so content doesn't crowd the tab bar */
+  .slide { padding: 12px 12px 8px 12px !important; }
+  .slabel { margin-bottom: 6px !important; }
+  .stitle { font-size: .78rem !important; margin-bottom: 6px !important; }
+  .bubble { font-size: .6rem !important; padding: 6px 9px !important; }
+  .chat { gap: 6px !important; }
+  .ccard { padding: 6px 8px !important; }
   .ltitle { font-size: 1.1rem !important; }
   .prow { gap: 6px !important; padding: 7px 8px !important; }
   .pbadge { font-size: .58rem !important; padding: 2px 6px !important; }
@@ -2458,7 +2465,7 @@ window.addEventListener('resize', function(){
 });
 </script>
 </body>
-</html>""", height=640, scrolling=False)
+</html>""", height=700, scrolling=False)
 
 
 # ==================== GLOBAL BACKGROUND ====================
