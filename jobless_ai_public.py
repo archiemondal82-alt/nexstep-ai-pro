@@ -104,7 +104,7 @@ def render_spline_scene(scene_url: str, title: str = "Interactive 3D", descripti
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-      <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900&family=Space+Mono:wght@400;700&dummy=x&display=swap" rel="stylesheet">
       <style>
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
         html, body {{ background: #0a0f1a !important; background-color: #0a0f1a !important; overflow: hidden; cursor: none !important; }}
@@ -156,16 +156,16 @@ def render_spline_scene(scene_url: str, title: str = "Interactive 3D", descripti
         }}
         .label {{
           font-family: 'Space Mono', monospace;
-          font-size: 0.62rem;
-          letter-spacing: 0.2em;
+          font-size: 0.56rem;
+          letter-spacing: 0.22em;
           text-transform: uppercase;
-          color: rgba(0,180,255,0.55);
+          color: rgba(0,180,255,0.65);
           margin-bottom: 20px;
           display: flex;
           align-items: center;
           gap: 10px;
           background: rgba(0,71,255,0.08);
-          border: 1px solid rgba(0,71,255,0.2);
+          border: 1px solid rgba(0,71,255,0.22);
           padding: 6px 14px;
           border-radius: 50px;
           backdrop-filter: blur(12px);
@@ -177,7 +177,7 @@ def render_spline_scene(scene_url: str, title: str = "Interactive 3D", descripti
           width: 6px; height: 6px;
           border-radius: 50%;
           background: #0047FF;
-          box-shadow: 0 0 10px #0047FF, 0 0 20px rgba(0,71,255,0.5);
+          box-shadow: 0 0 10px #0047FF, 0 0 22px rgba(0,71,255,0.5);
           animation: pulse 2s ease-in-out infinite;
           flex-shrink: 0;
         }}
@@ -185,19 +185,19 @@ def render_spline_scene(scene_url: str, title: str = "Interactive 3D", descripti
 
         .left-panel h1 {{
           font-family: 'Inter', system-ui, sans-serif;
-          font-size: 2.8rem;
+          font-size: 2.9rem;
           font-weight: 900;
           color: #ffffff;
-          line-height: 0.95;
-          letter-spacing: -0.04em;
+          line-height: 0.9;
+          letter-spacing: -0.045em;
           margin-bottom: 18px;
         }}
         .left-panel p {{
           color: rgba(138,155,181,0.85);
           font-family: 'Inter', system-ui, sans-serif;
-          font-size: 0.92rem;
+          font-size: 0.88rem;
           font-weight: 400;
-          line-height: 1.75;
+          line-height: 1.78;
           max-width: 340px;
           margin-bottom: 32px;
         }}
@@ -206,24 +206,24 @@ def render_spline_scene(scene_url: str, title: str = "Interactive 3D", descripti
           align-items: center;
           gap: 8px;
           padding: 14px 30px;
-          background: linear-gradient(135deg, #0047FF 0%, rgba(14,168,216,0.9) 100%);
+          background: linear-gradient(135deg, #0047FF 0%, rgba(14,168,216,0.92) 100%);
           color: #ffffff;
           font-family: 'Inter', system-ui, sans-serif;
-          font-size: 0.8rem;
+          font-size: 0.76rem;
           font-weight: 700;
-          letter-spacing: 0.08em;
+          letter-spacing: 0.1em;
           text-transform: uppercase;
           border-radius: 50px;
-          border: 1px solid rgba(0,71,255,0.3);
+          border: 1px solid rgba(0,71,255,0.35);
           cursor: none;
-          box-shadow: 0 0 28px rgba(0,71,255,0.4), 0 4px 16px rgba(0,0,0,0.3);
-          transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+          box-shadow: 0 0 32px rgba(0,71,255,0.45), 0 4px 18px rgba(0,0,0,0.35);
+          transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
           width: fit-content;
           position: relative;
           overflow: hidden;
         }}
         .btn:hover {{
-          box-shadow: 0 0 44px rgba(0,71,255,0.65), 0 6px 24px rgba(0,0,0,0.45);
+          box-shadow: 0 0 52px rgba(0,71,255,0.72), 0 10px 28px rgba(0,0,0,0.48);
           transform: translateY(-3px);
         }}
 
@@ -577,7 +577,7 @@ _HEADER_HTML = """<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JobLess AI</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400&family=Space+Mono:wght@400;700&dummy=x&display=swap" rel="stylesheet">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; cursor: none !important; }
 
@@ -1770,67 +1770,58 @@ class UIComponents:
     def apply_custom_css():
         css = """
         <style>
-            /* ── 21st.dev Globe Hero aesthetic — JobLess AI ─────────────────────── */
-            @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400&family=Space+Mono:wght@400;700&display=swap');
+            /* ══ 21st.dev Globe Hero aesthetic — JobLess AI ══════════════════ */
+            @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400&family=Space+Mono:wght@400;700&display=swap');
 
-            /* ── Keyframes ────────────────────────────────────────────────────── */
+            /* ── Keyframes ─────────────────────────────────────────────────── */
             @keyframes fadeUp {
                 from { opacity: 0; transform: translateY(20px); }
                 to   { opacity: 1; transform: translateY(0); }
             }
             @keyframes scan { 0% { left: -100% } 100% { left: 200% } }
-
             @keyframes shimmer {
                 0%   { left: -100%; opacity: 0; }
                 20%  { opacity: 1; }
                 100% { left: 200%; opacity: 0; }
             }
-            @keyframes orbPulse {
-                0%, 100% { opacity: 0.5; transform: scale(1) translate(0, 0); }
-                50%       { opacity: 0.9; transform: scale(1.06) translate(20px, -15px); }
+            @keyframes orbFloat {
+                0%, 100% { opacity: 0.45; transform: scale(1) translate(0,0); }
+                50%       { opacity: 0.8;  transform: scale(1.07) translate(18px,-14px); }
             }
-            @keyframes orbPulse2 {
-                0%, 100% { opacity: 0.35; transform: scale(1) translate(0, 0); }
-                50%       { opacity: 0.7; transform: scale(1.08) translate(-18px, 12px); }
-            }
-            @keyframes pingPip {
-                0%   { box-shadow: 0 0 0 0 rgba(0,71,255,0.7); }
-                70%  { box-shadow: 0 0 0 8px rgba(0,71,255,0); }
-                100% { box-shadow: 0 0 0 0 rgba(0,71,255,0); }
-            }
-            @keyframes gradientShift {
-                0%   { background-position: 0% 50%; }
-                50%  { background-position: 100% 50%; }
-                100% { background-position: 0% 50%; }
+            @keyframes orbFloat2 {
+                0%, 100% { opacity: 0.3; transform: scale(1) translate(0,0); }
+                50%       { opacity: 0.65; transform: scale(1.09) translate(-16px,12px); }
             }
 
-            /* ── Ambient background orbs (21st.dev blur-3xl style) ────────────── */
+            /* ── Ambient orbs (blur-3xl, 21st.dev style) ──────────────────── */
             .stApp::before {
                 content: '';
                 position: fixed;
-                top: 20%; left: 20%;
+                top: 18%; left: 18%;
                 width: 700px; height: 700px;
                 border-radius: 50%;
-                background: radial-gradient(circle at center, rgba(0,71,255,0.07) 0%, transparent 65%);
+                background: radial-gradient(circle at center,
+                    rgba(0,71,255,0.07) 0%, transparent 65%);
                 pointer-events: none;
                 z-index: 0;
-                animation: orbPulse 10s ease-in-out infinite;
+                animation: orbFloat 11s ease-in-out infinite;
                 will-change: transform, opacity;
             }
             .stApp::after {
                 content: '';
                 position: fixed;
-                bottom: 15%; right: 15%;
+                bottom: 12%; right: 12%;
                 width: 500px; height: 500px;
                 border-radius: 50%;
-                background: radial-gradient(circle at center, rgba(0,71,255,0.05) 0%, transparent 65%);
+                background: radial-gradient(circle at center,
+                    rgba(0,71,255,0.05) 0%, transparent 65%);
                 pointer-events: none;
                 z-index: 0;
-                animation: orbPulse2 14s ease-in-out infinite;
+                animation: orbFloat2 15s ease-in-out infinite;
                 will-change: transform, opacity;
             }
 
-            /* ── Global base ──────────────────────────────────────────────────── */
+            /* ── Global base ───────────────────────────────────────────────── */
             html, body {
                 background: #060606 !important;
                 color: #FAFAF7 !important;
@@ -1846,15 +1837,15 @@ class UIComponents:
                 color: #FAFAF7 !important;
             }
 
-            /* ── Typography — 21st.dev heavy heading style ────────────────────── */
+            /* ── Typography — Inter 900 headings (21st.dev "font-black") ───── */
             h1, h2, h3, h4, h5, h6 {
                 font-family: 'Inter', system-ui, sans-serif !important;
                 color: #FFFFFF !important;
             }
             h1 {
                 font-weight: 900 !important;
-                letter-spacing: -0.04em !important;
-                line-height: 0.9 !important;
+                letter-spacing: -0.045em !important;
+                line-height: 0.88 !important;
             }
             h2 {
                 font-size: 1.8rem !important;
@@ -1862,18 +1853,18 @@ class UIComponents:
                 letter-spacing: -0.03em !important;
             }
             h3 {
-                font-size: 1.2rem !important;
+                font-size: 1.18rem !important;
                 font-weight: 700 !important;
                 letter-spacing: -0.02em !important;
                 color: #3b82f6 !important;
             }
             p, li {
                 font-weight: 400 !important;
-                color: rgba(250,250,247,0.65) !important;
+                color: rgba(250,250,247,0.62) !important;
                 line-height: 1.75 !important;
             }
 
-            /* ── Streamlit layout resets ──────────────────────────────────────── */
+            /* ── Streamlit layout resets ───────────────────────────────────── */
             .main .block-container {
                 padding-top: 1rem !important;
                 padding-left: 2rem !important;
@@ -1886,49 +1877,57 @@ class UIComponents:
             div[data-testid="stDecoration"],
             div[data-testid="stStatusWidget"] { display: none !important; }
 
-            /* ── Sidebar ──────────────────────────────────────────────────────── */
+            /* ── Sidebar ──────────────────────────────────────────────────── */
             [data-testid="stSidebar"] {
-                background: rgba(5,8,18,0.97) !important;
-                backdrop-filter: blur(24px) !important;
-                -webkit-backdrop-filter: blur(24px) !important;
-                border-right: 1px solid rgba(0,71,255,0.15) !important;
-                box-shadow: 4px 0 60px rgba(0,0,0,0.6) !important;
+                background: rgba(4,6,16,0.97) !important;
+                backdrop-filter: blur(28px) !important;
+                -webkit-backdrop-filter: blur(28px) !important;
+                border-right: 1px solid rgba(0,71,255,0.13) !important;
+                box-shadow: 4px 0 60px rgba(0,0,0,0.7) !important;
             }
             [data-testid="stAppViewContainer"] { margin-left: 0 !important; width: 100% !important; }
             [data-testid="stMain"]             { margin-left: 0 !important; width: 100% !important; }
             [data-testid="stSidebar"] > div:first-child { padding-top: 0 !important; }
             [data-testid="stSidebar"] hr {
-                border-color: rgba(255,255,255,0.05) !important;
+                border-color: rgba(255,255,255,0.04) !important;
                 margin: 16px 0 !important;
             }
             [data-testid="stSidebar"] h1,
             [data-testid="stSidebar"] h2,
             [data-testid="stSidebar"] h3 {
                 font-family: 'Space Mono', monospace !important;
-                font-size: 0.68rem !important;
-                color: rgba(0,71,255,0.5) !important;
+                font-size: 0.62rem !important;
+                color: rgba(0,71,255,0.45) !important;
                 text-transform: uppercase !important;
-                letter-spacing: 0.18em !important;
+                letter-spacing: 0.2em !important;
                 margin: 18px 0 8px 0 !important;
                 font-weight: 400 !important;
             }
 
-            /* ── Tabs ─────────────────────────────────────────────────────────── */
+            /* ── Ghost nav buttons ─────────────────────────────────────────── */
+            [data-testid="stBottomBlockContainer"] {
+                display: none !important;
+                visibility: hidden !important;
+                height: 0 !important;
+                overflow: hidden !important;
+            }
+
+            /* ── Tabs ──────────────────────────────────────────────────────── */
             .stTabs [data-baseweb="tab-list"] {
-                background: rgba(255,255,255,0.02) !important;
-                border-radius: 14px !important;
+                background: rgba(255,255,255,0.018) !important;
+                border-radius: 16px !important;
                 padding: 5px !important;
-                border: 1px solid rgba(255,255,255,0.05) !important;
+                border: 1px solid rgba(255,255,255,0.045) !important;
                 gap: 3px !important;
-                backdrop-filter: blur(12px) !important;
+                backdrop-filter: blur(16px) !important;
             }
             .stTabs [data-baseweb="tab"] {
                 font-family: 'Inter', system-ui, sans-serif !important;
                 font-size: 0.82rem !important;
                 font-weight: 500 !important;
-                color: rgba(250,250,247,0.4) !important;
-                border-radius: 10px !important;
-                transition: all 0.25s cubic-bezier(0.16,1,0.3,1) !important;
+                color: rgba(250,250,247,0.38) !important;
+                border-radius: 12px !important;
+                transition: all 0.3s cubic-bezier(0.16,1,0.3,1) !important;
                 padding: 10px 18px !important;
                 letter-spacing: 0.01em !important;
             }
@@ -1937,31 +1936,34 @@ class UIComponents:
                 color: rgba(250,250,247,0.85) !important;
             }
             .stTabs [aria-selected="true"] {
-                background: linear-gradient(135deg, rgba(0,71,255,0.18), rgba(0,71,255,0.08)) !important;
+                background: linear-gradient(135deg,
+                    rgba(0,71,255,0.2), rgba(0,71,255,0.08)) !important;
                 color: #ffffff !important;
-                border: 1px solid rgba(0,71,255,0.3) !important;
-                box-shadow: 0 4px 16px rgba(0,71,255,0.15), inset 0 1px 0 rgba(255,255,255,0.08) !important;
+                border: 1px solid rgba(0,71,255,0.32) !important;
+                box-shadow:
+                    0 4px 18px rgba(0,71,255,0.18),
+                    inset 0 1px 0 rgba(255,255,255,0.08) !important;
                 font-weight: 600 !important;
             }
 
-            /* ── Cards & Glassmorphism — 21st.dev backdrop-blur-xl ────────────── */
+            /* ── Cards & Glassmorphism — 21st.dev backdrop-blur-xl ────────── */
             .result-card, .stat-card, .hist-card, .resource-card, .stExpander {
-                background: rgba(255,255,255,0.018) !important;
-                backdrop-filter: blur(28px) !important;
-                -webkit-backdrop-filter: blur(28px) !important;
-                border: 1px solid rgba(255,255,255,0.055) !important;
+                background: rgba(255,255,255,0.016) !important;
+                backdrop-filter: blur(32px) !important;
+                -webkit-backdrop-filter: blur(32px) !important;
+                border: 1px solid rgba(255,255,255,0.05) !important;
                 border-radius: 20px !important;
                 box-shadow:
-                    0 8px 40px rgba(0,0,0,0.35),
-                    inset 0 1px 0 rgba(255,255,255,0.06),
-                    inset 0 0 0 1px rgba(0,71,255,0.02) !important;
+                    0 8px 40px rgba(0,0,0,0.38),
+                    inset 0 1px 0 rgba(255,255,255,0.055),
+                    inset 0 0 0 1px rgba(0,71,255,0.015) !important;
                 transition: all 0.4s cubic-bezier(0.16,1,0.3,1) !important;
                 position: relative;
                 overflow: hidden;
             }
             .result-card {
                 padding: 28px !important;
-                animation: fadeUp 0.65s cubic-bezier(0.16,1,0.3,1);
+                animation: fadeUp 0.7s cubic-bezier(0.16,1,0.3,1);
                 margin-bottom: 20px;
             }
             .result-card:hover, .stat-card:hover, .hist-card:hover,
@@ -1969,12 +1971,12 @@ class UIComponents:
                 border-color: rgba(0,71,255,0.28) !important;
                 transform: translateY(-6px) !important;
                 box-shadow:
-                    0 24px 64px rgba(0,0,0,0.5),
-                    0 0 0 1px rgba(0,71,255,0.12),
+                    0 24px 64px rgba(0,0,0,0.52),
+                    0 0 0 1px rgba(0,71,255,0.1),
                     inset 0 1px 0 rgba(255,255,255,0.1) !important;
-                background: rgba(255,255,255,0.035) !important;
+                background: rgba(255,255,255,0.032) !important;
             }
-            /* Top-edge gradient line on hover */
+            /* Top gradient line on hover */
             .result-card::before {
                 content: '';
                 position: absolute;
@@ -1982,54 +1984,43 @@ class UIComponents:
                 width: 100%; height: 1px;
                 background: linear-gradient(90deg,
                     transparent,
-                    rgba(0,71,255,0.6) 30%,
-                    rgba(0,180,255,0.8) 50%,
-                    rgba(0,71,255,0.6) 70%,
+                    rgba(0,71,255,0.7) 35%,
+                    rgba(0,200,255,0.9) 50%,
+                    rgba(0,71,255,0.7) 65%,
                     transparent);
                 opacity: 0;
                 transition: opacity 0.4s ease;
             }
             .result-card:hover::before { opacity: 1; }
-            /* Shimmer scan line on hover */
+            /* Shimmer sweep on hover */
             .result-card::after {
                 content: '';
                 position: absolute;
                 top: 0; left: -100%;
                 width: 50%; height: 100%;
                 background: linear-gradient(90deg,
-                    transparent,
-                    rgba(255,255,255,0.04),
-                    transparent);
-                transition: none;
+                    transparent, rgba(255,255,255,0.04), transparent);
             }
             .result-card:hover::after {
-                animation: shimmer 0.8s ease forwards;
+                animation: shimmer 0.85s ease forwards;
             }
 
-            /* ── Ghost nav buttons ────────────────────────────────────────────── */
-            [data-testid="stBottomBlockContainer"] {
-                display: none !important;
-                visibility: hidden !important;
-                height: 0 !important;
-                overflow: hidden !important;
-            }
-
-            /* ── Buttons — 21st.dev gradient + shimmer ────────────────────────── */
+            /* ── Buttons — 21st.dev gradient + shimmer sweep ───────────────── */
             .stButton > button {
                 font-family: 'Inter', system-ui, sans-serif !important;
                 font-weight: 600 !important;
-                font-size: 0.88rem !important;
-                letter-spacing: 0.03em !important;
-                background: linear-gradient(135deg, #0047FF 0%, #0047FF 60%, rgba(0,168,216,0.9) 100%) !important;
-                background-size: 200% 200% !important;
+                font-size: 0.85rem !important;
+                letter-spacing: 0.02em !important;
+                background: linear-gradient(135deg,
+                    #0047FF 0%, #0047FF 55%, rgba(14,168,216,0.95) 100%) !important;
                 color: #FFFFFF !important;
                 border-radius: 12px !important;
-                border: 1px solid rgba(0,71,255,0.25) !important;
+                border: 1px solid rgba(0,71,255,0.22) !important;
                 padding: 11px 26px !important;
                 transition: all 0.35s cubic-bezier(0.16,1,0.3,1) !important;
                 box-shadow:
-                    0 0 28px rgba(0,71,255,0.28),
-                    0 4px 16px rgba(0,0,0,0.25) !important;
+                    0 0 30px rgba(0,71,255,0.3),
+                    0 4px 18px rgba(0,0,0,0.28) !important;
                 position: relative !important;
                 overflow: hidden !important;
             }
@@ -2039,39 +2030,58 @@ class UIComponents:
                 top: 0 !important; left: -100% !important;
                 width: 50% !important; height: 100% !important;
                 background: linear-gradient(90deg,
-                    transparent,
-                    rgba(255,255,255,0.25),
-                    transparent) !important;
-                transition: none !important;
+                    transparent, rgba(255,255,255,0.22), transparent) !important;
                 pointer-events: none !important;
             }
             .stButton > button:hover {
-                background: linear-gradient(135deg, #1a5fff 0%, #0ea8d8 100%) !important;
+                background: linear-gradient(135deg,
+                    #1a5fff 0%, #0ea8d8 100%) !important;
                 transform: translateY(-3px) !important;
                 box-shadow:
-                    0 0 44px rgba(0,71,255,0.5),
-                    0 8px 28px rgba(0,0,0,0.35) !important;
+                    0 0 48px rgba(0,71,255,0.55),
+                    0 10px 30px rgba(0,0,0,0.38) !important;
                 border-color: rgba(0,71,255,0.5) !important;
             }
             .stButton > button:hover::before {
                 animation: shimmer 0.65s ease forwards !important;
             }
-            .stButton > button:active {
-                transform: translateY(-1px) !important;
+            .stButton > button:active { transform: translateY(-1px) !important; }
+
+            /* ── Download button — ghost variant ───────────────────────────── */
+            .stDownloadButton > button {
+                font-family: 'Inter', system-ui, sans-serif !important;
+                font-weight: 600 !important;
+                background: rgba(0,71,255,0.08) !important;
+                color: rgba(0,180,255,0.9) !important;
+                border: 1px solid rgba(0,71,255,0.28) !important;
+                border-radius: 12px !important;
+                padding: 11px 26px !important;
+                transition: all 0.3s cubic-bezier(0.16,1,0.3,1) !important;
+                backdrop-filter: blur(12px) !important;
+                box-shadow: none !important;
+            }
+            .stDownloadButton > button:hover {
+                background: rgba(0,71,255,0.18) !important;
+                border-color: rgba(0,71,255,0.55) !important;
+                color: #fff !important;
+                transform: translateY(-2px) !important;
+                box-shadow: 0 0 28px rgba(0,71,255,0.22) !important;
             }
 
-            /* ── Inputs — enhanced focus ring ────────────────────────────────── */
+            /* ── Inputs — deep glass focus ring ────────────────────────────── */
             .stTextInput > div > div > input,
             .stTextArea > div > div > textarea,
             .stSelectbox > div > div,
             .stMultiSelect > div > div {
-                background: rgba(255,255,255,0.025) !important;
-                border: 1px solid rgba(255,255,255,0.08) !important;
+                background: rgba(255,255,255,0.022) !important;
+                border: 1px solid rgba(255,255,255,0.07) !important;
                 border-radius: 12px !important;
                 color: #FAFAF7 !important;
                 font-family: 'Inter', system-ui, sans-serif !important;
                 font-size: 0.95rem !important;
-                transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease !important;
+                transition: border-color 0.25s ease,
+                            background 0.25s ease,
+                            box-shadow 0.25s ease !important;
             }
             .stTextInput > div > div > input:focus,
             .stTextArea > div > div > textarea:focus,
@@ -2080,41 +2090,40 @@ class UIComponents:
                 background: rgba(0,71,255,0.04) !important;
                 box-shadow:
                     0 0 0 3px rgba(0,71,255,0.12),
-                    0 0 20px rgba(0,71,255,0.08) !important;
-                outline: none !important;
+                    0 0 20px rgba(0,71,255,0.07) !important;
             }
             label, .stRadio label, .stCheckbox label,
             .stSelectbox label, .stTextInput label, .stTextArea label {
                 font-family: 'Space Mono', monospace !important;
-                font-size: 0.68rem !important;
-                letter-spacing: 0.14em !important;
-                color: rgba(0,71,255,0.5) !important;
+                font-size: 0.66rem !important;
+                letter-spacing: 0.16em !important;
+                color: rgba(0,71,255,0.48) !important;
                 text-transform: uppercase !important;
                 font-weight: 400 !important;
             }
 
-            /* ── Dividers ─────────────────────────────────────────────────────── */
+            /* ── Dividers ──────────────────────────────────────────────────── */
             hr {
                 border: none !important;
-                border-top: 1px solid rgba(255,255,255,0.05) !important;
+                border-top: 1px solid rgba(255,255,255,0.045) !important;
                 margin: 32px 0 !important;
                 background: transparent !important;
             }
 
-            /* ── Skill Badge Pills — 21st.dev rounded-full + backdrop-blur ────── */
+            /* ── Skill badges — rounded-full + blur (21st.dev pill) ────────── */
             .skill-badge {
                 display: inline-flex;
                 align-items: center;
                 padding: 5px 14px;
                 border-radius: 50px;
                 font-family: 'Space Mono', monospace;
-                font-size: 0.68rem;
+                font-size: 0.66rem;
                 font-weight: 400;
                 letter-spacing: 0.06em;
                 margin: 3px;
                 background: rgba(0,71,255,0.1);
                 color: rgba(0,180,255,0.9);
-                border: 1px solid rgba(0,71,255,0.25);
+                border: 1px solid rgba(0,71,255,0.24);
                 backdrop-filter: blur(12px);
                 -webkit-backdrop-filter: blur(12px);
                 transition: all 0.25s cubic-bezier(0.16,1,0.3,1);
@@ -2134,11 +2143,11 @@ class UIComponents:
             }
             .skill-badge.green {
                 background: rgba(52,211,153,0.1);
-                border-color: rgba(52,211,153,0.3);
+                border-color: rgba(52,211,153,0.28);
                 color: #6ee7b7;
             }
 
-            /* ── Match Ring ───────────────────────────────────────────────────── */
+            /* ── Match Ring ────────────────────────────────────────────────── */
             .match-ring-wrap { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; }
             .match-ring { position:relative; width:84px; height:84px; }
             .match-ring svg { transform:rotate(-90deg); }
@@ -2146,135 +2155,136 @@ class UIComponents:
             .match-ring .ring-fill {
                 fill:none; stroke-width:5; stroke-linecap:round;
                 transition: stroke-dashoffset 1.4s cubic-bezier(.16,1,.3,1);
-                filter: drop-shadow(0 0 6px currentColor);
+                filter: drop-shadow(0 0 7px currentColor);
             }
             .match-ring .ring-text { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-            .match-ring .ring-pct { font-size:1.45rem; font-weight:800; color:#fff; line-height:1; letter-spacing:-0.03em; }
-            .match-ring .ring-label { font-size:0.52rem; color:rgba(255,255,255,0.35); letter-spacing:0.12em; text-transform:uppercase; font-family:'Space Mono',monospace; margin-top:3px; }
+            .match-ring .ring-pct { font-size:1.45rem; font-weight:900; color:#fff; line-height:1; letter-spacing:-0.04em; }
+            .match-ring .ring-label { font-size:0.5rem; color:rgba(255,255,255,0.32); letter-spacing:0.14em; text-transform:uppercase; font-family:'Space Mono',monospace; margin-top:3px; }
 
-            /* ── Stat cards ───────────────────────────────────────────────────── */
+            /* ── Stat cards ─────────────────────────────────────────────────── */
             .stats-row { display:flex; gap:16px; margin:20px 0; flex-wrap:wrap; }
             .stat-card { padding: 26px 22px; text-align: left; }
             .stat-card .stat-num {
-                font-size: 2.4rem;
+                font-size: 2.5rem;
                 font-weight: 900;
                 color: #FAFAF7;
                 line-height: 1;
                 margin-bottom: 8px;
-                letter-spacing: -0.04em;
+                letter-spacing: -0.045em;
             }
             .stat-card .stat-lbl {
                 font-family: 'Space Mono', monospace;
-                font-size: 0.62rem;
-                color: rgba(0,71,255,0.5);
+                font-size: 0.6rem;
+                color: rgba(0,71,255,0.48);
                 text-transform: uppercase;
-                letter-spacing: 0.14em;
+                letter-spacing: 0.16em;
             }
 
-            /* ── History & resource cards ─────────────────────────────────────── */
-            .hist-card { padding: 22px; margin-bottom: 14px; border-radius: 16px; text-decoration: none; }
+            /* ── History / resource cards ───────────────────────────────────── */
+            .hist-card { padding: 22px; margin-bottom: 14px; border-radius: 18px; text-decoration: none; }
             .resource-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin: 16px 0; }
             .resource-card { padding: 26px; text-decoration: none; display: block; }
             .resource-card .rc-icon { font-size: 1.8rem; margin-bottom: 14px; }
             .resource-card .rc-name { font-size: 1.05rem; font-weight: 700; color: #FAFAF7; margin-bottom: 6px; letter-spacing: -0.01em; }
-            .resource-card .rc-desc { font-size: 0.84rem; color: rgba(250,250,247,0.5); line-height: 1.65; }
+            .resource-card .rc-desc { font-size: 0.83rem; color: rgba(250,250,247,0.48); line-height: 1.65; }
             .resource-card .rc-tag {
-                display: inline-block;
-                margin-top: 14px;
-                font-family: 'Space Mono', monospace;
-                font-size: 0.62rem;
-                padding: 4px 12px;
-                border-radius: 50px;
-                background: rgba(0,71,255,0.1);
-                color: rgba(0,180,255,0.8);
+                display: inline-block; margin-top: 14px;
+                font-family: 'Space Mono', monospace; font-size: 0.6rem;
+                padding: 4px 12px; border-radius: 50px;
+                background: rgba(0,71,255,0.1); color: rgba(0,180,255,0.8);
                 border: 1px solid rgba(0,71,255,0.22);
             }
 
-            /* ── Interview / tip items ───────────────────────────────────────── */
+            /* ── Tip / learn items ──────────────────────────────────────────── */
             .tip-item {
                 display:flex; gap:10px; align-items:flex-start;
-                padding:14px 16px; border-radius:12px;
+                padding:14px 16px; border-radius:14px;
                 background: rgba(168,85,247,0.05);
-                border: 1px solid rgba(168,85,247,0.15);
+                border: 1px solid rgba(168,85,247,0.13);
                 margin-bottom:8px; font-size:0.88rem; color:#d8b4fe;
                 backdrop-filter: blur(8px);
             }
             .learn-item {
                 display:flex; gap:10px; align-items:center;
-                padding:14px 16px; border-radius:12px;
+                padding:14px 16px; border-radius:14px;
                 background: rgba(52,211,153,0.04);
-                border: 1px solid rgba(52,211,153,0.14);
+                border: 1px solid rgba(52,211,153,0.13);
                 margin-bottom:8px; font-size:0.88rem; color:#6ee7b7;
                 backdrop-filter: blur(8px);
             }
 
-            /* ── Compare ──────────────────────────────────────────────────────── */
+            /* ── Compare ────────────────────────────────────────────────────── */
             .compare-header {
                 font-family:'Inter', system-ui, sans-serif;
-                font-size:1.5rem;
-                font-weight: 800;
-                letter-spacing: -0.03em;
-                color:#FAFAF7;
-                margin-bottom:12px;
+                font-size:1.5rem; font-weight:800;
+                letter-spacing:-0.03em; color:#FAFAF7; margin-bottom:12px;
             }
             .compare-cell {
-                background: rgba(255,255,255,0.02);
-                border: 1px solid rgba(255,255,255,0.06);
-                border-radius: 16px;
-                padding: 22px;
-                height: 100%;
-                backdrop-filter: blur(20px);
+                background: rgba(255,255,255,0.018);
+                border: 1px solid rgba(255,255,255,0.055);
+                border-radius: 18px; padding: 22px; height: 100%;
+                backdrop-filter: blur(24px);
             }
 
-            /* ── Progress Bar — with glow ─────────────────────────────────────── */
+            /* ── Progress bar — gradient + glow ────────────────────────────── */
             .stProgress > div > div > div {
                 background: linear-gradient(90deg, #0047FF, #0ea8d8) !important;
                 border-radius: 50px !important;
-                box-shadow: 0 0 12px rgba(0,71,255,0.4) !important;
+                box-shadow: 0 0 14px rgba(0,71,255,0.45) !important;
             }
 
-            /* ── Job Links ────────────────────────────────────────────────────── */
+            /* ── Job links — rounded-full pills ────────────────────────────── */
             .job-links-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
             .job-link-btn {
                 display:inline-flex; align-items:center; gap:8px;
                 padding:8px 18px; border-radius:50px;
-                font-size:0.78rem; font-weight:500;
+                font-size:0.76rem; font-weight:500;
                 text-decoration:none !important;
-                border: 1px solid rgba(255,255,255,0.08);
+                border: 1px solid rgba(255,255,255,0.07);
                 transition: all 0.25s cubic-bezier(0.16,1,0.3,1);
-                background: rgba(255,255,255,0.025);
+                background: rgba(255,255,255,0.022);
                 color: #FAFAF7;
                 backdrop-filter: blur(8px);
             }
             .job-link-btn:hover {
                 background: rgba(0,71,255,0.12);
-                border-color: rgba(0,71,255,0.4);
+                border-color: rgba(0,71,255,0.38);
                 transform: translateY(-2px);
                 box-shadow: 0 6px 20px rgba(0,71,255,0.15);
                 color: #fff;
             }
 
-            /* ── Hamburger + nav panel ────────────────────────────────────────── */
+            /* ── Expander polish ────────────────────────────────────────────── */
+            .stExpander > div > div > div > p,
+            .stExpander summary {
+                font-family: 'Inter', system-ui, sans-serif !important;
+                font-weight: 600 !important;
+                font-size: 0.95rem !important;
+                color: rgba(250,250,247,0.85) !important;
+                letter-spacing: -0.01em !important;
+            }
+
+            /* ── Hamburger + nav panel ──────────────────────────────────────── */
             #jl-hamburger {
-                background: rgba(5,8,18,0.7);
+                background: rgba(4,6,16,0.72);
                 border: 1px solid rgba(0,71,255,0.2);
                 border-radius: 12px;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,71,255,0.05);
-                backdrop-filter: blur(16px);
+                box-shadow: 0 4px 22px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,71,255,0.04);
+                backdrop-filter: blur(18px);
             }
             #jl-hamburger:hover {
                 background: rgba(0,71,255,0.15);
                 border-color: rgba(0,71,255,0.5);
-                box-shadow: 0 0 24px rgba(0,71,255,0.2);
+                box-shadow: 0 0 24px rgba(0,71,255,0.22);
             }
             #jl-hamburger span { background: #0047FF; }
             #jl-nav-panel {
                 background: rgba(4,6,16,0.97);
                 border-left: 1px solid rgba(0,71,255,0.1);
-                box-shadow: -8px 0 60px rgba(0,0,0,0.8);
-                backdrop-filter: blur(32px);
+                box-shadow: -8px 0 60px rgba(0,0,0,0.85);
+                backdrop-filter: blur(36px);
             }
-            #jl-nav-panel .nav-label { color: rgba(0,71,255,0.45); }
+            #jl-nav-panel .nav-label { color: rgba(0,71,255,0.42); }
             #jl-nav-panel .nav-item:hover {
                 background: rgba(0,71,255,0.07);
                 border-color: rgba(0,71,255,0.18);
@@ -2286,84 +2296,29 @@ class UIComponents:
                 color: #3b82f6;
             }
             #jl-nav-panel .settings-btn {
-                border-color: rgba(255,255,255,0.08);
-                color: rgba(250,250,247,0.7);
-                background: rgba(255,255,255,0.03);
+                border-color: rgba(255,255,255,0.07);
+                color: rgba(250,250,247,0.65);
+                background: rgba(255,255,255,0.025);
             }
             #jl-nav-panel .settings-btn:hover {
                 background: rgba(0,71,255,0.15);
                 border-color: rgba(0,71,255,0.4);
             }
 
-            /* ── Streamlit native widget polish ──────────────────────────────── */
-            /* Slider */
+            /* ── Slider / select slider ─────────────────────────────────────── */
             .stSlider > div > div > div > div {
                 background: linear-gradient(90deg, #0047FF, #0ea8d8) !important;
             }
-            /* Select slider active */
             .stSelectSlider > div > div {
-                background: rgba(0,71,255,0.12) !important;
-                border: 1px solid rgba(0,71,255,0.25) !important;
+                background: rgba(0,71,255,0.1) !important;
+                border: 1px solid rgba(0,71,255,0.24) !important;
                 border-radius: 10px !important;
             }
-            /* Radio / Checkbox */
-            .stRadio > div > label > div:first-child,
-            .stCheckbox > label > div:first-child {
-                border-color: rgba(0,71,255,0.4) !important;
-            }
-            /* Download button — distinct from primary */
-            .stDownloadButton > button {
-                font-family: 'Inter', system-ui, sans-serif !important;
-                font-weight: 600 !important;
-                background: rgba(0,71,255,0.08) !important;
-                color: rgba(0,180,255,0.9) !important;
-                border: 1px solid rgba(0,71,255,0.3) !important;
-                border-radius: 12px !important;
-                padding: 11px 26px !important;
-                transition: all 0.3s cubic-bezier(0.16,1,0.3,1) !important;
-                backdrop-filter: blur(12px) !important;
-                box-shadow: none !important;
-            }
-            .stDownloadButton > button:hover {
-                background: rgba(0,71,255,0.18) !important;
-                border-color: rgba(0,71,255,0.55) !important;
-                color: #fff !important;
-                transform: translateY(-2px) !important;
-                box-shadow: 0 0 28px rgba(0,71,255,0.2) !important;
-            }
-            /* Expander header */
-            .stExpander > div > div > div > p,
-            .stExpander summary {
-                font-family: 'Inter', system-ui, sans-serif !important;
-                font-weight: 600 !important;
-                font-size: 0.95rem !important;
-                color: rgba(250,250,247,0.85) !important;
-                letter-spacing: -0.01em !important;
-            }
-            /* Alerts */
-            .stAlert {
-                border-radius: 14px !important;
-                backdrop-filter: blur(16px) !important;
-                border: 1px solid !important;
-            }
-            /* Spinner */
-            .stSpinner > div {
-                border-color: rgba(0,71,255,0.15) !important;
-                border-top-color: #0047FF !important;
-            }
-            /* Success / error / warning messages */
-            div[data-testid="stNotification"] {
-                border-radius: 14px !important;
-                backdrop-filter: blur(20px) !important;
-                background: rgba(5,8,18,0.92) !important;
-            }
 
-            /* ── Subtle section separator ─────────────────────────────────────── */
-            hr {
-                border: none !important;
-                border-top: 1px solid rgba(255,255,255,0.045) !important;
-                margin: 32px 0 !important;
-                background: transparent !important;
+            /* ── Spinner ────────────────────────────────────────────────────── */
+            .stSpinner > div {
+                border-color: rgba(0,71,255,0.12) !important;
+                border-top-color: #0047FF !important;
             }
         </style>
         """
@@ -2559,7 +2514,7 @@ class UIComponents:
 <html>
 <head>
 <meta charset="UTF-8">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900&family=Space+Mono:wght@400;700&dummy=x&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{background:#050a12!important;font-family:'DM Sans',sans-serif}
@@ -6400,7 +6355,7 @@ def main():
 <html>
 <head>
 <meta charset="UTF-8">
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900&family=Space+Mono:wght@400;700&dummy=x&display=swap" rel="stylesheet">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 html, body { background: #060606 !important; background-color: #060606 !important; overflow: hidden; }
@@ -6532,9 +6487,9 @@ html, body { background: #060606 !important; background-color: #060606 !importan
 
 .card-desc {
   font-family: 'Inter', system-ui, sans-serif;
-  font-size: 0.71rem;
-  color: rgba(74,90,114,0.9);
-  line-height: 1.45;
+  font-size: 0.69rem;
+  color: rgba(74,90,114,0.92);
+  line-height: 1.48;
 }
 
 .card-arrow {
@@ -6542,12 +6497,12 @@ html, body { background: #060606 !important; background-color: #060606 !importan
   bottom: 10px;
   right: 12px;
   font-size: 0.7rem;
-  color: rgba(0,71,255,0.28);
+  color: rgba(0,71,255,0.26);
   font-family: 'Space Mono', monospace;
-  transition: color 0.25s cubic-bezier(0.16,1,0.3,1), transform 0.25s cubic-bezier(0.16,1,0.3,1);
+  transition: color 0.28s cubic-bezier(0.16,1,0.3,1), transform 0.28s cubic-bezier(0.16,1,0.3,1);
 }
 .card:hover .card-arrow {
-  color: rgba(0,180,255,0.8);
+  color: rgba(0,200,255,0.85);
   transform: translate(3px, -3px);
 }
 
@@ -6559,18 +6514,18 @@ html, body { background: #060606 !important; background-color: #060606 !importan
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 11px 26px;
+  padding: 12px 26px;
   background: linear-gradient(135deg, #0047FF 0%, #0ea8d8 100%);
   color: #ffffff;
   font-family: 'Inter', system-ui, sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   border-radius: 50px;
-  border: 1px solid rgba(0,71,255,0.3);
+  border: 1px solid rgba(0,71,255,0.32);
   cursor: pointer;
-  box-shadow: 0 0 32px rgba(0,71,255,0.4), 0 4px 18px rgba(0,0,0,0.38);
+  box-shadow: 0 0 32px rgba(0,71,255,0.42), 0 4px 18px rgba(0,0,0,0.4);
   transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
   position: relative;
   overflow: hidden;
@@ -6583,14 +6538,8 @@ html, body { background: #060606 !important; background-color: #060606 !importan
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent);
   transition: none;
 }
-.gs-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 0 48px rgba(0,71,255,0.6), 0 8px 26px rgba(0,0,0,0.45);
-}
-.gs-btn:hover::before {
-  left: 200%;
-  transition: left 0.6s ease;
-}
+.gs-btn:hover { transform: translateY(-3px); box-shadow: 0 0 50px rgba(0,71,255,0.65), 0 10px 28px rgba(0,0,0,0.48); }
+.gs-btn:hover::before { left: 200%; transition: left 0.6s ease; }
 .gs-btn:active { transform: translateY(-1px); }
 </style>
 </head>
@@ -6701,14 +6650,14 @@ document.addEventListener('mousemove', function(e) {
 
     # Footer
     st.markdown(f"""
-        <div style="text-align:center;padding:28px;color:rgba(255,255,255,0.25);
-                    font-family:'Inter',system-ui,sans-serif;font-size:0.78rem;
+        <div style="text-align:center;padding:28px 20px;color:rgba(255,255,255,0.22);
+                    font-family:'Inter',system-ui,sans-serif;font-size:0.75rem;
                     border-top:1px solid rgba(255,255,255,0.04);margin-top:20px;">
-            © {datetime.date.today().year} <span style="color:rgba(0,71,255,0.6);font-weight:600;">JobLess AI</span> · Created by Anubhab Mondal
+            © {{datetime.date.today().year}} <span style="color:rgba(0,71,255,0.65);font-weight:700;">JobLess AI</span> · Created by Anubhab Mondal
             <br>
-            <span style="font-size:0.7rem;color:rgba(255,255,255,0.15);font-family:'Space Mono',monospace;letter-spacing:0.05em;">
+            <span style="font-size:0.68rem;color:rgba(255,255,255,0.14);font-family:'Space Mono',monospace;letter-spacing:0.04em;">
                 Your resume data is processed by your chosen AI provider and is
-                <strong style="color:rgba(255,255,255,0.25);">not stored</strong> by this app.
+                <strong style="color:rgba(255,255,255,0.3);">not stored</strong> by this app.
             </span>
         </div>
     """, unsafe_allow_html=True)
