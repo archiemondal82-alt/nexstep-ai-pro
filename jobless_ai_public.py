@@ -2010,21 +2010,35 @@ class UIComponents:
             div[data-testid="stToolbar"], div[data-testid="stDecoration"], div[data-testid="stStatusWidget"] { display: none !important; }
 
             /* Make component iframes seamless — no visible border or boundary */
+            iframe,
             iframe[title="streamlit_components.v1.components.html"],
             .stComponentFrame,
             [data-testid="stComponentFrame"],
-            .element-container iframe {
+            [data-testid="stCustomComponentV1"],
+            .element-container iframe,
+            .stHtml iframe {
                 border: none !important;
                 outline: none !important;
                 box-shadow: none !important;
-                background: transparent !important;
+                background: #0A0A0A !important;
             }
             .stComponentFrame > div,
-            [data-testid="stComponentFrame"] > div {
+            [data-testid="stComponentFrame"] > div,
+            [data-testid="stCustomComponentV1"] > div,
+            .stHtml > div,
+            .stHtml {
                 border: none !important;
                 outline: none !important;
                 box-shadow: none !important;
-                background: transparent !important;
+                background: #0A0A0A !important;
+            }
+            /* Remove any gap/margin between vertically stacked elements */
+            .stComponentFrame,
+            [data-testid="stComponentFrame"],
+            [data-testid="stCustomComponentV1"],
+            .stHtml {
+                margin-bottom: 0 !important;
+                padding: 0 !important;
             }
 
             /* Sidebar — dark glass */
