@@ -2009,6 +2009,24 @@ class UIComponents:
             header[data-testid="stHeader"] { background: #0A0A0A !important; }
             div[data-testid="stToolbar"], div[data-testid="stDecoration"], div[data-testid="stStatusWidget"] { display: none !important; }
 
+            /* Make component iframes seamless — no visible border or boundary */
+            iframe[title="streamlit_components.v1.components.html"],
+            .stComponentFrame,
+            [data-testid="stComponentFrame"],
+            .element-container iframe {
+                border: none !important;
+                outline: none !important;
+                box-shadow: none !important;
+                background: transparent !important;
+            }
+            .stComponentFrame > div,
+            [data-testid="stComponentFrame"] > div {
+                border: none !important;
+                outline: none !important;
+                box-shadow: none !important;
+                background: transparent !important;
+            }
+
             /* Sidebar — dark glass */
             [data-testid="stSidebar"] {
                 background: rgba(10,10,10,0.95) !important;
