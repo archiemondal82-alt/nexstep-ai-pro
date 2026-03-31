@@ -195,9 +195,10 @@ def render_spline_scene(scene_url: str, title: str = "Interactive 3D", descripti
         /* Gooey text morphing */
         .gooey-container {{
           position: relative;
-          height: 3.2rem;
-          margin-bottom: 16px;
+          height: {'3.6rem' if show_get_started else '2.4rem'};
+          margin-bottom: {'20px' if show_get_started else '14px'};
           filter: url(#gooey-threshold);
+          overflow: hidden;
         }}
         .gooey-text {{
           position: absolute;
@@ -205,7 +206,7 @@ def render_spline_scene(scene_url: str, title: str = "Interactive 3D", descripti
           top: 0;
           display: inline-block;
           font-family: 'Space Grotesk', sans-serif;
-          font-size: 2.6rem;
+          font-size: {'2.6rem' if show_get_started else '1.6rem'};
           font-weight: 700;
           color: #ffffff;
           line-height: 1.1;
@@ -4860,23 +4861,35 @@ def render_sidebar(config: Config) -> tuple[str, str, str, bool, bool]:
 
         current_key = config.get_api_key(selected_provider)
 
-        # ── Groq: hide key from user, auto-load from st.secrets ──
+        # ── Groq / Cohere: hide key from user, auto-load from st.secrets ──
         _is_groq_sidebar = ("Groq" in selected_provider or "groq" in selected_provider.lower())
-        _groq_sidebar_secret = ""
+        _is_cohere_sidebar = ("Cohere" in selected_provider or "cohere" in selected_provider.lower())
+        _preconfigured_secret = ""
+        _preconfigured_icon = ""
+        _preconfigured_label = ""
         if _is_groq_sidebar:
             try:
-                _groq_sidebar_secret = st.secrets.get("GROQ_API_KEY", "")
+                _preconfigured_secret = st.secrets.get("GROQ_API_KEY", "")
             except Exception:
                 pass
+            _preconfigured_icon = "⚡"
+            _preconfigured_label = "Groq"
+        elif _is_cohere_sidebar:
+            try:
+                _preconfigured_secret = st.secrets.get("COHERE_API_KEY", "")
+            except Exception:
+                pass
+            _preconfigured_icon = "🌊"
+            _preconfigured_label = "Cohere"
 
-        if _is_groq_sidebar and _groq_sidebar_secret:
+        if (_is_groq_sidebar or _is_cohere_sidebar) and _preconfigured_secret:
             # Auto-set the key silently (never display it)
             if not st.session_state.get(f"api_key_{selected_provider}", ""):
-                config.set_api_key(_groq_sidebar_secret, selected_provider)
-            st.markdown("""
+                config.set_api_key(_preconfigured_secret, selected_provider)
+            st.markdown(f"""
             <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);
                         border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:8px;">
-                <span style="font-size:0.9rem;">⚡</span>
+                <span style="font-size:0.9rem;">{_preconfigured_icon}</span>
                 <span style="color:#E5E5E5;font-size:0.78rem;font-weight:500;flex:1;">Pre-configured</span>
                 <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);
                              border-radius:5px;padding:2px 8px;font-size:0.6rem;color:#999;
@@ -6155,6 +6168,20 @@ def main():
     init_session_state()
     render_global_background()
 
+    # ── Keep-alive: prevent Streamlit Cloud from sleeping the app ──────────
+    components.html("""
+    <script>
+    (function(){
+      // Ping the app every 10 minutes to keep the websocket alive
+      setInterval(function(){
+        try {
+          fetch(window.parent.location.href, {method:'HEAD', mode:'no-cors'}).catch(function(){});
+        } catch(e){}
+      }, 10 * 60 * 1000); // 10 minutes
+    })();
+    </script>
+    """, height=0)
+
     config = Config()
     ui = UIComponents()
     ai_handler = AIHandler(config)
@@ -6243,50 +6270,63 @@ def main():
                 key="inline_provider_select", label_visibility="collapsed"
             )
 
-            # ── Groq: auto-connect from st.secrets (key never exposed to user) ──
+            # ── Groq / Cohere: auto-connect from st.secrets (key never exposed to user) ──
             _is_groq = ("Groq" in _inline_provider or "groq" in _inline_provider.lower())
+            _is_cohere = ("Cohere" in _inline_provider or "cohere" in _inline_provider.lower())
+            _inline_secret = ""
+            _inline_icon = ""
+            _inline_label = ""
             if _is_groq:
-                _groq_secret = ""
                 try:
-                    _groq_secret = st.secrets.get("GROQ_API_KEY", "")
+                    _inline_secret = st.secrets.get("GROQ_API_KEY", "")
                 except Exception:
                     pass
-                if _groq_secret:
-                    st.markdown("""
-                    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.15);
-                                border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;">
-                        <span style="font-size:1.1rem;">⚡</span>
-                        <span style="color:#E5E5E5;font-size:0.88rem;font-weight:500;">
-                            Groq is ready — API key is pre-configured
-                        </span>
-                        <span style="margin-left:auto;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);
-                                     border-radius:6px;padding:3px 10px;font-size:0.7rem;color:#999;font-family:'Space Mono',monospace;">
-                            CONNECTED
-                        </span>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    if st.button("🚀 Unlock JobLess AI", use_container_width=True, type="primary",
-                                 key="inline_save_key"):
+                _inline_icon = "⚡"
+                _inline_label = "Groq"
+            elif _is_cohere:
+                try:
+                    _inline_secret = st.secrets.get("COHERE_API_KEY", "")
+                except Exception:
+                    pass
+                _inline_icon = "🌊"
+                _inline_label = "Cohere"
+
+            if (_is_groq or _is_cohere) and _inline_secret:
+                st.markdown(f"""
+                <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.15);
+                            border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;">
+                    <span style="font-size:1.1rem;">{_inline_icon}</span>
+                    <span style="color:#E5E5E5;font-size:0.88rem;font-weight:500;">
+                        {_inline_label} is ready — API key is pre-configured
+                    </span>
+                    <span style="margin-left:auto;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);
+                                 border-radius:6px;padding:3px 10px;font-size:0.7rem;color:#999;font-family:'Space Mono',monospace;">
+                        CONNECTED
+                    </span>
+                </div>
+                """, unsafe_allow_html=True)
+                if st.button("🚀 Unlock JobLess AI", use_container_width=True, type="primary",
+                             key="inline_save_key"):
+                    config.set_provider(_inline_provider)
+                    config.set_api_key(_inline_secret, _inline_provider)
+                    st.success(f"✅ {_inline_label} connected! Loading your dashboard...")
+                    st.rerun()
+            elif (_is_groq or _is_cohere) and not _inline_secret:
+                # Fallback: no secret configured, let user paste their own
+                _inline_key = st.text_input(
+                    "API Key", type="password",
+                    placeholder=f"Paste your {_inline_label or 'API'} key here...",
+                    key="inline_api_key_input", label_visibility="collapsed"
+                )
+                if st.button("🚀 Unlock JobLess AI", use_container_width=True, type="primary",
+                             key="inline_save_key"):
+                    if _inline_key.strip():
                         config.set_provider(_inline_provider)
-                        config.set_api_key(_groq_secret, _inline_provider)
-                        st.success("✅ Groq connected! Loading your dashboard...")
+                        config.set_api_key(_inline_key.strip(), _inline_provider)
+                        st.success("✅ Key saved! Loading your dashboard...")
                         st.rerun()
-                else:
-                    # Fallback: no secret configured, let user paste their own
-                    _inline_key = st.text_input(
-                        "API Key", type="password",
-                        placeholder="Paste your Groq API key here...",
-                        key="inline_api_key_input", label_visibility="collapsed"
-                    )
-                    if st.button("🚀 Unlock JobLess AI", use_container_width=True, type="primary",
-                                 key="inline_save_key"):
-                        if _inline_key.strip():
-                            config.set_provider(_inline_provider)
-                            config.set_api_key(_inline_key.strip(), _inline_provider)
-                            st.success("✅ Key saved! Loading your dashboard...")
-                            st.rerun()
-                        else:
-                            st.error("⚠️ Please paste your API key first.")
+                    else:
+                        st.error("⚠️ Please paste your API key first.")
             else:
                 # ── Other providers: normal password input ──
                 _inline_key = st.text_input(
