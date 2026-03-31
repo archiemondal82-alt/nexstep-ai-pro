@@ -289,13 +289,14 @@ def render_spline_scene(scene_url: str, title: str = "Interactive 3D", descripti
 
         /* ── MOBILE ── */
         @media (max-width: 600px) {{
-          .wrapper {{ flex-direction: column !important; height: auto !important; min-height: {height}px !important; }}
+          .wrapper {{ flex-direction: column !important; height: auto !important; }}
           .left-panel {{ flex: 0 0 auto !important; width: 100% !important; padding: 16px 20px !important; }}
           .left-panel h1 {{ font-size: 1.6rem !important; }}
           .gooey-container {{ height: 2.4rem !important; margin-bottom: 12px !important; }}
           .gooey-text {{ font-size: 1.6rem !important; }}
           .left-panel p {{ font-size: 0.82rem !important; margin-bottom: 14px !important; }}
-          .right-panel {{ flex: 1 !important; width: 100% !important; min-height: 180px !important; }}
+          {'/* Home: show globe below text */' if show_get_started else '/* Sections: hide globe to fit in compact iframe */'}
+          .right-panel {{ {'flex: 0 0 220px !important; width: 100% !important;' if show_get_started else 'display: none !important;'} }}
         }}
         @media (min-width: 601px) and (max-width: 900px) {{
           .left-panel {{ flex: 0 0 38%; padding: 16px 20px; }}
@@ -683,6 +684,22 @@ def render_spline_scene(scene_url: str, title: str = "Interactive 3D", descripti
         }}
 
         init();
+      }})();
+      </script>
+
+      <!-- Auto-resize iframe on mobile to fit stacked content -->
+      <script>
+      (function() {{
+        function fitIframe() {{
+          try {{
+            if (window.innerWidth <= 600 && window.frameElement) {{
+              var h = document.querySelector('.wrapper').scrollHeight;
+              if (h > 0) window.frameElement.style.height = (h + 8) + 'px';
+            }}
+          }} catch(e) {{}}
+        }}
+        setTimeout(fitIframe, 200);
+        window.addEventListener('resize', fitIframe);
       }})();
       </script>
     </body>
